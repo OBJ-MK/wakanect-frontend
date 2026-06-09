@@ -1,0 +1,16 @@
+{
+  "name": "Wakanect",
+  "short_name": "Wakanect",
+  "description": "Automatisation commerciale WhatsApp",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0F1C3F",
+  "theme_color": "#0F1C3F",
+  "icons": [
+    {
+      "src": "/faveicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

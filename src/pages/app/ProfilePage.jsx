@@ -1,12 +1,13 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import {
   Store, Moon, Sun, Bell, MessageSquare,
-  LogOut, ChevronRight, ExternalLink, Copy
+  LogOut, ChevronRight, Share2, HelpCircle,
+  Package, CreditCard
 } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { useAuthStore } from '@/store/authStore'
 import { getInitials } from '@/lib/utils'
-import { Button } from '@/components/ui/Button'
 
 function useDarkMode() {
   const [dark, setDark] = useState(() =>
@@ -23,8 +24,8 @@ function useDarkMode() {
   return [dark, toggle]
 }
 
-function SettingRow({ icon: Icon, label, description, action, danger = false }) {
-  return (
+function SettingRow({ icon: Icon, label, description, action, danger = false, to }) {
+  const inner = (
     <div className="flex items-center gap-3 px-4 py-3.5 border-b border-white/6 last:border-0">
       <div className={`w-9 h-9 rounded-2xl flex items-center justify-center shrink-0 ${danger ? 'bg-red-500/10' : 'bg-white/8'}`}>
         <Icon size={17} className={danger ? 'text-red-400' : 'text-white/60'} />
@@ -36,32 +37,32 @@ function SettingRow({ icon: Icon, label, description, action, danger = false }) 
       {action}
     </div>
   )
+
+  if (to) {
+    return (
+      <Link to={to} className="block hover:bg-white/4 transition-colors">
+        {inner}
+      </Link>
+    )
+  }
+
+  return inner
 }
 
 export function ProfilePage() {
   const { handleLogout } = useAuth()
   const { merchant } = useAuthStore()
   const [dark, toggleDark] = useDarkMode()
-  const [copied, setCopied] = useState(false)
 
   const boutiqueUrl = merchant?.slug ? `wakanect.com/boutique/${merchant.slug}` : null
 
-  function copyLink() {
-    if (boutiqueUrl) {
-      navigator.clipboard.writeText(`https://${boutiqueUrl}`)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 1800)
-    }
-  }
-
   return (
     <div className="min-h-screen bg-navy-deep">
-      {/* Header */}
+      {/* Header / profile card */}
       <div className="glass border-b border-white/6 px-4 pt-safe pt-4 pb-6">
         <div className="max-w-lg mx-auto">
           <h1 className="font-display font-bold text-h2 text-white mb-5">Profil</h1>
 
-          {/* Avatar */}
           <div className="flex items-center gap-4">
             <div className="w-16 h-16 rounded-full bg-gradient-to-br from-orange to-amber flex items-center justify-center shrink-0">
               <span className="font-display font-bold text-h2 text-white">
@@ -76,17 +77,7 @@ export function ProfilePage() {
                 {merchant?.owner_name ?? ''}
               </p>
               {boutiqueUrl && (
-                <div className="flex items-center gap-2 mt-1.5">
-                  <p className="text-micro text-orange truncate">{boutiqueUrl}</p>
-                  <button
-                    onClick={copyLink}
-                    className="shrink-0 text-white/40 hover:text-white transition-colors"
-                    aria-label="Copier le lien"
-                  >
-                    <Copy size={13} />
-                  </button>
-                  {copied && <span className="text-micro text-emerald">Copié !</span>}
-                </div>
+                <p className="text-micro text-orange truncate mt-1">{boutiqueUrl}</p>
               )}
             </div>
           </div>
@@ -94,32 +85,47 @@ export function ProfilePage() {
       </div>
 
       <div className="page-container py-5 flex flex-col gap-4">
-        {/* Boutique settings */}
+        {/* Boutique */}
         <div className="glass rounded-3xl overflow-hidden">
-          <p className="text-micro text-white/40 uppercase tracking-wider px-4 pt-4 pb-2">
-            Boutique
-          </p>
+          <p className="text-micro text-white/40 uppercase tracking-wider px-4 pt-4 pb-2">Boutique</p>
           <SettingRow
             icon={Store}
             label="Informations boutique"
-            description="Nom, slug, WhatsApp"
+            description="Logo, nom, lien, numéro, adresse"
+            to="/app/profil/boutique"
             action={<ChevronRight size={16} className="text-white/30 shrink-0" />}
           />
-          {boutiqueUrl && (
-            <SettingRow
-              icon={ExternalLink}
-              label="Voir ma boutique"
-              description={boutiqueUrl}
-              action={<ChevronRight size={16} className="text-white/30 shrink-0" />}
-            />
-          )}
+          <SettingRow
+            icon={Share2}
+            label="Partager ma boutique"
+            description="QR code + lien"
+            to="/app/profil/partager"
+            action={<ChevronRight size={16} className="text-white/30 shrink-0" />}
+          />
+          <SettingRow
+            icon={Package}
+            label="Comment ajouter un produit"
+            description="Numéro Wakanect + 3 étapes"
+            to="/app/profil/comment-ajouter"
+            action={<ChevronRight size={16} className="text-white/30 shrink-0" />}
+          />
         </div>
 
-        {/* Appearance & notifications */}
+        {/* Abonnement */}
         <div className="glass rounded-3xl overflow-hidden">
-          <p className="text-micro text-white/40 uppercase tracking-wider px-4 pt-4 pb-2">
-            Préférences
-          </p>
+          <p className="text-micro text-white/40 uppercase tracking-wider px-4 pt-4 pb-2">Abonnement</p>
+          <SettingRow
+            icon={CreditCard}
+            label="Mon abonnement"
+            description="Plan actuel · Facturation"
+            to="/app/profil/abonnement"
+            action={<ChevronRight size={16} className="text-white/30 shrink-0" />}
+          />
+        </div>
+
+        {/* Preferences */}
+        <div className="glass rounded-3xl overflow-hidden">
+          <p className="text-micro text-white/40 uppercase tracking-wider px-4 pt-4 pb-2">Préférences</p>
           <SettingRow
             icon={dark ? Moon : Sun}
             label="Mode nuit"
@@ -141,7 +147,8 @@ export function ProfilePage() {
           <SettingRow
             icon={Bell}
             label="Notifications"
-            description="Nouvelles commandes, alertes stock"
+            description="Commandes, alertes stock"
+            to="/app/notifications"
             action={<ChevronRight size={16} className="text-white/30 shrink-0" />}
           />
           <SettingRow
@@ -152,7 +159,18 @@ export function ProfilePage() {
           />
         </div>
 
-        {/* Danger zone */}
+        {/* Help */}
+        <div className="glass rounded-3xl overflow-hidden">
+          <SettingRow
+            icon={HelpCircle}
+            label="Aide & support"
+            description="FAQ · Nous écrire"
+            to="/app/profil/aide"
+            action={<ChevronRight size={16} className="text-white/30 shrink-0" />}
+          />
+        </div>
+
+        {/* Logout */}
         <div className="glass rounded-3xl overflow-hidden">
           <button
             onClick={handleLogout}

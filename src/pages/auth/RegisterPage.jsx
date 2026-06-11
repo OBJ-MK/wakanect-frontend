@@ -27,7 +27,13 @@ export function RegisterPage() {
 
   function onSubmit(e) {
     e.preventDefault()
-    handleRegister(form)
+    handleRegister({
+      businessName: form.shop_name,
+      slug: form.slug,
+      ownerName: form.owner_name,
+      whatsappPhone: form.whatsapp_number,
+      password: form.password,
+    })
   }
 
   return (

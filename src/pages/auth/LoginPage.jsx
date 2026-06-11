@@ -52,12 +52,17 @@ export function LoginPage() {
         </Button>
       </form>
 
-      <p className="text-center text-label text-white/45 mt-5">
-        Pas encore de compte ?{' '}
-        <Link to="/register" className="text-orange font-semibold hover:text-orange-hi">
-          Créer un compte
+      <div className="flex flex-col items-center gap-2 mt-5">
+        <Link to="/mot-de-passe-oublie" className="text-label text-white/40 hover:text-white/60 transition-colors">
+          Mot de passe oublié ?
         </Link>
-      </p>
+        <p className="text-label text-white/45">
+          Pas encore de compte ?{' '}
+          <Link to="/register" className="text-orange font-semibold hover:text-orange-hi">
+            Créer un compte
+          </Link>
+        </p>
+      </div>
     </div>
   )
 }

@@ -1,0 +1,107 @@
+import { useState } from 'react'
+import { Link } from 'react-router-dom'
+import { ChevronLeft, AlertTriangle, Package, Plus, Minus } from 'lucide-react'
+import { formatFCFA } from '@/lib/formatters'
+
+const MOCK_LOW = [
+  { id: '2', name: 'Sneakers Air Force One', price: 45000, stock: 3, category: 'Chaussures', image_url: null },
+  { id: '7', name: 'Robe longue imprimé bogolan', price: 32000, stock: 2, category: 'Vêtements', image_url: null },
+  { id: '8', name: 'Bracelet perles', price: 5000, stock: 1, category: 'Accessoires', image_url: null },
+]
+
+function StockRow({ product }) {
+  const [qty, setQty] = useState(product.stock)
+
+  return (
+    <div className="flex items-center gap-3 px-4 py-4 border-b border-white/6 last:border-0">
+      <div className="w-12 h-12 rounded-2xl bg-navy-light flex items-center justify-center shrink-0">
+        {product.image_url ? (
+          <img src={product.image_url} alt="" className="w-full h-full object-cover rounded-2xl" />
+        ) : (
+          <Package size={18} className="text-white/30" />
+        )}
+      </div>
+
+      <div className="flex-1 min-w-0">
+        <p className="text-body text-white font-medium truncate">{product.name}</p>
+        <div className="flex items-center gap-2 mt-0.5">
+          <AlertTriangle size={11} className="text-amber" />
+          <span className="text-micro text-amber font-semibold">Stock bas</span>
+          <span className="text-micro text-white/35">{formatFCFA(product.price)}</span>
+        </div>
+      </div>
+
+      {/* Qty stepper */}
+      <div className="flex items-center gap-2 shrink-0">
+        <button
+          onClick={() => setQty(q => Math.max(0, q - 1))}
+          className="w-7 h-7 rounded-xl bg-white/8 text-white/70 flex items-center justify-center hover:bg-white/15 active:scale-95 transition-all"
+          aria-label="Diminuer"
+        >
+          <Minus size={12} />
+        </button>
+        <span className={`text-body font-bold min-w-[2ch] text-center ${qty <= 2 ? 'text-red-400' : 'text-amber'}`}>
+          {qty}
+        </span>
+        <button
+          onClick={() => setQty(q => q + 1)}
+          className="w-7 h-7 rounded-xl bg-orange/20 text-orange flex items-center justify-center hover:bg-orange/30 active:scale-95 transition-all"
+          aria-label="Augmenter"
+        >
+          <Plus size={12} />
+        </button>
+      </div>
+    </div>
+  )
+}
+
+export function StockBasPage() {
+  return (
+    <div className="min-h-screen bg-navy-deep">
+      <div className="sticky top-0 z-20 glass border-b border-white/6 px-4 py-3">
+        <div className="max-w-lg mx-auto flex items-center gap-3">
+          <Link
+            to="/app"
+            className="p-2 -ml-2 rounded-xl text-white/60 hover:text-white hover:bg-white/8 transition-colors"
+          >
+            <ChevronLeft size={20} />
+          </Link>
+          <div className="flex-1">
+            <h1 className="font-display font-bold text-h3 text-white">Stock bas</h1>
+            <p className="text-micro text-white/45">{MOCK_LOW.length} produit{MOCK_LOW.length > 1 ? 's' : ''} à approvisionner</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="page-container py-4 flex flex-col gap-4">
+        {/* Info banner */}
+        <div className="glass rounded-2xl px-4 py-3 border border-amber/20">
+          <p className="text-label text-white/70">
+            Ajustez les quantités directement ici, ou transférez un message WhatsApp au numéro Wakanect pour recréer du stock.
+          </p>
+        </div>
+
+        {MOCK_LOW.length === 0 ? (
+          <div className="flex flex-col items-center py-20 text-center">
+            <div className="w-16 h-16 rounded-full bg-emerald/12 flex items-center justify-center mb-4">
+              <Package size={28} className="text-emerald" />
+            </div>
+            <p className="text-body font-semibold text-white">Tout est bien approvisionné !</p>
+            <p className="text-label text-white/40 mt-1">Aucun produit en stock bas</p>
+          </div>
+        ) : (
+          <div className="glass rounded-3xl overflow-hidden">
+            {MOCK_LOW.map(p => <StockRow key={p.id} product={p} />)}
+          </div>
+        )}
+
+        <Link
+          to="/app/profil/comment-ajouter"
+          className="text-center text-label text-orange hover:text-orange-hi transition-colors"
+        >
+          Comment ajouter du stock via WhatsApp ?
+        </Link>
+      </div>
+    </div>
+  )
+}

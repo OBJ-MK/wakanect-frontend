@@ -1,17 +1,5 @@
 import { Link } from 'react-router-dom'
-import { ChevronLeft, Check, CreditCard, Calendar, ChevronRight } from 'lucide-react'
-
-const MOCK_SUB = {
-  plan: 'Pro',
-  period: 'Mensuel',
-  status: 'active',
-  next_billing: '2026-07-11',
-  price: 8500,
-  history: [
-    { date: '2026-06-11', amount: 8500, plan: 'Pro Mensuel', status: 'Payé' },
-    { date: '2026-05-11', amount: 8500, plan: 'Pro Mensuel', status: 'Payé' },
-  ],
-}
+import { ChevronLeft, CreditCard, Zap, ChevronRight } from 'lucide-react'
 
 const PLAN_COLOR = {
   Gratuit: 'text-white/60',
@@ -20,7 +8,7 @@ const PLAN_COLOR = {
 }
 
 export function MonAbonnementPage() {
-  const sub = MOCK_SUB
+  const sub = { plan: 'Gratuit', period: 'Essai 14 jours', status: 'trial', next_billing: null, price: 0, history: [] }
   const planColor = PLAN_COLOR[sub.plan] ?? 'text-orange'
 
   return (
@@ -48,20 +36,27 @@ export function MonAbonnementPage() {
               <p className="text-label text-white/50 mt-1">{sub.period}</p>
             </div>
             <div className="text-right">
-              <p className="font-display font-bold text-h2 text-white">
-                {sub.price.toLocaleString('fr-FR')} <span className="text-h3 font-medium text-white/50">FCFA</span>
-              </p>
-              <p className="text-micro text-white/35">par mois</p>
+              <p className="font-display font-bold text-h2 text-white">0 <span className="text-h3 font-medium text-white/50">FCFA</span></p>
+              <p className="text-micro text-white/35">gratuit</p>
             </div>
           </div>
 
           <div className="mt-4 pt-4 border-t border-white/8 flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-emerald" />
+            <div className="w-2 h-2 rounded-full bg-amber" />
             <p className="text-label text-white/60">
-              Actif · Prochain renouvellement le <span className="text-white font-semibold">{sub.next_billing}</span>
+              Essai en cours · Passez à un plan payant pour continuer après l'essai
             </p>
           </div>
         </div>
+
+        {/* CTA upgrade */}
+        <Link
+          to="/abonnement"
+          className="flex items-center justify-center gap-2 py-4 rounded-3xl bg-orange text-white font-semibold text-body hover:bg-orange-hi active:scale-[0.98] transition-all shadow-orange-glow"
+        >
+          <Zap size={18} />
+          Choisir un plan
+        </Link>
 
         {/* Actions */}
         <div className="glass rounded-3xl overflow-hidden">
@@ -73,46 +68,16 @@ export function MonAbonnementPage() {
             <div className="w-9 h-9 rounded-2xl bg-orange/10 flex items-center justify-center">
               <CreditCard size={16} className="text-orange" />
             </div>
-            <p className="flex-1 text-body font-medium text-white">Changer de formule</p>
+            <p className="flex-1 text-body font-medium text-white">Voir les formules</p>
             <ChevronRight size={16} className="text-white/30" />
           </Link>
-          <button className="w-full flex items-center gap-3 px-4 py-3.5 hover:bg-white/4 transition-colors text-left">
-            <div className="w-9 h-9 rounded-2xl bg-white/8 flex items-center justify-center">
-              <Calendar size={16} className="text-white/60" />
-            </div>
-            <p className="flex-1 text-body font-medium text-white">Changer la période</p>
-            <ChevronRight size={16} className="text-white/30" />
-          </button>
         </div>
 
-        {/* Historique */}
-        {sub.history.length > 0 && (
-          <div>
-            <p className="text-micro text-white/40 uppercase tracking-wider mb-3 px-1">Historique de paiement</p>
-            <div className="glass rounded-3xl overflow-hidden">
-              {sub.history.map((h, i) => (
-                <div key={i} className="flex items-center gap-3 px-4 py-3.5 border-b border-white/6 last:border-0">
-                  <div className="flex-1 min-w-0">
-                    <p className="text-body text-white font-medium">{h.plan}</p>
-                    <p className="text-micro text-white/40">{h.date}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-label font-bold text-white">{h.amount.toLocaleString('fr-FR')} FCFA</p>
-                    <div className="flex items-center gap-1 justify-end mt-0.5">
-                      <Check size={10} className="text-emerald" />
-                      <span className="text-micro text-emerald">{h.status}</span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Cancel */}
-        <button className="text-center text-label text-white/30 hover:text-red-400 transition-colors">
-          Annuler l'abonnement
-        </button>
+        {/* Historique vide */}
+        <div className="glass rounded-3xl p-6 flex flex-col items-center text-center gap-2">
+          <p className="text-body font-semibold text-white/40">Aucun paiement</p>
+          <p className="text-label text-white/25">Votre historique de paiement apparaîtra ici</p>
+        </div>
       </div>
     </div>
   )

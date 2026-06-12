@@ -12,7 +12,7 @@ const NAV_ITEMS = [
 export function BottomNav() {
   return (
     <nav
-      className="fixed bottom-0 inset-x-0 z-40 glass border-t border-white/8 safe-bottom"
+      className="fixed bottom-0 inset-x-0 z-40 glass bottom-nav-bg border-t border-white/8 safe-bottom"
       aria-label="Navigation principale"
     >
       <div className="flex items-end justify-around px-2 pt-2 pb-1 max-w-lg mx-auto">

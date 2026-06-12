@@ -129,3 +129,86 @@
     -webkit-tap-highlight-color: transparent;
   }
 }
+
+/* ─── LIGHT MODE OVERRIDES ──────────────────────────────────────────────────
+   L'app est dark-first. Quand .dark est absent on adapte les tokens hardcodés.
+   Toutes ces règles sont hors @layer pour battre les utilities Tailwind.
+─────────────────────────────────────────────────────────────────────────── */
+
+/* Fond : navy-deep/navy → cream/white */
+:root:not(.dark) .bg-navy-deep,
+:root:not(.dark) .min-h-dvh.bg-navy-deep,
+:root:not(.dark) .min-h-screen.bg-navy-deep { background-color: var(--bg-base); }
+
+:root:not(.dark) .bg-navy { background-color: var(--bg-surface); }
+:root:not(.dark) .bg-navy-light { background-color: var(--bg-surface-2); }
+
+/* Fond semi-transparent navy utilisé dans les inputs */
+:root:not(.dark) .bg-navy\/60 { background-color: rgba(255, 248, 244, 0.9); }
+:root:not(.dark) .bg-navy\/70 { background-color: rgba(255, 248, 244, 0.95); }
+
+/* bg-white/8, bg-white/12 utilisé comme fond de sections */
+:root:not(.dark) .bg-white\/8  { background-color: rgba(15, 28, 63, 0.05); }
+:root:not(.dark) .bg-white\/12 { background-color: rgba(15, 28, 63, 0.07); }
+:root:not(.dark) .bg-white\/5  { background-color: rgba(15, 28, 63, 0.04); }
+:root:not(.dark) .bg-white\/4  { background-color: rgba(15, 28, 63, 0.03); }
+
+/* Composant glass */
+:root:not(.dark) .glass {
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(15, 28, 63, 0.1);
+  box-shadow: 0 4px 24px rgba(15, 28, 63, 0.07), inset 0 1px 0 rgba(255,255,255,0.9);
+}
+
+/* Gradient hero (AuthLayout) */
+:root:not(.dark) .bg-gradient-hero {
+  background: linear-gradient(160deg, #F5EDE6 0%, #FFFFFF 55%, #FFF8F4 100%);
+}
+
+/* Texte blanc → navy en light mode — mapping opacity → sémantique */
+:root:not(.dark) .text-white          { color: var(--text-primary); }
+:root:not(.dark) .text-white\/95      { color: var(--text-primary); }
+:root:not(.dark) .text-white\/80      { color: var(--text-primary); }
+:root:not(.dark) .text-white\/70      { color: var(--text-secondary); }
+:root:not(.dark) .text-white\/65      { color: var(--text-secondary); }
+:root:not(.dark) .text-white\/60      { color: var(--text-secondary); }
+:root:not(.dark) .text-white\/55      { color: var(--text-secondary); }
+:root:not(.dark) .text-white\/50      { color: var(--text-secondary); }
+:root:not(.dark) .text-white\/45      { color: var(--text-muted); }
+:root:not(.dark) .text-white\/40      { color: var(--text-muted); }
+:root:not(.dark) .text-white\/35      { color: rgba(15, 28, 63, 0.35); }
+:root:not(.dark) .text-white\/30      { color: rgba(15, 28, 63, 0.3); }
+:root:not(.dark) .text-white\/25      { color: rgba(15, 28, 63, 0.25); }
+:root:not(.dark) .text-white\/20      { color: rgba(15, 28, 63, 0.2); }
+
+/* Exceptions : texte blanc conservé sur fonds colorés solides */
+:root:not(.dark) .bg-orange  .text-white,
+:root:not(.dark) .bg-orange-hi .text-white,
+:root:not(.dark) .bg-emerald .text-white,
+:root:not(.dark) .bg-wa-green .text-white,
+:root:not(.dark) .bg-red-400 .text-white,
+:root:not(.dark) .bg-red-500 .text-white,
+:root:not(.dark) .bg-amber   .text-white { color: rgba(255, 255, 255, 0.95); }
+
+/* Boutons solides : l'élément lui-même */
+:root:not(.dark) .bg-orange,
+:root:not(.dark) .bg-orange-hi { color: rgba(255, 255, 255, 0.95); }
+
+/* Bordures blanches/opaques */
+:root:not(.dark) .border-white\/6  { border-color: var(--border-default); }
+:root:not(.dark) .border-white\/8  { border-color: var(--border-default); }
+:root:not(.dark) .border-white\/10 { border-color: var(--border-default); }
+:root:not(.dark) .border-white\/15 { border-color: var(--border-strong); }
+
+/* Hover backgrounds */
+:root:not(.dark) .hover\:bg-white\/4:hover { background-color: rgba(15, 28, 63, 0.04); }
+:root:not(.dark) .hover\:bg-white\/6:hover { background-color: rgba(15, 28, 63, 0.05); }
+:root:not(.dark) .hover\:bg-white\/8:hover { background-color: rgba(15, 28, 63, 0.06); }
+
+/* BottomNav light */
+:root:not(.dark) .bottom-nav-bg {
+  background: rgba(255, 255, 255, 0.9);
+  border-color: rgba(15, 28, 63, 0.1);
+}

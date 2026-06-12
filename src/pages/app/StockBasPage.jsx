@@ -3,11 +3,7 @@ import { Link } from 'react-router-dom'
 import { ChevronLeft, AlertTriangle, Package, Plus, Minus } from 'lucide-react'
 import { formatFCFA } from '@/lib/formatters'
 
-const MOCK_LOW = [
-  { id: '2', name: 'Sneakers Air Force One', price: 45000, stock: 3, category: 'Chaussures', image_url: null },
-  { id: '7', name: 'Robe longue imprimé bogolan', price: 32000, stock: 2, category: 'Vêtements', image_url: null },
-  { id: '8', name: 'Bracelet perles', price: 5000, stock: 1, category: 'Accessoires', image_url: null },
-]
+const MOCK_LOW = []
 
 function StockRow({ product }) {
   const [qty, setQty] = useState(product.stock)

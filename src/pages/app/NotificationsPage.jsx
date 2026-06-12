@@ -2,44 +2,7 @@ import { ChevronLeft, Bell, Package, ShoppingBag, AlertTriangle } from 'lucide-r
 import { Link } from 'react-router-dom'
 import { formatRelativeTime } from '@/lib/formatters'
 
-const MOCK_NOTIFS = [
-  {
-    id: '1',
-    type: 'order',
-    title: 'Nouvelle commande',
-    body: 'Aminata Diallo a passé une commande de 45 000 FCFA',
-    to: '/app/commandes',
-    read: false,
-    created_at: new Date(Date.now() - 10 * 60000).toISOString(),
-  },
-  {
-    id: '2',
-    type: 'validation',
-    title: 'Produit à valider',
-    body: 'Un nouveau produit a été détecté via WhatsApp : Robe Wax Ankara',
-    to: '/app/validation',
-    read: false,
-    created_at: new Date(Date.now() - 45 * 60000).toISOString(),
-  },
-  {
-    id: '3',
-    type: 'stock',
-    title: 'Stock bas',
-    body: 'Sneakers Air Force One — seulement 3 en stock',
-    to: '/app/stock-bas',
-    read: true,
-    created_at: new Date(Date.now() - 2 * 3600000).toISOString(),
-  },
-  {
-    id: '4',
-    type: 'order',
-    title: 'Commande confirmée',
-    body: 'Moussa Traoré a confirmé sa commande de 28 500 FCFA',
-    to: '/app/commandes',
-    read: true,
-    created_at: new Date(Date.now() - 6 * 3600000).toISOString(),
-  },
-]
+const MOCK_NOTIFS = []
 
 const ICON_MAP = {
   order: { Icon: ShoppingBag, bg: 'bg-orange/12', color: 'text-orange' },

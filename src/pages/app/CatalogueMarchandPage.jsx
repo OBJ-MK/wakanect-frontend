@@ -78,7 +78,7 @@ function ProductCard({ product }) {
 
 export function CatalogueMarchandPage() {
   const [search, setSearch] = useState('')
-  const products = MOCK_PRODUCTS
+  const products = []
   const filtered = products.filter(p =>
     p.name.toLowerCase().includes(search.toLowerCase())
   )

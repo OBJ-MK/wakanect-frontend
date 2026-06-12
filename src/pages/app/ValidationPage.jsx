@@ -10,34 +10,7 @@ import { formatFCFA } from '@/lib/formatters'
 import { CATEGORIES } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 
-const MOCK_PENDING = [
-  {
-    id: 'p1',
-    rawText: 'Robe Wax Ankara Premium\nPrix : 25 000 FCFA\nTailles : S, M, L, XL\nCouleurs : rouge, noir, blanc\nStock : 15',
-    name: 'Robe Wax Ankara Premium',
-    price: 25000,
-    sizes: ['S', 'M', 'L', 'XL'],
-    colors: ['Rouge', 'Noir', 'Blanc'],
-    quantity: 15,
-    category: 'Vêtements',
-    confidence: 92,
-    is_duplicate: false,
-    timestamp: new Date(Date.now() - 10 * 60000).toISOString(),
-  },
-  {
-    id: 'p2',
-    rawText: 'Sneakers blanc 42\n40 000 cfa\nqté 3',
-    name: 'Sneakers blanc 42',
-    price: 40000,
-    sizes: ['42'],
-    colors: ['Blanc'],
-    quantity: 3,
-    category: '',
-    confidence: 65,
-    is_duplicate: true,
-    timestamp: new Date(Date.now() - 45 * 60000).toISOString(),
-  },
-]
+const MOCK_PENDING = []
 
 function PendingProductCard({ product, onConfirm, onReject }) {
   const [form, setForm] = useState({
@@ -246,7 +219,7 @@ export function ValidationPage() {
   const { pending: fetchedPending, loading, applyProduct } = usePendingProducts()
   const [rejected, setRejected] = useState(new Set())
 
-  const pending = fetchedPending.length > 0 ? fetchedPending : MOCK_PENDING
+  const pending = fetchedPending
   const visible = pending.filter(p => !rejected.has(p.id))
 
   async function handleConfirm(id, data) {

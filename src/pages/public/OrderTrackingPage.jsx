@@ -3,20 +3,6 @@ import { Package, CheckCircle, Truck, Clock, MessageCircle } from 'lucide-react'
 import { formatFCFA } from '@/lib/formatters'
 import { buildWhatsAppLink } from '@/lib/utils'
 
-const MOCK_ORDER = {
-  id: 'CMD-2024-001',
-  customer_name: 'Aminata Diallo',
-  status: 'Confirmée',
-  payment_status: 'En attente de paiement',
-  total: 45000,
-  shop_name: 'Fashion Dakar',
-  whatsapp_number: '+221770000000',
-  created_at: new Date(Date.now() - 3600000).toISOString(),
-  items: [
-    { name: 'Robe Wax Ankara Premium', price: 25000, quantity: 1, color: 'Rouge', size: 'M' },
-    { name: 'Sac à main cuir', price: 20000, quantity: 1, color: null, size: null },
-  ],
-}
 
 const STATUS_STEPS = [
   { key: 'Nouvelle', label: 'Commande reçue', icon: Clock },
@@ -28,7 +14,27 @@ const STATUS_ORDER = ['Nouvelle', 'Confirmée', 'Livrée']
 
 export function OrderTrackingPage() {
   const { slug, orderId } = useParams()
-  const order = MOCK_ORDER
+  const order = null
+
+  if (!order) {
+    return (
+      <div className="min-h-screen bg-cream dark:bg-navy-deep flex flex-col items-center justify-center px-5 text-center gap-4">
+        <div className="w-16 h-16 rounded-full bg-navy/8 dark:bg-white/8 flex items-center justify-center">
+          <Package size={28} className="text-navy/30 dark:text-white/25" />
+        </div>
+        <p className="font-display font-bold text-h3 text-navy dark:text-white">Commande introuvable</p>
+        <p className="text-label text-navy/50 dark:text-white/40">
+          Ce lien de suivi n'est plus valide ou la commande n'existe pas.
+        </p>
+        <Link
+          to={`/boutique/${slug}`}
+          className="mt-2 px-5 py-2.5 rounded-2xl bg-orange text-white text-label font-semibold hover:bg-orange-hi transition-all"
+        >
+          Retour à la boutique
+        </Link>
+      </div>
+    )
+  }
 
   const currentStep = STATUS_ORDER.indexOf(order.status)
   const isPaid = order.payment_status === 'Payée'

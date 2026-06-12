@@ -7,15 +7,14 @@ import { Input } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
 import { CATEGORIES } from '@/lib/constants'
 
-const MOCK_PRODUCT = {
-  id: '1',
-  name: 'Robe Wax Ankara Premium',
-  price: '25000',
-  stock: '12',
-  category: 'Vêtements',
+const EMPTY_PRODUCT = {
+  name: '',
+  price: '',
+  stock: '',
+  category: '',
   description: '',
-  sizes: ['S', 'M', 'L', 'XL'],
-  colors: ['Rouge', 'Noir', 'Blanc'],
+  sizes: [],
+  colors: [],
   images: [],
 }
 

@@ -6,12 +6,7 @@ import { Input } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
 import { cn } from '@/lib/utils'
 
-const MOCK_PRODUCTS = [
-  { id: '1', name: 'Robe Wax Ankara Premium', price: 25000, stock: 12, category: 'Vêtements', image_url: null },
-  { id: '2', name: 'Sneakers Air Force One', price: 45000, stock: 3, category: 'Chaussures', image_url: null },
-  { id: '3', name: 'Sac à main cuir véritable', price: 35000, stock: 0, category: 'Accessoires', image_url: null },
-  { id: '4', name: 'Boubou grand modèle', price: 18000, stock: 8, category: 'Vêtements', image_url: null },
-]
+const MOCK_PRODUCTS = []
 
 function StockRow({ product, onSave }) {
   const [editing, setEditing] = useState(false)
@@ -118,7 +113,7 @@ export function StockPage() {
   const { products: fetchedProducts, loading, updateStock } = useStock()
   const [search, setSearch] = useState('')
 
-  const products = fetchedProducts.length > 0 ? fetchedProducts : MOCK_PRODUCTS
+  const products = fetchedProducts
   const filtered = products.filter(p =>
     p.name.toLowerCase().includes(search.toLowerCase())
   )

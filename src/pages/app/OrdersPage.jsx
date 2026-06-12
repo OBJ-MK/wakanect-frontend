@@ -8,55 +8,7 @@ import { PaymentBadge } from '@/components/features/orders/PaymentBadge'
 import { formatFCFA, formatRelativeTime } from '@/lib/formatters'
 import { cn } from '@/lib/utils'
 
-const MOCK_ORDERS = [
-  {
-    id: '1',
-    customer_name: 'Aminata Diallo',
-    customer_phone: '+221770000001',
-    total: 45000,
-    status: 'Nouvelle',
-    payment_status: 'Payée',
-    delivery_address: '5 Rue Moussé Diop, Dakar',
-    delivery_mode: 'Livraison',
-    note: 'Merci de livrer avant 18h',
-    created_at: new Date(Date.now() - 12 * 60000).toISOString(),
-    items: [
-      { name: 'Robe Wax Ankara', price: 25000, quantity: 1, color: 'Rouge' },
-      { name: 'Sac à main', price: 20000, quantity: 1, color: null },
-    ],
-  },
-  {
-    id: '2',
-    customer_name: 'Moussa Traoré',
-    customer_phone: '+221770000002',
-    total: 28500,
-    status: 'Confirmée',
-    payment_status: 'En attente de paiement',
-    delivery_address: null,
-    delivery_mode: 'Retrait',
-    note: null,
-    created_at: new Date(Date.now() - 2 * 3600000).toISOString(),
-    items: [
-      { name: 'Sneakers Air Force', price: 28500, quantity: 1, color: 'Blanc' },
-    ],
-  },
-  {
-    id: '3',
-    customer_name: 'Fatou Sow',
-    customer_phone: '+221770000003',
-    total: 67000,
-    status: 'Livrée',
-    payment_status: 'Payée',
-    delivery_address: '12 Avenue Bourguiba, Thiès',
-    delivery_mode: 'Livraison',
-    note: null,
-    created_at: new Date(Date.now() - 86400000).toISOString(),
-    items: [
-      { name: 'Boubou grand modèle', price: 18000, quantity: 1, color: 'Bleu' },
-      { name: 'Ensemble wax', price: 49000, quantity: 1, color: null },
-    ],
-  },
-]
+const MOCK_ORDERS = []
 
 export function OrdersPage() {
   const { orders: fetchedOrders, loading, changeStatus } = useOrders()
@@ -64,7 +16,7 @@ export function OrdersPage() {
   const [selected, setSelected] = useState(null)
   const [statusUpdating, setStatusUpdating] = useState(false)
 
-  const orders = fetchedOrders.length > 0 ? fetchedOrders : MOCK_ORDERS
+  const orders = fetchedOrders
   const filtered = orders.filter(o =>
     o.customer_name.toLowerCase().includes(search.toLowerCase())
   )

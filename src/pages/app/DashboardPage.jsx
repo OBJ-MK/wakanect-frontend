@@ -8,12 +8,12 @@ import { useAuthStore } from '@/store/authStore'
 import { formatFCFA } from '@/lib/formatters'
 import { WakanectLogo } from '@/components/brand/WakanectLogo'
 
-const MOCK_STATS = {
-  revenue_today: 185_000,
-  revenue_change: +12.4,
-  pending_validation: 2,
-  orders_count: 34,
-  low_stock_count: 3,
+const EMPTY_STATS = {
+  revenue_today: 0,
+  revenue_change: 0,
+  pending_validation: 0,
+  orders_count: 0,
+  low_stock_count: 0,
 }
 
 function SparkLine() {
@@ -78,7 +78,7 @@ export function DashboardPage() {
   const { stats, loading } = useDashboard()
   const navigate = useNavigate()
 
-  const data = stats || MOCK_STATS
+  const data = stats || EMPTY_STATS
   const firstName = merchant?.owner_name?.split(' ')[0] ?? 'commerçant'
 
   return (

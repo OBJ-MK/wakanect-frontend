@@ -6,19 +6,6 @@ import { formatFCFA } from '@/lib/formatters'
 import { buildWhatsAppLink } from '@/lib/utils'
 import { cn } from '@/lib/utils'
 
-const MOCK_PRODUCT = {
-  id: '1',
-  name: 'Robe Wax Ankara Premium',
-  price: 25000,
-  stock: 12,
-  category: 'Vêtements',
-  description: 'Magnifique robe en tissu wax ankara de haute qualité. Parfaite pour toutes les occasions. Fabriquée à la main par des artisans locaux.',
-  colors: ['Rouge', 'Noir', 'Blanc'],
-  sizes: ['S', 'M', 'L', 'XL'],
-  images: [],
-  shop_name: 'Fashion Dakar',
-  whatsapp_number: '+221770000000',
-}
 
 const COLOR_MAP = {
   'Rouge': '#E53E3E',
@@ -88,14 +75,32 @@ export function ProductDetailPage() {
   const navigate = useNavigate()
   const { boutique } = useTenant()
 
-  const product = boutique?.products?.find(p => p.id === id) ?? MOCK_PRODUCT
-  const shopPhone = boutique?.whatsapp_number ?? product.whatsapp_number ?? ''
+  const product = boutique?.products?.find(p => p.id === id) ?? null
+  const shopPhone = boutique?.whatsapp_number ?? ''
 
-  const [selectedColor, setSelectedColor] = useState(product.colors?.[0] ?? null)
+  const [selectedColor, setSelectedColor] = useState(product?.colors?.[0] ?? null)
   const [selectedSize, setSelectedSize] = useState(null)
   const [qty, setQty] = useState(1)
 
-  const outOfStock = product.stock === 0
+  const outOfStock = product ? product.stock === 0 : true
+
+  if (!product) {
+    return (
+      <div className="min-h-screen bg-cream dark:bg-navy-deep flex flex-col items-center justify-center px-5 text-center gap-4">
+        <div className="w-16 h-16 rounded-full bg-navy/8 dark:bg-white/8 flex items-center justify-center">
+          <Package size={28} className="text-navy/30 dark:text-white/25" />
+        </div>
+        <p className="font-display font-bold text-h3 text-navy dark:text-white">Produit introuvable</p>
+        <p className="text-label text-navy/50 dark:text-white/40">Ce produit n'existe plus ou a été retiré de la boutique.</p>
+        <Link
+          to={`/boutique/${slug}`}
+          className="mt-2 px-5 py-2.5 rounded-2xl bg-orange text-white text-label font-semibold hover:bg-orange-hi transition-all"
+        >
+          Voir la boutique
+        </Link>
+      </div>
+    )
+  }
 
   const colorAvailable = (color) => product.colors?.includes(color)
 
@@ -104,7 +109,6 @@ export function ProductDetailPage() {
   }
 
   function addToCart() {
-    // Cart is managed in CartSheet / store — navigate to cart after adding
     navigate(`/boutique/${slug}/commande`)
   }
 

@@ -1,8 +1,20 @@
 import { createBrowserRouter } from 'react-router-dom'
+import { lazy, Suspense } from 'react'
 import { AuthLayout } from '@/components/layout/AuthLayout'
 import { AppShell } from '@/components/layout/AppShell'
 import { PublicLayout } from '@/components/layout/PublicLayout'
 import { ProtectedRoute } from './ProtectedRoute'
+import { AdminRoute } from './AdminRoute'
+
+const AdminApp = lazy(() => import('@/pages/admin/AdminApp'))
+
+function AdminFallback() {
+  return (
+    <div className="min-h-screen bg-[#0F1C3F] flex items-center justify-center">
+      <div className="w-8 h-8 border-2 border-[#EC5E2A] border-t-transparent rounded-full animate-spin" />
+    </div>
+  )
+}
 
 // Auth
 import { LoginPage } from '@/pages/auth/LoginPage'
@@ -128,6 +140,22 @@ export const router = createBrowserRouter([
       { path: 'commande', element: <CheckoutPage /> },
       { path: 'confirmation', element: <ConfirmationPage /> },
       { path: 'suivi/:orderId', element: <OrderTrackingPage /> },
+    ],
+  },
+
+  // Super-admin back-office — lazy-loaded, chunk isolé (commerçants ne le téléchargent jamais)
+  {
+    path: '/admin',
+    element: <AdminRoute />,
+    children: [
+      {
+        path: '*',
+        element: (
+          <Suspense fallback={<AdminFallback />}>
+            <AdminApp />
+          </Suspense>
+        ),
+      },
     ],
   },
 

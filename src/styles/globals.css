@@ -130,6 +130,34 @@
   }
 }
 
+/* ─── ADMIN SHELL — palette toujours dark, indépendante du mode light/dark ─
+   Scoping via .admin-shell pour ne pas polluer l'app commerçant.
+   Les overrides light mode ci-dessous ciblent .bg-navy, .text-white/*, etc.
+   — ce bloc les annule à l'intérieur de l'admin avec une spécificité plus haute.
+─────────────────────────────────────────────────────────────────────────── */
+.admin-shell .bg-navy         { background-color: #0F1C3F; }
+.admin-shell .bg-navy-deep    { background-color: #0A1430; }
+.admin-shell .bg-navy-light   { background-color: #1A2D5A; }
+.admin-shell .bg-white\/8     { background-color: rgba(255,255,255,0.08); }
+.admin-shell .bg-white\/12    { background-color: rgba(255,255,255,0.12); }
+.admin-shell .border-white\/6  { border-color: rgba(255,255,255,0.06); }
+.admin-shell .border-white\/8  { border-color: rgba(255,255,255,0.08); }
+.admin-shell .border-white\/10 { border-color: rgba(255,255,255,0.1); }
+.admin-shell .border-white\/15 { border-color: rgba(255,255,255,0.15); }
+.admin-shell .text-white       { color: rgba(255,255,255,0.95); }
+.admin-shell .text-white\/95   { color: rgba(255,255,255,0.95); }
+.admin-shell .text-white\/80   { color: rgba(255,255,255,0.80); }
+.admin-shell .text-white\/70   { color: rgba(255,255,255,0.70); }
+.admin-shell .text-white\/65   { color: rgba(255,255,255,0.65); }
+.admin-shell .text-white\/60   { color: rgba(255,255,255,0.60); }
+.admin-shell .text-white\/55   { color: rgba(255,255,255,0.55); }
+.admin-shell .text-white\/50   { color: rgba(255,255,255,0.50); }
+.admin-shell .text-white\/45   { color: rgba(255,255,255,0.45); }
+.admin-shell .text-white\/40   { color: rgba(255,255,255,0.40); }
+.admin-shell .hover\:bg-white\/4:hover  { background-color: rgba(255,255,255,0.04); }
+.admin-shell .hover\:bg-white\/6:hover  { background-color: rgba(255,255,255,0.06); }
+.admin-shell .hover\:bg-white\/8:hover  { background-color: rgba(255,255,255,0.08); }
+
 /* ─── LIGHT MODE OVERRIDES ──────────────────────────────────────────────────
    L'app est dark-first. Quand .dark est absent on adapte les tokens hardcodés.
    Toutes ces règles sont hors @layer pour battre les utilities Tailwind.

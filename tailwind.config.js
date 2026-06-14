@@ -30,6 +30,15 @@ export default {
         emerald: {
           DEFAULT: '#34D399',
         },
+        // Admin console — danger + neutrals (namespaced pour éviter collisions)
+        danger: '#E5484D',
+        admin: {
+          ink:    '#1B2336',
+          'ink-2': '#5B6273',
+          muted:  '#8A909E',
+          line:   '#E7E9EE',
+          fill:   '#F5F6F8',
+        },
       },
       fontFamily: {
         display: ['"Plus Jakarta Sans"', 'sans-serif'],
@@ -57,6 +66,8 @@ export default {
         'card': '0 4px 24px rgba(0,0,0,0.12)',
         'orange-glow': '0 0 24px rgba(236,94,42,0.25)',
         'amber-glow': '0 0 24px rgba(255,179,71,0.2)',
+        'admin-card': '0 1px 4px rgba(0,0,0,0.08), 0 0 0 1px #E7E9EE',
+        'sidebar': 'inset -1px 0 0 rgba(255,255,255,0.06)',
       },
       backgroundImage: {
         'gradient-navy': 'linear-gradient(135deg, #0F1C3F 0%, #0A1430 100%)',
@@ -73,6 +84,8 @@ export default {
         'scale-in': 'scaleIn 0.25s ease forwards',
         'slide-up': 'slideUp 0.35s ease forwards',
         'sparkline': 'sparkline 1.2s ease forwards',
+        'slide-in-right': 'slideInRight 0.25s ease forwards',
+        'bottom-sheet': 'slideUp 0.3s ease forwards',
       },
       keyframes: {
         fadeUp: {
@@ -90,6 +103,10 @@ export default {
         sparkline: {
           '0%': { strokeDashoffset: '1000' },
           '100%': { strokeDashoffset: '0' },
+        },
+        slideInRight: {
+          '0%':   { transform: 'translateX(-100%)' },
+          '100%': { transform: 'translateX(0)' },
         },
       },
     },

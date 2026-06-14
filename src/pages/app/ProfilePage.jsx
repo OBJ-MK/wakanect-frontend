@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import {
   Store, Moon, Sun, Bell, MessageSquare,
   LogOut, ChevronRight, Share2, HelpCircle,
-  Package, CreditCard
+  Package, CreditCard, Users, Smartphone
 } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { useAuthStore } from '@/store/authStore'
@@ -109,6 +109,13 @@ export function ProfilePage() {
             to="/app/profil/comment-ajouter"
             action={<ChevronRight size={16} className="text-white/30 shrink-0" />}
           />
+          <SettingRow
+            icon={Users}
+            label="Mon équipe"
+            description="Employés · accès & permissions"
+            to="/app/equipe"
+            action={<ChevronRight size={16} className="text-white/30 shrink-0" />}
+          />
         </div>
 
         {/* Abonnement */}
@@ -145,16 +152,23 @@ export function ProfilePage() {
             }
           />
           <SettingRow
-            icon={Bell}
-            label="Notifications"
-            description="Commandes, alertes stock"
-            to="/app/notifications"
-            action={<ChevronRight size={16} className="text-white/30 shrink-0" />}
-          />
-          <SettingRow
             icon={MessageSquare}
             label="Réponse auto WhatsApp"
             description="Message de bienvenue automatique"
+            action={<ChevronRight size={16} className="text-white/30 shrink-0" />}
+          />
+          <SettingRow
+            icon={Smartphone}
+            label="Installer l'app"
+            description="Ajouter à l'écran d'accueil"
+            to="/app/profil/installer"
+            action={<ChevronRight size={16} className="text-white/30 shrink-0" />}
+          />
+          <SettingRow
+            icon={Bell}
+            label="Activer les notifications"
+            description="Commandes, alertes stock"
+            to="/app/notifications/activer"
             action={<ChevronRight size={16} className="text-white/30 shrink-0" />}
           />
         </div>

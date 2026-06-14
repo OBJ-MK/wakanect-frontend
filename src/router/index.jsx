@@ -41,6 +41,11 @@ import { PartagerPage } from '@/pages/app/PartagerPage'
 import { AidePage } from '@/pages/app/AidePage'
 import { CommentAjouterPage } from '@/pages/app/CommentAjouterPage'
 import { MonAbonnementPage } from '@/pages/app/MonAbonnementPage'
+import { MonEquipePage } from '@/pages/app/MonEquipePage'
+import { AjouterEmployePage } from '@/pages/app/AjouterEmployePage'
+import { FicheEmployePage } from '@/pages/app/FicheEmployePage'
+import { ActiverNotificationsPage } from '@/pages/app/ActiverNotificationsPage'
+import { InstallerAppPage } from '@/pages/app/InstallerAppPage'
 
 // Public boutique
 import { CataloguePage } from '@/pages/public/CataloguePage'
@@ -103,6 +108,11 @@ export const router = createBrowserRouter([
           { path: 'profil/aide', element: <AidePage /> },
           { path: 'profil/comment-ajouter', element: <CommentAjouterPage /> },
           { path: 'profil/abonnement', element: <MonAbonnementPage /> },
+          { path: 'profil/installer', element: <InstallerAppPage /> },
+          { path: 'notifications/activer', element: <ActiverNotificationsPage /> },
+          { path: 'equipe', element: <MonEquipePage /> },
+          { path: 'equipe/ajouter', element: <AjouterEmployePage /> },
+          { path: 'equipe/:id', element: <FicheEmployePage /> },
         ],
       },
     ],

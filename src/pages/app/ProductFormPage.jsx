@@ -6,6 +6,7 @@ import {
 import { Input } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
 import { CATEGORIES } from '@/lib/constants'
+import { stockService } from '@/services/stockService'
 
 const EMPTY_PRODUCT = {
   name: '',
@@ -108,16 +109,33 @@ export function ProductFormPage() {
     images: [null, null],
   })
   const [saving, setSaving] = useState(false)
+  const [loadingProduct, setLoadingProduct] = useState(isEdit)
 
   useEffect(() => {
-    if (isEdit) {
-      // Load existing product data
-      setForm({
-        ...MOCK_PRODUCT,
-        images: [...MOCK_PRODUCT.images, null, null].slice(0, Math.max(2, MOCK_PRODUCT.images.length + 1)),
+    if (!isEdit) return
+    stockService.list()
+      .then(data => {
+        const list = Array.isArray(data) ? data : (data?.products ?? data?.rows ?? [])
+        const product = list.find(p => String(p.id) === String(id))
+        if (!product) return
+        const imgs = [
+          ...(product.images ?? (product.image_url ? [product.image_url] : [])),
+          null,
+        ].slice(0, Math.max(2, (product.images?.length ?? 0) + 1))
+        setForm({
+          name: product.name ?? '',
+          price: product.price ?? '',
+          stock: product.stock ?? '',
+          category: product.category ?? '',
+          description: product.description ?? '',
+          sizes: product.sizes ?? [],
+          colors: product.colors ?? [],
+          images: imgs,
+        })
       })
-    }
-  }, [isEdit])
+      .catch(() => {/* form stays empty — don't crash */})
+      .finally(() => setLoadingProduct(false))
+  }, [id, isEdit])
 
   const set = (key) => (e) => setForm(f => ({ ...f, [key]: e.target.value }))
 
@@ -144,6 +162,14 @@ export function ProductFormPage() {
     await new Promise(r => setTimeout(r, 800))
     setSaving(false)
     navigate('/app/catalogue')
+  }
+
+  if (loadingProduct) {
+    return (
+      <div className="min-h-screen bg-navy-deep flex items-center justify-center">
+        <div className="w-8 h-8 rounded-full border-2 border-orange/30 border-t-orange animate-spin" />
+      </div>
+    )
   }
 
   return (

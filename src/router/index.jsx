@@ -159,6 +159,14 @@ export const router = createBrowserRouter([
     element: <AdminRoute />,
     children: [
       {
+        index: true,
+        element: (
+          <Suspense fallback={<AdminFallback />}>
+            <AdminApp />
+          </Suspense>
+        ),
+      },
+      {
         path: '*',
         element: (
           <Suspense fallback={<AdminFallback />}>

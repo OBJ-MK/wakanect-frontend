@@ -2,6 +2,7 @@ import { AlertTriangle, XCircle, Info } from 'lucide-react'
 
 const LEVEL_STYLES = {
   error:   { icon: XCircle,       bar: 'bg-danger',  text: 'text-danger',     bg: 'bg-danger/5 border-danger/15' },
+  danger:  { icon: XCircle,       bar: 'bg-danger',  text: 'text-danger',     bg: 'bg-danger/5 border-danger/15' },
   warning: { icon: AlertTriangle, bar: 'bg-amber',   text: 'text-amber-700',  bg: 'bg-amber/5 border-amber/20' },
   info:    { icon: Info,          bar: 'bg-navy/30', text: 'text-navy',       bg: 'bg-admin-fill border-admin-line' },
 }

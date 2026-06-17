@@ -6,6 +6,7 @@
 const VARIANTS = {
   // Plans
   pro:       'bg-orange/10 text-orange border-orange/20',
+  premium:   'bg-navy/10 text-navy border-navy/20',
   business:  'bg-navy/10 text-navy border-navy/20',
   trial:     'bg-amber/20 text-amber-700 border-amber/30',
   free:      'bg-admin-fill text-admin-ink-2 border-admin-line',
@@ -36,7 +37,7 @@ const VARIANTS = {
 }
 
 const LABELS = {
-  pro: 'Pro', business: 'Business', trial: 'Essai', free: 'Gratuit',
+  pro: 'Pro', premium: 'Business', business: 'Business', trial: 'Essai', free: 'Gratuit',
   active: 'Active', suspended: 'Suspendue', dormant: 'Inactive',
   error: 'Erreur', warning: 'Attention', info: 'Info',
   regex: 'Regex', cloudflare: 'Cloudflare', haiku: 'Haiku', failed: 'Échec',

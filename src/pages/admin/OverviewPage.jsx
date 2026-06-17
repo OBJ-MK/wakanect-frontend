@@ -37,6 +37,8 @@ export default function OverviewPage() {
   const [range, setRange] = useState('7d')
   const { data, loading, error, refetch } = useAdminQuery(() => adminApi.overview(range), [range])
 
+  if (import.meta.env.DEV) console.log('[admin:overview] data =', data, '| error =', error)
+
   if (error) return <ErrorState message={error} onRetry={refetch} />
 
   const shops  = data?.shops ?? {}

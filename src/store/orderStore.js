@@ -13,4 +13,11 @@ export const useOrderStore = create((set) => ({
         ? { ...state.selectedOrder, status }
         : state.selectedOrder,
     })),
+  updateOrderPayment: (id) =>
+    set((state) => ({
+      orders: state.orders.map(o => o.id === id ? { ...o, payment_status: 'Payée' } : o),
+      selectedOrder: state.selectedOrder?.id === id
+        ? { ...state.selectedOrder, payment_status: 'Payée' }
+        : state.selectedOrder,
+    })),
 }))

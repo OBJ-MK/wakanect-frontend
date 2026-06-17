@@ -1,10 +1,20 @@
 import { formatFCFA, formatDate } from '@/lib/formatters'
 import { OrderStatusStepper } from './OrderStatusStepper'
 import { PaymentBadge } from './PaymentBadge'
+import { Button } from '@/components/ui/Button'
 import { MapPin, Phone, MessageCircle, Package } from 'lucide-react'
 
-export function OrderDetail({ order, onStatusUpdate, loading }) {
+export function OrderDetail({ order, onStatusUpdate, onMarkPaid, loading }) {
   if (!order) return null
+
+  const status = order.status
+  const isPaid = order.payment_status === 'Payée'
+
+  const canConfirm = status === 'Nouvelle'
+  const canDeliver = status === 'Confirmée'
+  const canCancel  = status !== 'Livrée' && status !== 'Annulée'
+  const canMarkPaid = !isPaid && status !== 'Annulée'
+  const hasActionBar = canConfirm || canDeliver || canMarkPaid || canCancel
 
   return (
     <div className="flex flex-col gap-4">
@@ -12,7 +22,7 @@ export function OrderDetail({ order, onStatusUpdate, loading }) {
       <div className="glass rounded-3xl p-5">
         <p className="text-micro text-white/45 uppercase tracking-wider mb-4">Statut commande</p>
         <OrderStatusStepper
-          status={order.status}
+          status={status}
           onUpdate={onStatusUpdate}
           loading={loading}
         />
@@ -87,6 +97,45 @@ export function OrderDetail({ order, onStatusUpdate, loading }) {
       <p className="text-micro text-white/30 text-center">
         Commandé le {formatDate(order.created_at)}
       </p>
+
+      {/* Fixed action bar */}
+      {hasActionBar && (
+        <div className="fixed bottom-20 inset-x-0 z-30 glass border-t border-white/8 px-4 pt-3 pb-4">
+          <div className="max-w-lg mx-auto flex flex-col gap-2.5">
+            {(canConfirm || canDeliver) && (
+              <Button
+                variant="primary"
+                size="lg"
+                fullWidth
+                loading={loading}
+                onClick={() => onStatusUpdate(canConfirm ? 'Confirmée' : 'Livrée')}
+              >
+                {canConfirm ? 'Confirmer la commande' : 'Marquer comme livrée'}
+              </Button>
+            )}
+            {canMarkPaid && (
+              <Button
+                variant="secondary"
+                size="md"
+                fullWidth
+                loading={loading}
+                onClick={onMarkPaid}
+              >
+                Marquer comme payée
+              </Button>
+            )}
+            {canCancel && (
+              <button
+                onClick={() => onStatusUpdate('Annulée')}
+                disabled={loading}
+                className="text-center text-label text-red-400/80 hover:text-red-400 transition-colors py-1 disabled:opacity-40"
+              >
+                Annuler la commande
+              </button>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

@@ -3,30 +3,22 @@ import { Link } from 'react-router-dom'
 import { Plus, Edit3, LayoutGrid, AlertTriangle, Package, Search } from 'lucide-react'
 import { formatFCFA } from '@/lib/formatters'
 import { cn } from '@/lib/utils'
-
-const MOCK_PRODUCTS = [
-  { id: '1', name: 'Robe Wax Ankara Premium', price: 25000, stock: 12, category: 'Vêtements', images: [] },
-  { id: '2', name: 'Sneakers Air Force One', price: 45000, stock: 3, category: 'Chaussures', images: [] },
-  { id: '3', name: 'Sac à main cuir véritable', price: 35000, stock: 0, category: 'Accessoires', images: [] },
-  { id: '4', name: 'Boubou grand modèle', price: 18000, stock: 8, category: 'Vêtements', images: [] },
-  { id: '5', name: 'Sandales cuir tressé', price: 12000, stock: 15, category: 'Chaussures', images: [] },
-  { id: '6', name: 'Pochette tissu wax', price: 8000, stock: 20, category: 'Accessoires', images: [] },
-]
+import { useStock } from '@/hooks/useStock'
 
 function ProductCard({ product }) {
   const lowStock = product.stock > 0 && product.stock <= 5
   const outOfStock = product.stock === 0
+  const thumb = product.images?.[0] ?? product.image_url ?? null
 
   return (
     <div className={cn(
       'glass rounded-3xl overflow-hidden flex flex-col',
       outOfStock && 'opacity-60',
     )}>
-      {/* Photo zone — min 2 photos indicated */}
       <div className="relative bg-navy-light aspect-square flex items-center justify-center">
-        {product.images?.length > 0 ? (
+        {thumb ? (
           <img
-            src={product.images[0]}
+            src={thumb}
             alt={product.name}
             className="w-full h-full object-cover"
           />
@@ -78,7 +70,7 @@ function ProductCard({ product }) {
 
 export function CatalogueMarchandPage() {
   const [search, setSearch] = useState('')
-  const products = []
+  const { products, loading } = useStock()
   const filtered = products.filter(p =>
     p.name.toLowerCase().includes(search.toLowerCase())
   )
@@ -131,7 +123,11 @@ export function CatalogueMarchandPage() {
         )}
 
         {/* Product grid */}
-        {filtered.length === 0 ? (
+        {loading ? (
+          <div className="flex justify-center py-16">
+            <div className="w-8 h-8 rounded-full border-2 border-orange/30 border-t-orange animate-spin" />
+          </div>
+        ) : filtered.length === 0 ? (
           <div className="flex flex-col items-center py-20 text-center">
             <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-4">
               <Package size={28} className="text-white/20" />

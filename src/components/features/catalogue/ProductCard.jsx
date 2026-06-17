@@ -1,31 +1,36 @@
 import { useState } from 'react'
-import { ShoppingCart, ExternalLink } from 'lucide-react'
+import { ShoppingCart } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 import { formatFCFA } from '@/lib/formatters'
-import { buildColorRequestLink } from '@/lib/utils'
 import { useCatalogueStore } from '@/store/catalogueStore'
 import { Button } from '@/components/ui/Button'
-import { cn } from '@/lib/utils'
 
 export function ProductCard({ product }) {
   const { addToCart, boutique } = useCatalogueStore()
-  const [selectedColor, setSelectedColor] = useState(product.colors?.[0] ?? null)
+  const navigate = useNavigate()
   const [added, setAdded] = useState(false)
 
   const outOfStock = product.stock <= 0
 
-  function handleAdd() {
+  function handleAdd(e) {
+    e.stopPropagation()
     if (outOfStock) return
-    addToCart(product, selectedColor)
+    addToCart(product, null)
     setAdded(true)
     setTimeout(() => setAdded(false), 1400)
   }
 
-  const waLink = boutique?.whatsapp_number
-    ? buildColorRequestLink(boutique.whatsapp_number, product.name, '__couleur__')
-    : null
+  function handleCardClick() {
+    if (boutique?.slug) {
+      navigate(`/boutique/${boutique.slug}/produit/${product.id}`)
+    }
+  }
 
   return (
-    <div className="flex flex-col rounded-3xl bg-white dark:bg-navy overflow-hidden shadow-card border border-[var(--border-default)]">
+    <div
+      onClick={handleCardClick}
+      className="flex flex-col rounded-3xl bg-white dark:bg-navy overflow-hidden shadow-card border border-[var(--border-default)] cursor-pointer hover:shadow-md transition-shadow"
+    >
       {/* Image */}
       <div className="relative aspect-square bg-cream-dark dark:bg-navy-light overflow-hidden">
         {product.image_url ? (
@@ -56,33 +61,17 @@ export function ProductCard({ product }) {
         </p>
         <p className="text-label font-bold text-orange">{formatFCFA(product.price)}</p>
 
-        {/* Color chips */}
+        {/* Color chips — lecture seule */}
         {product.colors?.length > 0 && (
           <div className="flex flex-wrap gap-1">
             {product.colors.map(color => (
-              <button
+              <span
                 key={color}
-                onClick={() => setSelectedColor(color)}
-                className={cn(
-                  'px-2 py-0.5 rounded-full text-micro border transition-colors',
-                  selectedColor === color
-                    ? 'bg-orange text-white border-orange'
-                    : 'border-[var(--border-default)] text-[var(--text-secondary)] hover:border-orange/50',
-                )}
+                className="px-2 py-0.5 rounded-full text-micro border border-[var(--border-default)] text-[var(--text-secondary)]"
               >
                 {color}
-              </button>
+              </span>
             ))}
-            {waLink && (
-              <a
-                href={waLink.replace('__couleur__', 'autre couleur')}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-micro border border-wa-green/40 text-wa-green hover:bg-wa-green/10 transition-colors"
-              >
-                <ExternalLink size={10} /> Autre
-              </a>
-            )}
           </div>
         )}
 

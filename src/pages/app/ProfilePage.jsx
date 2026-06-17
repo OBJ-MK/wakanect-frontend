@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
-  Store, Moon, Sun, Bell, MessageSquare,
+  Store, Moon, Sun, Bell,
   LogOut, ChevronRight, Share2, HelpCircle,
   Package, CreditCard, Users, Smartphone
 } from 'lucide-react'
@@ -146,16 +146,10 @@ export function ProfilePage() {
                 aria-label="Mode nuit"
               >
                 <span
-                  className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-all ${dark ? 'left-5.5' : 'left-0.5'}`}
+                  className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition-all ${dark ? 'translate-x-5' : 'translate-x-0'}`}
                 />
               </button>
             }
-          />
-          <SettingRow
-            icon={MessageSquare}
-            label="Réponse auto WhatsApp"
-            description="Message de bienvenue automatique"
-            action={<ChevronRight size={16} className="text-white/30 shrink-0" />}
           />
           <SettingRow
             icon={Smartphone}

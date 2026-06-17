@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ChevronLeft, AlertCircle } from 'lucide-react'
+import { ChevronLeft, AlertCircle, Copy } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { usePendingProducts } from '@/hooks/useStock'
 import { WhatsAppBubble } from '@/components/features/parsing/WhatsAppBubble'
@@ -10,9 +10,44 @@ import { formatFCFA } from '@/lib/formatters'
 import { CATEGORIES } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 
-const MOCK_PENDING = []
+const DUPLICATE_LABELS = {
+  'image-exact': 'Image identique',
+  'text+price': 'Texte + prix identiques',
+}
 
-function PendingProductCard({ product, onConfirm, onReject }) {
+function DuplicateFlag({ duplicate }) {
+  if (!duplicate) return null
+  const label = DUPLICATE_LABELS[duplicate.matched_on] ?? duplicate.matched_on
+  return (
+    <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber/10 border border-amber/20">
+      <Copy size={12} className="text-amber shrink-0" />
+      <span className="text-micro font-semibold text-amber">
+        Doublon possible — {label}
+      </span>
+      {duplicate.confidence != null && (
+        <span className="text-micro text-amber/70 ml-0.5">({duplicate.confidence}%)</span>
+      )}
+    </div>
+  )
+}
+
+function ImageStrip({ images }) {
+  if (!images?.length) return null
+  return (
+    <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1">
+      {images.map((url, i) => (
+        <img
+          key={i}
+          src={url}
+          alt=""
+          className="h-20 w-20 rounded-2xl object-cover shrink-0 border border-white/10"
+        />
+      ))}
+    </div>
+  )
+}
+
+function PendingProductCard({ product, onPublish, onIgnore }) {
   const [form, setForm] = useState({
     name: product.name,
     price: String(product.price || ''),
@@ -51,9 +86,9 @@ function PendingProductCard({ product, onConfirm, onReject }) {
     setForm(f => ({ ...f, colors: f.colors.filter(x => x !== c) }))
   }
 
-  async function handleConfirm() {
+  async function handlePublish() {
     setLoading(true)
-    await onConfirm(product.id, {
+    await onPublish(product.id, {
       ...form,
       price: parseInt(form.price, 10),
       quantity: parseInt(form.quantity, 10),
@@ -61,16 +96,18 @@ function PendingProductCard({ product, onConfirm, onReject }) {
     setLoading(false)
   }
 
-  async function handleReject() {
-    await onReject(product.id)
+  async function handleIgnore() {
+    await onIgnore(product.id)
   }
 
   return (
     <div className="glass rounded-4xl overflow-hidden animate-fade-up">
-      {/* Thread line */}
       <div className="h-0.5 gradient-thread opacity-60" />
 
       <div className="p-5 flex flex-col gap-5">
+        {/* Photos du candidat */}
+        <ImageStrip images={product.images} />
+
         {/* WA Bubble section */}
         <div>
           <p className="text-micro text-white/40 uppercase tracking-wider mb-3">
@@ -78,22 +115,17 @@ function PendingProductCard({ product, onConfirm, onReject }) {
           </p>
           <div className="bg-[#0A4A2A] rounded-3xl p-4">
             <WhatsAppBubble
-              text={product.rawText}
+              text={product.raw_text}
               timestamp={product.timestamp}
               senderName="Commerçant"
             />
           </div>
         </div>
 
-        {/* Confidence + duplicate */}
+        {/* Confidence + duplicate flag */}
         <div className="flex flex-wrap items-center gap-2">
           <ConfidenceBadge score={product.confidence} />
-          {product.is_duplicate && (
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-500/15">
-              <AlertCircle size={13} className="text-red-400" />
-              <span className="text-micro font-semibold text-red-400">Doublon suspecté</span>
-            </div>
-          )}
+          <DuplicateFlag duplicate={product.duplicate} />
         </div>
 
         {/* Parsed fields */}
@@ -106,7 +138,6 @@ function PendingProductCard({ product, onConfirm, onReject }) {
             onChange={set('name')}
           />
 
-          {/* Prix + Quantité — flex-wrap pour mobile */}
           <div className="flex flex-wrap gap-3">
             <Input
               label="Prix (FCFA)"
@@ -127,7 +158,6 @@ function PendingProductCard({ product, onConfirm, onReject }) {
             />
           </div>
 
-          {/* Catégorie */}
           <div className="flex flex-col gap-1.5">
             <label className="text-label font-semibold text-white/60">Catégorie</label>
             <select
@@ -142,7 +172,6 @@ function PendingProductCard({ product, onConfirm, onReject }) {
             </select>
           </div>
 
-          {/* Tailles */}
           <div className="flex flex-col gap-1.5">
             <label className="text-label font-semibold text-white/60">Tailles</label>
             <div className="flex flex-wrap gap-2 mb-2">
@@ -173,7 +202,6 @@ function PendingProductCard({ product, onConfirm, onReject }) {
             </div>
           </div>
 
-          {/* Couleurs */}
           <div className="flex flex-col gap-1.5">
             <label className="text-label font-semibold text-white/60">Couleurs</label>
             <div className="flex flex-wrap gap-2 mb-2">
@@ -206,8 +234,8 @@ function PendingProductCard({ product, onConfirm, onReject }) {
         </div>
 
         <LineActionBar
-          onConfirm={handleConfirm}
-          onReject={handleReject}
+          onPublish={handlePublish}
+          onIgnore={handleIgnore}
           loading={loading}
         />
       </div>
@@ -216,24 +244,20 @@ function PendingProductCard({ product, onConfirm, onReject }) {
 }
 
 export function ValidationPage() {
-  const { pending: fetchedPending, loading, applyProduct } = usePendingProducts()
-  const [rejected, setRejected] = useState(new Set())
+  const { pending, loading, applyProduct, ignoreProduct } = usePendingProducts()
 
-  const pending = fetchedPending
-  const visible = pending.filter(p => !rejected.has(p.id))
-
-  async function handleConfirm(id, data) {
+  async function handlePublish(id, data) {
     await applyProduct(id, data)
-    setRejected(s => new Set([...s, id]))
   }
 
-  function handleReject(id) {
-    setRejected(s => new Set([...s, id]))
+  async function handleIgnore(id) {
+    await ignoreProduct(id)
   }
+
+  const visible = pending
 
   return (
     <div className="min-h-screen bg-navy-deep">
-      {/* Header */}
       <div className="sticky top-0 z-20 glass border-b border-white/6 px-4 py-3">
         <div className="max-w-lg mx-auto flex items-center gap-3">
           <Link to="/app" className="p-2 -ml-2 rounded-xl text-white/60 hover:text-white hover:bg-white/8 transition-colors">
@@ -264,8 +288,8 @@ export function ValidationPage() {
             <PendingProductCard
               key={product.id}
               product={product}
-              onConfirm={handleConfirm}
-              onReject={handleReject}
+              onPublish={handlePublish}
+              onIgnore={handleIgnore}
             />
           ))
         )}

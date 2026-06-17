@@ -22,7 +22,7 @@ export default function AdminApp() {
   return (
     <AdminContext.Provider value={{ impersonating, setImpersonating }}>
       <Routes>
-        <Route element={<AdminShell />}>
+        <Route path="/*" element={<AdminShell />}>
           <Route index element={<OverviewPage />} />
           <Route path="parsing" element={<ParsingPage />} />
           <Route path="parsing/journal" element={<ParsingJournalPage />} />

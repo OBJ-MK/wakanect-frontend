@@ -155,7 +155,7 @@ export const router = createBrowserRouter([
 
   // Super-admin back-office — lazy-loaded, chunk isolé (commerçants ne le téléchargent jamais)
   {
-    path: '/admin',
+    path: '/admin/*',
     element: <AdminRoute />,
     children: [
       {

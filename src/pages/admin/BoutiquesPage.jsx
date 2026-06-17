@@ -11,7 +11,7 @@ import { EmptyState } from '@/components/admin/EmptyState'
 
 const PLAN_OPTIONS   = ['', 'pro', 'premium', 'free']
 const STATUS_OPTIONS = ['', 'active', 'suspended', 'dormant']
-const PLAN_LABELS    = { '': 'Tous les plans', pro: 'Pro', premium: 'Business', free: 'Gratuit' }
+const PLAN_LABELS    = { '': 'Tous les plans', pro: 'Pro', premium: 'Premium', free: 'Gratuit' }
 const STATUS_LABELS  = { '': 'Tous statuts', active: 'Active', suspended: 'Suspendue', dormant: 'Inactive' }
 
 const COLUMNS = [

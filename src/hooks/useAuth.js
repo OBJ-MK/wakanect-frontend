@@ -16,7 +16,7 @@ export function useAuth() {
       const { token, merchant: m } = await authService.login(credentials)
       localStorage.setItem('waka_token', token)
       login(token, m)
-      navigate('/app')
+      navigate(m?.role === 'superadmin' ? '/admin' : '/app')
     } catch (e) {
       setError(e.message)
     } finally {

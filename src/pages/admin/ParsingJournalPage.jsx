@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { Download, AlertCircle } from 'lucide-react'
 import { adminApi } from '@/services/adminApi'
 import { useAdminQuery } from '@/hooks/useAdminQuery'
@@ -44,26 +44,25 @@ export default function ParsingJournalPage() {
   const { data: topData, loading: topLoading, error: topError, refetch: refetchTop } =
     useAdminQuery(() => adminApi.parsingTop(range), [range])
 
+  // Pure fetch — no state side-effects inside fetchFn.
+  const { data: eventsPage, loading: eventsLoading, error: eventsError, refetch: refetchEvents } =
+    useAdminQuery(() => adminApi.parsingEvents(null, 50), [range])
+
+  // Apply fetched page once available; reset on range change.
+  useEffect(() => {
+    if (!eventsPage) return
+    setAllEvents(eventsPage.rows ?? [])
+    setCursor(eventsPage.nextCursor ?? null)
+  }, [eventsPage])
+
   const loadEvents = useCallback(
     () => adminApi.parsingEvents(cursor, 50)
       .then(res => {
-        setAllEvents(prev => cursor ? [...prev, ...res.rows] : res.rows)
+        setAllEvents(prev => [...prev, ...res.rows])
         setCursor(res.nextCursor ?? null)
       }),
     [cursor],
   )
-
-  const {
-    loading: eventsLoading, error: eventsError, refetch: refetchEvents,
-  } = useAdminQuery(() => {
-    setAllEvents([])
-    setCursor(null)
-    return adminApi.parsingEvents(null, 50).then(res => {
-      setAllEvents(res.rows ?? [])
-      setCursor(res.nextCursor ?? null)
-      return res
-    })
-  }, [range])
 
   const handleExportCSV = () => {
     window.open(adminApi.parsingEventsCSVUrl(), '_blank')

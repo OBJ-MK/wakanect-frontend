@@ -8,7 +8,7 @@ export function useStock() {
 
   useEffect(() => {
     stockService.list()
-      .then(setProducts)
+      .then(data => setProducts(Array.isArray(data) ? data : (data?.products ?? data?.rows ?? [])))
       .catch(e => setError(e.message))
       .finally(() => setLoading(false))
   }, [])
@@ -28,7 +28,7 @@ export function usePendingProducts() {
 
   useEffect(() => {
     stockService.getPending()
-      .then(setPending)
+      .then(data => setPending(Array.isArray(data) ? data : (data?.pending ?? data?.rows ?? [])))
       .catch(e => setError(e.message))
       .finally(() => setLoading(false))
   }, [])
@@ -38,5 +38,10 @@ export function usePendingProducts() {
     setPending(prev => prev.filter(p => p.id !== id))
   }
 
-  return { pending, loading, error, applyProduct }
+  async function ignoreProduct(id) {
+    await stockService.ignorePending(id)
+    setPending(prev => prev.filter(p => p.id !== id))
+  }
+
+  return { pending, loading, error, applyProduct, ignoreProduct }
 }

@@ -1,51 +1,12 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import {
-  ChevronLeft, Camera, X, Plus, Check
+  ChevronLeft, Camera, X, Plus, Check, Clock
 } from 'lucide-react'
 import { Input } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
 import { CATEGORIES } from '@/lib/constants'
 import { stockService } from '@/services/stockService'
-
-const EMPTY_PRODUCT = {
-  name: '',
-  price: '',
-  stock: '',
-  category: '',
-  description: '',
-  sizes: [],
-  colors: [],
-  images: [],
-}
-
-function PhotoSlot({ image, onAdd, onRemove, index }) {
-  return (
-    <div className="relative aspect-square rounded-2xl overflow-hidden bg-navy-light border-2 border-dashed border-white/15 flex items-center justify-center">
-      {image ? (
-        <>
-          <img src={image} alt={`Photo ${index + 1}`} className="w-full h-full object-cover" />
-          <button
-            onClick={() => onRemove(index)}
-            className="absolute top-1.5 right-1.5 w-6 h-6 rounded-full bg-navy/80 flex items-center justify-center text-white hover:bg-red-500/80 transition-colors"
-            aria-label="Supprimer la photo"
-          >
-            <X size={12} />
-          </button>
-        </>
-      ) : (
-        <label className="flex flex-col items-center gap-1.5 cursor-pointer w-full h-full items-center justify-center flex">
-          <Camera size={20} className="text-white/30" />
-          <span className="text-micro text-white/30">Photo {index + 1}{index < 2 ? ' *' : ''}</span>
-          <input type="file" accept="image/*" className="sr-only" onChange={e => {
-            const file = e.target.files?.[0]
-            if (file) onAdd(index, URL.createObjectURL(file))
-          }} />
-        </label>
-      )}
-    </div>
-  )
-}
 
 function TagInput({ label, tags, onAdd, onRemove, placeholder, colorClass = 'bg-orange/15 text-orange' }) {
   const [val, setVal] = useState('')
@@ -93,6 +54,27 @@ function TagInput({ label, tags, onAdd, onRemove, placeholder, colorClass = 'bg-
   )
 }
 
+function ReadOnlyImages({ images }) {
+  if (!images?.length) return null
+  return (
+    <div className="flex flex-col gap-2">
+      <label className="text-label font-semibold text-white/60">
+        Photos <span className="text-white/35 font-normal">(gestion photos bientôt)</span>
+      </label>
+      <div className="flex gap-2 overflow-x-auto pb-1">
+        {images.map((url, i) => (
+          <img
+            key={i}
+            src={url}
+            alt=""
+            className="h-20 w-20 rounded-2xl object-cover shrink-0 border border-white/10"
+          />
+        ))}
+      </div>
+    </div>
+  )
+}
+
 export function ProductFormPage() {
   const { id } = useParams()
   const navigate = useNavigate()
@@ -106,10 +88,12 @@ export function ProductFormPage() {
     description: '',
     sizes: [],
     colors: [],
-    images: [null, null],
+    images: [],
   })
   const [saving, setSaving] = useState(false)
   const [loadingProduct, setLoadingProduct] = useState(isEdit)
+  const [error, setError] = useState(null)
+  const [success, setSuccess] = useState(false)
 
   useEffect(() => {
     if (!isEdit) return
@@ -118,19 +102,15 @@ export function ProductFormPage() {
         const list = Array.isArray(data) ? data : (data?.products ?? data?.rows ?? [])
         const product = list.find(p => String(p.id) === String(id))
         if (!product) return
-        const imgs = [
-          ...(product.images ?? (product.image_url ? [product.image_url] : [])),
-          null,
-        ].slice(0, Math.max(2, (product.images?.length ?? 0) + 1))
         setForm({
-          name: product.name ?? '',
-          price: product.price ?? '',
-          stock: product.stock ?? '',
-          category: product.category ?? '',
+          name:        product.name        ?? '',
+          price:       product.price       ?? '',
+          stock:       product.stock       ?? '',
+          category:    product.category    ?? '',
           description: product.description ?? '',
-          sizes: product.sizes ?? [],
-          colors: product.colors ?? [],
-          images: imgs,
+          sizes:       product.sizes       ?? [],
+          colors:      product.colors      ?? [],
+          images:      product.images      ?? (product.image_url ? [product.image_url] : []),
         })
       })
       .catch(() => {/* form stays empty — don't crash */})
@@ -139,29 +119,27 @@ export function ProductFormPage() {
 
   const set = (key) => (e) => setForm(f => ({ ...f, [key]: e.target.value }))
 
-  function setImage(index, url) {
-    setForm(f => {
-      const imgs = [...f.images]
-      imgs[index] = url
-      if (index === imgs.length - 1) imgs.push(null)
-      return { ...f, images: imgs }
-    })
-  }
-
-  function removeImage(index) {
-    setForm(f => {
-      const imgs = f.images.filter((_, i) => i !== index)
-      if (imgs[imgs.length - 1] !== null) imgs.push(null)
-      return { ...f, images: imgs }
-    })
-  }
-
   async function handleSubmit(e) {
     e.preventDefault()
+    setError(null)
     setSaving(true)
-    await new Promise(r => setTimeout(r, 800))
-    setSaving(false)
-    navigate('/app/catalogue')
+    try {
+      await stockService.update(id, {
+        name:        form.name,
+        price:       Number(form.price),
+        description: form.description,
+        category:    form.category,
+        stock:       Number(form.stock),
+        colors:      form.colors,
+        sizes:       form.sizes,
+      })
+      setSuccess(true)
+      setTimeout(() => navigate('/app/catalogue'), 800)
+    } catch (e) {
+      setError(e.message)
+    } finally {
+      setSaving(false)
+    }
   }
 
   if (loadingProduct) {
@@ -188,25 +166,11 @@ export function ProductFormPage() {
         </div>
       </div>
 
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={isEdit ? handleSubmit : e => e.preventDefault()}>
         <div className="page-container py-5 flex flex-col gap-5">
-          {/* Photos — min 2 slots */}
-          <div className="flex flex-col gap-2">
-            <label className="text-label font-semibold text-white/60">
-              Photos <span className="text-white/35 font-normal">(2 minimum)</span>
-            </label>
-            <div className="grid grid-cols-3 gap-2">
-              {form.images.map((img, i) => (
-                <PhotoSlot
-                  key={i}
-                  index={i}
-                  image={img}
-                  onAdd={setImage}
-                  onRemove={removeImage}
-                />
-              ))}
-            </div>
-          </div>
+
+          {/* Images — read-only en édition, section retirée en création */}
+          {isEdit && <ReadOnlyImages images={form.images} />}
 
           {/* Core fields */}
           <div className="glass rounded-3xl p-4 flex flex-col gap-4">
@@ -240,7 +204,6 @@ export function ProductFormPage() {
               />
             </div>
 
-            {/* Catégorie */}
             <div className="flex flex-col gap-1.5">
               <label className="text-label font-semibold text-white/60">Catégorie</label>
               <select
@@ -293,10 +256,33 @@ export function ProductFormPage() {
             </div>
           </div>
 
-          <Button type="submit" size="lg" fullWidth loading={saving} className="mt-1">
-            <Check size={16} />
-            {isEdit ? 'Enregistrer les modifications' : 'Publier le produit'}
-          </Button>
+          {/* Feedback erreur / succès */}
+          {error && (
+            <p className="text-label text-red-400 bg-red-500/10 rounded-2xl px-4 py-3">{error}</p>
+          )}
+          {success && (
+            <p className="text-label text-emerald-400 bg-emerald-500/10 rounded-2xl px-4 py-3">
+              Modifications enregistrées !
+            </p>
+          )}
+
+          {/* Bouton d'action */}
+          {isEdit ? (
+            <Button type="submit" size="lg" fullWidth loading={saving} className="mt-1">
+              <Check size={16} />
+              Enregistrer les modifications
+            </Button>
+          ) : (
+            <div className="flex flex-col items-center gap-2 mt-1">
+              <Button type="button" size="lg" fullWidth disabled className="opacity-50 cursor-not-allowed">
+                <Clock size={16} />
+                Publier le produit
+              </Button>
+              <p className="text-micro text-white/35">
+                Ajout manuel de produits bientôt disponible — utilisez WhatsApp pour l'instant
+              </p>
+            </div>
+          )}
         </div>
       </form>
     </div>

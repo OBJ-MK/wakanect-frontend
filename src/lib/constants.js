@@ -1,4 +1,4 @@
-export const API_BASE = import.meta.env.VITE_API_URL || 'https://api.wakanect.com'
+export const API_BASE = import.meta.env.VITE_API_URL
 
 export const ORDER_STATUSES = {
   NEW: 'Nouvelle',

@@ -1,7 +1,7 @@
 import { NavLink } from 'react-router-dom'
 import {
   LayoutDashboard, Zap, FileText, Store, Users,
-  CreditCard, Activity, Shield,
+  CreditCard, Settings2, Activity, Shield,
 } from 'lucide-react'
 
 const NAV = [
@@ -11,6 +11,7 @@ const NAV = [
   { to: '/admin/boutiques',        label: 'Boutiques',        icon: Store },
   { to: '/admin/employes',         label: 'Employés',         icon: Users },
   { to: '/admin/abonnements',      label: 'Abonnements',      icon: CreditCard },
+  { to: '/admin/plans',            label: 'Plans tarifaires', icon: Settings2 },
   { to: '/admin/sante',            label: 'Santé système',    icon: Activity },
   { to: '/admin/audit',            label: 'Journal d\'audit', icon: Shield },
 ]

@@ -69,4 +69,11 @@ export const adminApi = {
   // ── Écran 9 · Audit ──────────────────────────────────────────────────────
   audit: (scope = 'all') =>
     api.get(`/api/admin/audit?scope=${scope}`),
+
+  // ── Plans tarifaires ─────────────────────────────────────────────────────
+  plans: () =>
+    api.get('/api/admin/plans'),
+
+  updatePlan: (planKey, data) =>
+    api.patch(`/api/admin/plans/${planKey}`, data),
 }

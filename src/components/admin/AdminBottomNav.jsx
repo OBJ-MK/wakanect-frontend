@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { NavLink } from 'react-router-dom'
 import {
   LayoutDashboard, Zap, Store, CreditCard,
-  MoreHorizontal, Users, Activity, Shield, FileText, X,
+  MoreHorizontal, Users, Activity, Shield, FileText, Settings2, X,
 } from 'lucide-react'
 
 const MAIN_NAV = [
@@ -15,6 +15,7 @@ const MAIN_NAV = [
 const MORE_NAV = [
   { to: '/admin/parsing/journal', label: 'Journal parsing',  icon: FileText },
   { to: '/admin/employes',        label: 'Employés',         icon: Users },
+  { to: '/admin/plans',           label: 'Plans tarifaires', icon: Settings2 },
   { to: '/admin/sante',           label: 'Santé système',    icon: Activity },
   { to: '/admin/audit',           label: 'Journal d\'audit', icon: Shield },
 ]

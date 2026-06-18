@@ -8,6 +8,7 @@ import BoutiquesPage from './BoutiquesPage'
 import BoutiqueFichePage from './BoutiqueFichePage'
 import EmployesPage from './EmployesPage'
 import AbonnementsAdminPage from './AbonnementsAdminPage'
+import PlansAdminPage from './PlansAdminPage'
 import SantePage from './SantePage'
 import AuditPage from './AuditPage'
 
@@ -30,6 +31,7 @@ export default function AdminApp() {
           <Route path="boutiques/:slug" element={<BoutiqueFichePage />} />
           <Route path="employes" element={<EmployesPage />} />
           <Route path="abonnements" element={<AbonnementsAdminPage />} />
+          <Route path="plans" element={<PlansAdminPage />} />
           <Route path="sante" element={<SantePage />} />
           <Route path="audit" element={<AuditPage />} />
         </Route>

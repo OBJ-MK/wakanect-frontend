@@ -18,8 +18,13 @@ async function request(path, options = {}) {
   })
 
   if (!res.ok) {
-    const err = await res.json().catch(() => ({ message: res.statusText }))
-    throw new Error(err.message || `Erreur ${res.status}`)
+    let payload
+    try { payload = await res.json() } catch { payload = {} }
+    const message = payload.error || payload.message || `Erreur ${res.status}`
+    const err = new Error(message)
+    err.status = res.status
+    err.code   = payload.code ?? null
+    throw err
   }
 
   if (res.status === 204) return null

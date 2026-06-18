@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ChevronLeft, ChevronRight, Plus, Users } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Plus, Users, Lock } from 'lucide-react'
 import { useAuthStore } from '@/store/authStore'
 import { employeeService } from '@/services/employeeService'
 import { getInitials, cn } from '@/lib/utils'
@@ -55,6 +55,13 @@ export function MonEquipePage() {
 
   const activeEmployees = employees.filter(e => e.active !== false)
 
+  // Quota employés depuis plan_limits (disponible après connexion avec le backend mis à jour)
+  const planLimits  = merchant?.plan_limits
+  const maxEmp      = planLimits?.max_employees ?? null
+  const activeCount = activeEmployees.length
+  const atLimit     = maxEmp !== null && maxEmp !== -1 && activeCount >= maxEmp
+  const noEmployees = maxEmp === 0
+
   return (
     <div className="min-h-screen bg-navy-deep">
       <div className="sticky top-0 z-20 glass border-b border-white/6 px-4 py-3">
@@ -83,6 +90,16 @@ export function MonEquipePage() {
               membres · Toi + {loading ? '…' : employees.length} employé{employees.length !== 1 ? 's' : ''}
             </p>
           </div>
+          {!loading && maxEmp !== null && (
+            <div className="text-right shrink-0">
+              <p className="font-display font-bold text-h3 text-white">
+                {activeCount} / {maxEmp === -1 ? '∞' : maxEmp}
+              </p>
+              <p className="text-micro text-white/35">
+                {maxEmp === -1 ? 'illimité' : 'employés'}
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Propriétaire */}
@@ -130,14 +147,33 @@ export function MonEquipePage() {
           )}
         </div>
 
-        {/* Ajouter */}
-        <Link
-          to="/app/equipe/ajouter"
-          className="flex items-center justify-center gap-2 py-4 rounded-3xl border-2 border-dashed border-white/15 text-white/50 hover:text-white/70 hover:border-white/25 transition-colors font-semibold text-body"
-        >
-          <Plus size={18} />
-          Ajouter un employé
-        </Link>
+        {/* Ajouter — désactivé si limite atteinte */}
+        {(atLimit || noEmployees) ? (
+          <div className="glass rounded-3xl p-4 border border-amber/20 flex flex-col items-center gap-2 text-center">
+            <div className="w-9 h-9 rounded-xl bg-amber/15 flex items-center justify-center">
+              <Lock size={16} className="text-amber" />
+            </div>
+            <p className="text-label text-white/70 font-semibold">
+              {noEmployees
+                ? 'Votre plan ne permet pas d\'ajouter des employés'
+                : `Limite atteinte (${activeCount}/${maxEmp} employé${maxEmp > 1 ? 's' : ''})`}
+            </p>
+            <Link
+              to="/abonnement"
+              className="text-label text-orange underline hover:text-orange-hi transition-colors"
+            >
+              Passer à un plan supérieur →
+            </Link>
+          </div>
+        ) : (
+          <Link
+            to="/app/equipe/ajouter"
+            className="flex items-center justify-center gap-2 py-4 rounded-3xl border-2 border-dashed border-white/15 text-white/50 hover:text-white/70 hover:border-white/25 transition-colors font-semibold text-body"
+          >
+            <Plus size={18} />
+            Ajouter un employé
+          </Link>
+        )}
       </div>
     </div>
   )

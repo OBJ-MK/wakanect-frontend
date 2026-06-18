@@ -1,7 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom'
 import {
   TrendingUp, ShoppingBag, CheckSquare, LayoutGrid,
-  Share2, Bell, Package, ChevronRight, AlertTriangle
+  Share2, Bell, Package, ChevronRight, AlertTriangle, BarChart2, Lock
 } from 'lucide-react'
 import { useDashboard } from '@/hooks/useDashboard'
 import { useAuthStore } from '@/store/authStore'
@@ -80,6 +80,10 @@ export function DashboardPage() {
 
   const data = stats || EMPTY_STATS
   const firstName = merchant?.owner_name?.split(' ')[0] ?? 'commerçant'
+
+  // advanced_stats gate — source : plan_limits injecté au login par le backend
+  const planLimits     = merchant?.plan_limits
+  const advancedStats  = planLimits?.features?.advanced_stats ?? null
 
   return (
     <div className="min-h-screen bg-navy-deep">
@@ -203,6 +207,32 @@ export function DashboardPage() {
           </div>
           <ChevronRight size={16} className="text-white/30 shrink-0" />
         </Link>
+
+        {/* Analytics avancées — gated sur plan_limits.features.advanced_stats */}
+        {advancedStats === true && (
+          <div className="glass rounded-3xl px-4 py-4 border border-amber/20 flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-amber/15 flex items-center justify-center shrink-0">
+              <BarChart2 size={18} className="text-amber" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-body font-semibold text-white">Analytics avancées</p>
+              <p className="text-micro text-white/45">Graphiques détaillés bientôt disponibles</p>
+            </div>
+          </div>
+        )}
+        {advancedStats === false && (
+          <div className="glass rounded-3xl px-4 py-4 border border-white/8 flex items-center gap-3 opacity-70">
+            <div className="w-9 h-9 rounded-xl bg-white/6 flex items-center justify-center shrink-0">
+              <Lock size={16} className="text-white/30" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-body font-semibold text-white/50">Analytics avancées</p>
+              <Link to="/abonnement" className="text-micro text-orange underline">
+                Disponible en plan Pro / Premium →
+              </Link>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )

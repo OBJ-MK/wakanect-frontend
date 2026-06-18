@@ -88,9 +88,10 @@ export function AjouterEmployePage() {
   const [step, setStep] = useState('form')
   const [form, setForm] = useState({ name: '', phone: '', password: '' })
   const [perms, setPerms] = useState(toPermSet(['dashboard.view', 'products.send', 'orders.confirm']))
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState(null)
-  const [copied, setCopied] = useState(false)
+  const [loading, setLoading]     = useState(false)
+  const [error, setError]         = useState(null)
+  const [limitError, setLimitError] = useState(false)
+  const [copied, setCopied]       = useState(false)
 
   const activePreset = detectPreset(perms)
   const presetLabel = PRESETS.find(p => p.id === activePreset)?.label ?? 'Personnalisé'
@@ -114,6 +115,7 @@ export function AjouterEmployePage() {
     e.preventDefault()
     setLoading(true)
     setError(null)
+    setLimitError(false)
     try {
       await employeeService.create({
         name:        form.name,
@@ -123,7 +125,12 @@ export function AjouterEmployePage() {
       })
       setStep('success')
     } catch (err) {
-      setError(err.message)
+      if (err.code === 'EMPLOYEE_LIMIT_REACHED' || err.status === 403) {
+        setLimitError(true)
+        setError(err.message)
+      } else {
+        setError(err.message)
+      }
     } finally {
       setLoading(false)
     }
@@ -296,7 +303,18 @@ export function AjouterEmployePage() {
           </div>
         </div>
 
-        {error && (
+        {limitError && (
+          <div className="glass rounded-2xl p-4 border border-amber/20 flex flex-col items-center gap-2 text-center">
+            <p className="text-label text-white/80">{error}</p>
+            <Link
+              to="/abonnement"
+              className="text-label text-orange underline hover:text-orange-hi transition-colors font-semibold"
+            >
+              Voir les plans disponibles →
+            </Link>
+          </div>
+        )}
+        {!limitError && error && (
           <p className="text-sm text-red-400 text-center px-2">{error}</p>
         )}
 

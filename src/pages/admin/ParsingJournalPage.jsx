@@ -64,8 +64,30 @@ export default function ParsingJournalPage() {
     [cursor],
   )
 
-  const handleExportCSV = () => {
-    window.open(adminApi.parsingEventsCSVUrl(), '_blank')
+  function handleExportCSV() {
+    if (allEvents.length === 0) return
+
+    const headers = ['Horodatage', 'Boutique', 'Tier', 'Tokens', 'Confiance', 'Valide']
+    const rows = allEvents.map(e => [
+      e.at ?? '',
+      e.slug ?? '',
+      e.tierResolved ?? '',
+      e.tokens ?? '',
+      e.confidence != null ? (e.confidence * 100).toFixed(1) + '%' : '',
+      e.producedValidProduct ? 'Oui' : 'Non',
+    ])
+
+    const csv = [headers, ...rows]
+      .map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
+      .join('\n')
+
+    const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' })
+    const url  = URL.createObjectURL(blob)
+    const a    = document.createElement('a')
+    a.href     = url
+    a.download = `parsing-events-${range}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
   }
 
   if (topError) return <ErrorState message={topError} onRetry={refetchTop} />
@@ -82,7 +104,8 @@ export default function ParsingJournalPage() {
           <RangeSelector value={range} onChange={v => { setRange(v); setAllEvents([]); setCursor(null) }} />
           <button
             onClick={handleExportCSV}
-            className="flex items-center gap-1.5 px-3 py-2 text-label font-medium bg-navy text-white rounded-lg hover:bg-navy-deep transition-colors"
+            disabled={allEvents.length === 0}
+            className="flex items-center gap-1.5 px-3 py-2 text-label font-medium bg-navy text-white rounded-lg hover:bg-navy-deep transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
           >
             <Download className="w-3.5 h-3.5" />
             CSV

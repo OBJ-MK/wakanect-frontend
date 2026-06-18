@@ -175,11 +175,16 @@
 :root:not(.dark) .bg-navy\/60 { background-color: rgba(255, 248, 244, 0.9); }
 :root:not(.dark) .bg-navy\/70 { background-color: rgba(255, 248, 244, 0.95); }
 
-/* bg-white/8, bg-white/12 utilisé comme fond de sections */
-:root:not(.dark) .bg-white\/8  { background-color: rgba(15, 28, 63, 0.05); }
-:root:not(.dark) .bg-white\/12 { background-color: rgba(15, 28, 63, 0.07); }
-:root:not(.dark) .bg-white\/5  { background-color: rgba(15, 28, 63, 0.04); }
+/* bg-white/* utilisé comme fond de sections et de toggles */
 :root:not(.dark) .bg-white\/4  { background-color: rgba(15, 28, 63, 0.03); }
+:root:not(.dark) .bg-white\/5  { background-color: rgba(15, 28, 63, 0.04); }
+:root:not(.dark) .bg-white\/6  { background-color: rgba(15, 28, 63, 0.04); }
+:root:not(.dark) .bg-white\/8  { background-color: rgba(15, 28, 63, 0.05); }
+:root:not(.dark) .bg-white\/10 { background-color: rgba(15, 28, 63, 0.07); }
+:root:not(.dark) .bg-white\/12 { background-color: rgba(15, 28, 63, 0.07); }
+/* bg-white/15 et /20 servent de rail OFF pour les toggles — must be visible */
+:root:not(.dark) .bg-white\/15 { background-color: rgba(15, 28, 63, 0.14); }
+:root:not(.dark) .bg-white\/20 { background-color: rgba(15, 28, 63, 0.16); }
 
 /* Composant glass */
 :root:not(.dark) .glass {
@@ -206,10 +211,10 @@
 :root:not(.dark) .text-white\/50      { color: var(--text-secondary); }
 :root:not(.dark) .text-white\/45      { color: var(--text-muted); }
 :root:not(.dark) .text-white\/40      { color: var(--text-muted); }
-:root:not(.dark) .text-white\/35      { color: rgba(15, 28, 63, 0.35); }
-:root:not(.dark) .text-white\/30      { color: rgba(15, 28, 63, 0.3); }
-:root:not(.dark) .text-white\/25      { color: rgba(15, 28, 63, 0.25); }
-:root:not(.dark) .text-white\/20      { color: rgba(15, 28, 63, 0.2); }
+:root:not(.dark) .text-white\/35      { color: rgba(15, 28, 63, 0.50); }
+:root:not(.dark) .text-white\/30      { color: rgba(15, 28, 63, 0.45); }
+:root:not(.dark) .text-white\/25      { color: rgba(15, 28, 63, 0.38); }
+:root:not(.dark) .text-white\/20      { color: rgba(15, 28, 63, 0.32); }
 
 /* Exceptions : texte blanc conservé sur fonds colorés solides */
 :root:not(.dark) .bg-orange  .text-white,
@@ -239,4 +244,10 @@
 :root:not(.dark) .bottom-nav-bg {
   background: rgba(255, 255, 255, 0.9);
   border-color: rgba(15, 28, 63, 0.1);
+}
+
+/* Toggle knob : fond blanc + ombre visible pour ressortir sur rail clair */
+:root:not(.dark) [role="switch"] > span {
+  background-color: #FFFFFF;
+  box-shadow: 0 1px 4px rgba(15, 28, 63, 0.22), 0 0 0 1px rgba(15, 28, 63, 0.08);
 }

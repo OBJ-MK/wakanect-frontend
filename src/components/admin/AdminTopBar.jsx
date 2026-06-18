@@ -1,6 +1,6 @@
-import { useState } from 'react'
-import { useLocation } from 'react-router-dom'
-import { Bell, Search, X } from 'lucide-react'
+import { useState, useRef, useEffect } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
+import { Bell, Search, X, LogOut } from 'lucide-react'
 import { useAuthStore } from '@/store/authStore'
 
 const TITLES = {
@@ -16,17 +16,38 @@ const TITLES = {
 
 export function AdminTopBar() {
   const { pathname } = useLocation()
-  const merchant = useAuthStore(s => s.merchant)
+  const navigate = useNavigate()
+  const { merchant, logout } = useAuthStore()
   const [searchOpen, setSearchOpen] = useState(false)
-  const [alertsOpen, setAlertsOpen] = useState(false)
+  const [menuOpen, setMenuOpen] = useState(false)
+  const menuRef = useRef(null)
 
   const title = Object.entries(TITLES)
     .filter(([path]) => pathname.startsWith(path))
     .sort((a, b) => b[0].length - a[0].length)[0]?.[1] ?? 'Admin'
 
-  const initials = merchant?.name
-    ? merchant.name.slice(0, 2).toUpperCase()
+  const initials = merchant?.owner_name
+    ? merchant.owner_name.slice(0, 2).toUpperCase()
+    : merchant?.shop_name
+    ? merchant.shop_name.slice(0, 2).toUpperCase()
     : 'SA'
+
+  // Fermer le menu si clic hors
+  useEffect(() => {
+    if (!menuOpen) return
+    function onClickOutside(e) {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        setMenuOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', onClickOutside)
+    return () => document.removeEventListener('mousedown', onClickOutside)
+  }, [menuOpen])
+
+  function handleLogout() {
+    logout()
+    navigate('/login')
+  }
 
   return (
     <header className="sticky top-0 z-20 h-14 bg-navy/85 backdrop-blur-glass border-b border-white/8 flex items-center px-4 gap-3">
@@ -55,7 +76,6 @@ export function AdminTopBar() {
 
         {/* Cloche alertes */}
         <button
-          onClick={() => setAlertsOpen(v => !v)}
           className="relative p-2 text-white/60 hover:text-white hover:bg-white/8 rounded-lg transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-orange"
           aria-label="Alertes"
         >
@@ -63,9 +83,28 @@ export function AdminTopBar() {
           <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-danger rounded-full" />
         </button>
 
-        {/* Avatar */}
-        <div className="w-7 h-7 rounded-full bg-orange flex items-center justify-center text-micro font-bold text-white ml-1">
-          {initials}
+        {/* Avatar + menu déconnexion */}
+        <div className="relative ml-1" ref={menuRef}>
+          <button
+            onClick={() => setMenuOpen(v => !v)}
+            className="w-7 h-7 rounded-full bg-orange flex items-center justify-center text-micro font-bold text-white hover:bg-orange-hi transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-orange"
+            aria-label="Menu compte"
+            aria-expanded={menuOpen}
+          >
+            {initials}
+          </button>
+
+          {menuOpen && (
+            <div className="absolute right-0 top-9 w-44 bg-navy border border-white/10 rounded-xl shadow-modal overflow-hidden">
+              <button
+                onClick={handleLogout}
+                className="w-full flex items-center gap-2.5 px-4 py-3 text-label text-red-400 hover:bg-red-500/10 transition-colors"
+              >
+                <LogOut className="w-4 h-4 shrink-0" />
+                Se déconnecter
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </header>

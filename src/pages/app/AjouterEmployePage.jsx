@@ -3,50 +3,51 @@ import { Link, useNavigate } from 'react-router-dom'
 import { ChevronLeft, Check, MessageCircle, Copy } from 'lucide-react'
 import { cn, buildWhatsAppLink } from '@/lib/utils'
 import { useAuthStore } from '@/store/authStore'
+import { employeeService } from '@/services/employeeService'
 
 const ALL_PERMS_KEYS = [
-  'view_dashboard', 'send_products', 'publish_products', 'edit_products',
-  'edit_stock', 'confirm_order', 'cancel_order', 'mark_paid',
+  'dashboard.view', 'products.send', 'products.publish', 'products.edit',
+  'stock.edit', 'orders.confirm', 'orders.cancel', 'orders.markPaid',
 ]
 
 const PERMISSION_GROUPS = [
   {
     group: 'Tableau de bord',
-    items: [{ key: 'view_dashboard', label: 'Voir le tableau de bord', hint: '(par défaut)' }],
+    items: [{ key: 'dashboard.view', label: 'Voir le tableau de bord', hint: '(par défaut)' }],
   },
   {
     group: 'Produits',
     items: [
-      { key: 'send_products', label: 'Envoyer des produits' },
-      { key: 'publish_products', label: 'Publier des produits' },
-      { key: 'edit_products', label: 'Modifier des produits' },
+      { key: 'products.send',    label: 'Envoyer des produits' },
+      { key: 'products.publish', label: 'Publier des produits' },
+      { key: 'products.edit',    label: 'Modifier des produits' },
     ],
   },
   {
     group: 'Stock',
-    items: [{ key: 'edit_stock', label: 'Modifier le stock' }],
+    items: [{ key: 'stock.edit', label: 'Modifier le stock' }],
   },
   {
     group: 'Commandes',
     items: [
-      { key: 'confirm_order', label: 'Confirmer une commande' },
-      { key: 'cancel_order', label: 'Annuler une commande' },
-      { key: 'mark_paid', label: 'Marquer une commande payée' },
+      { key: 'orders.confirm',  label: 'Confirmer une commande' },
+      { key: 'orders.cancel',   label: 'Annuler une commande' },
+      { key: 'orders.markPaid', label: 'Marquer une commande payée' },
     ],
   },
 ]
 
 const PRESETS = [
-  { id: 'vendor', label: 'Vendeur', keys: ['view_dashboard', 'send_products', 'confirm_order'] },
-  { id: 'catalogue', label: 'Gestion. catalogue', keys: ['view_dashboard', 'send_products', 'publish_products', 'edit_products'] },
-  { id: 'orders', label: 'Gestion. commandes', keys: ['view_dashboard', 'confirm_order', 'cancel_order', 'mark_paid'] },
-  { id: 'full', label: 'Accès complet', keys: ALL_PERMS_KEYS },
-  { id: 'custom', label: 'Personnalisé', keys: null },
+  { id: 'vendor',    label: 'Vendeur',           keys: ['dashboard.view', 'products.send', 'orders.confirm'] },
+  { id: 'catalogue', label: 'Gestion. catalogue', keys: ['dashboard.view', 'products.send', 'products.publish', 'products.edit'] },
+  { id: 'orders',    label: 'Gestion. commandes', keys: ['dashboard.view', 'orders.confirm', 'orders.cancel', 'orders.markPaid'] },
+  { id: 'full',      label: 'Accès complet',      keys: ALL_PERMS_KEYS },
+  { id: 'custom',    label: 'Personnalisé',        keys: null },
 ]
 
 function toPermSet(keys) {
   const s = new Set(keys)
-  s.add('view_dashboard')
+  s.add('dashboard.view')
   return s
 }
 
@@ -86,8 +87,9 @@ export function AjouterEmployePage() {
   const navigate = useNavigate()
   const [step, setStep] = useState('form')
   const [form, setForm] = useState({ name: '', phone: '', password: '' })
-  const [perms, setPerms] = useState(toPermSet(['view_dashboard', 'send_products', 'confirm_order']))
+  const [perms, setPerms] = useState(toPermSet(['dashboard.view', 'products.send', 'orders.confirm']))
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
   const [copied, setCopied] = useState(false)
 
   const activePreset = detectPreset(perms)
@@ -100,7 +102,7 @@ export function AjouterEmployePage() {
   }
 
   function togglePerm(key) {
-    if (key === 'view_dashboard') return
+    if (key === 'dashboard.view') return
     setPerms(prev => {
       const next = new Set(prev)
       next.has(key) ? next.delete(key) : next.add(key)
@@ -111,10 +113,20 @@ export function AjouterEmployePage() {
   async function onSubmit(e) {
     e.preventDefault()
     setLoading(true)
-    // TODO: appel API
-    await new Promise(r => setTimeout(r, 700))
-    setLoading(false)
-    setStep('success')
+    setError(null)
+    try {
+      await employeeService.create({
+        name:        form.name,
+        phone:       form.phone,
+        password:    form.password,
+        permissions: [...perms],
+      })
+      setStep('success')
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setLoading(false)
+    }
   }
 
   function copyCredentials() {
@@ -158,9 +170,9 @@ export function AjouterEmployePage() {
           <div className="glass rounded-3xl p-4 w-full flex flex-col divide-y divide-white/6">
             {[
               { label: 'Nom de la boutique', value: merchant?.shop_name ?? '—' },
-              { label: 'Numéro', value: form.phone },
-              { label: 'Mot de passe', value: form.password },
-              { label: 'Accès', value: `${presetLabel} · ${perms.size}/${ALL_PERMS_KEYS.length}` },
+              { label: 'Numéro',             value: form.phone },
+              { label: 'Mot de passe',        value: form.password },
+              { label: 'Accès',               value: `${presetLabel} · ${perms.size}/${ALL_PERMS_KEYS.length}` },
             ].map(({ label, value }) => (
               <div key={label} className="flex justify-between items-center py-3">
                 <span className="text-label text-white/50">{label}</span>
@@ -261,10 +273,10 @@ export function AjouterEmployePage() {
                     key={item.key}
                     type="button"
                     onClick={() => togglePerm(item.key)}
-                    disabled={item.key === 'view_dashboard'}
+                    disabled={item.key === 'dashboard.view'}
                     className={cn(
                       'w-full flex items-center gap-3 px-4 py-3.5 border-b border-white/6 last:border-0 text-left transition-colors',
-                      item.key !== 'view_dashboard' && 'hover:bg-white/4 active:bg-white/8'
+                      item.key !== 'dashboard.view' && 'hover:bg-white/4 active:bg-white/8'
                     )}
                   >
                     <span className="flex-1 text-body text-white">
@@ -283,6 +295,10 @@ export function AjouterEmployePage() {
             ))}
           </div>
         </div>
+
+        {error && (
+          <p className="text-sm text-red-400 text-center px-2">{error}</p>
+        )}
 
         <button
           type="submit"

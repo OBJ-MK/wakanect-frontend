@@ -4,6 +4,7 @@ import { Plus, Edit3, LayoutGrid, AlertTriangle, Package, Search } from 'lucide-
 import { formatFCFA } from '@/lib/formatters'
 import { cn } from '@/lib/utils'
 import { useStock } from '@/hooks/useStock'
+import { FilterChips } from '@/components/features/catalogue/FilterChips'
 
 function ProductCard({ product }) {
   const lowStock = product.stock > 0 && product.stock <= 5
@@ -70,10 +71,16 @@ function ProductCard({ product }) {
 
 export function CatalogueMarchandPage() {
   const [search, setSearch] = useState('')
+  const [activeCategory, setActiveCategory] = useState('Tout')
   const { products, loading } = useStock()
-  const filtered = products.filter(p =>
-    p.name.toLowerCase().includes(search.toLowerCase())
-  )
+
+  const categories = ['Tout', ...new Set(products.map(p => p.category).filter(Boolean))]
+
+  const filtered = products.filter(p => {
+    const matchSearch = p.name.toLowerCase().includes(search.toLowerCase())
+    const matchCat = activeCategory === 'Tout' || p.category === activeCategory
+    return matchSearch && matchCat
+  })
 
   const lowStockCount = products.filter(p => p.stock > 0 && p.stock <= 5).length
 
@@ -109,6 +116,15 @@ export function CatalogueMarchandPage() {
       </div>
 
       <div className="page-container py-4 flex flex-col gap-4">
+        {/* Filtre catégorie */}
+        {categories.length > 1 && (
+          <FilterChips
+            categories={categories}
+            active={activeCategory}
+            onChange={setActiveCategory}
+          />
+        )}
+
         {/* Stock bas quick link */}
         {lowStockCount > 0 && (
           <Link

@@ -17,8 +17,8 @@
   --bg-surface: #FFFFFF;
   --bg-surface-2: #F8F0EB;
   --text-primary: var(--color-navy);
-  --text-secondary: rgba(15, 28, 63, 0.65);
-  --text-muted: rgba(15, 28, 63, 0.45);
+  --text-secondary: rgba(15, 28, 63, 0.80);
+  --text-muted: rgba(15, 28, 63, 0.60);
   --border-default: rgba(15, 28, 63, 0.1);
   --border-strong: rgba(15, 28, 63, 0.2);
 

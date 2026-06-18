@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { ChevronLeft, CreditCard, Zap, ChevronRight } from 'lucide-react'
+import { ChevronLeft, Zap } from 'lucide-react'
 
 const PLAN_COLOR = {
   Gratuit: 'text-white/60',
@@ -57,21 +57,6 @@ export function MonAbonnementPage() {
           <Zap size={18} />
           Choisir un plan
         </Link>
-
-        {/* Actions */}
-        <div className="glass rounded-3xl overflow-hidden">
-          <p className="text-micro text-white/40 uppercase tracking-wider px-4 pt-4 pb-2">Gérer</p>
-          <Link
-            to="/abonnement"
-            className="flex items-center gap-3 px-4 py-3.5 border-b border-white/6 hover:bg-white/4 transition-colors"
-          >
-            <div className="w-9 h-9 rounded-2xl bg-orange/10 flex items-center justify-center">
-              <CreditCard size={16} className="text-orange" />
-            </div>
-            <p className="flex-1 text-body font-medium text-white">Voir les formules</p>
-            <ChevronRight size={16} className="text-white/30" />
-          </Link>
-        </div>
 
         {/* Historique vide */}
         <div className="glass rounded-3xl p-6 flex flex-col items-center text-center gap-2">

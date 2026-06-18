@@ -1,24 +1,26 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { ChevronLeft, Store, Camera, Check } from 'lucide-react'
+import { ChevronLeft, Camera, Check } from 'lucide-react'
 import { useAuthStore } from '@/store/authStore'
 import { Input } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
 import { getInitials } from '@/lib/utils'
 import { slugify } from '@/lib/formatters'
+import { merchantService } from '@/services/merchantService'
 
 export function EditBoutiquePage() {
-  const { merchant } = useAuthStore()
+  const { merchant, setMerchant } = useAuthStore()
   const navigate = useNavigate()
 
   const [form, setForm] = useState({
-    shop_name: merchant?.shop_name ?? '',
-    slug: merchant?.slug ?? '',
-    whatsapp_number: merchant?.whatsapp_number ?? '',
-    address: merchant?.address ?? '',
+    shop_name:   merchant?.shop_name   ?? '',
+    slug:        merchant?.slug        ?? '',
+    address:     merchant?.address     ?? '',
     description: merchant?.description ?? '',
+    _slugEdited: false,
   })
-  const [saving, setSaving] = useState(false)
+  const [saving, setSaving]       = useState(false)
+  const [error, setError]         = useState(null)
   const [logoPreview, setLogoPreview] = useState(null)
 
   const set = (key) => (e) => {
@@ -37,9 +39,21 @@ export function EditBoutiquePage() {
   async function handleSubmit(e) {
     e.preventDefault()
     setSaving(true)
-    await new Promise(r => setTimeout(r, 800))
-    setSaving(false)
-    navigate('/app/profil')
+    setError(null)
+    try {
+      const updated = await merchantService.updateProfile({
+        businessName:       form.shop_name,
+        slug:               form.slug,
+        address:            form.address,
+        catalogDescription: form.description,
+      })
+      setMerchant(updated)
+      navigate('/app/profil')
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setSaving(false)
+    }
   }
 
   return (
@@ -112,10 +126,9 @@ export function EditBoutiquePage() {
             <Input
               label="Numéro WhatsApp"
               type="tel"
-              placeholder="+221 77 000 00 00"
-              value={form.whatsapp_number}
-              onChange={set('whatsapp_number')}
-              hint="Les clients vous contactent via ce numéro"
+              value={merchant?.whatsapp_number ?? ''}
+              disabled
+              hint="Modifiable depuis les paramètres du compte"
             />
 
             <Input
@@ -140,6 +153,10 @@ export function EditBoutiquePage() {
               />
             </div>
           </div>
+
+          {error && (
+            <p className="text-sm text-red-400 text-center px-2">{error}</p>
+          )}
 
           <Button type="submit" size="lg" fullWidth loading={saving}>
             <Check size={16} />

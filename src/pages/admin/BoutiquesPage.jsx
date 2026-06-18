@@ -71,37 +71,43 @@ export default function BoutiquesPage() {
         </div>
 
         {/* Chip plan */}
-        <div className="flex gap-1.5 flex-wrap">
-          {PLAN_OPTIONS.map(p => (
-            <button
-              key={p}
-              onClick={() => setPlan(p)}
-              className={`px-3 py-2 text-label rounded-xl border transition-colors ${
-                plan === p
-                  ? 'bg-navy text-white border-navy'
-                  : 'bg-white text-admin-ink-2 border-admin-line hover:border-navy/30'
-              }`}
-            >
-              {PLAN_LABELS[p]}
-            </button>
-          ))}
+        <div className="flex flex-col gap-1">
+          <span className="text-micro font-semibold text-admin-muted uppercase tracking-wider">Plan</span>
+          <div className="flex gap-1.5 flex-wrap">
+            {PLAN_OPTIONS.map(p => (
+              <button
+                key={p}
+                onClick={() => setPlan(p)}
+                className={`px-3 py-2 text-label rounded-xl border transition-colors ${
+                  plan === p
+                    ? 'bg-navy text-white border-navy'
+                    : 'bg-white text-admin-ink-2 border-admin-line hover:border-navy/30'
+                }`}
+              >
+                {PLAN_LABELS[p]}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Chip statut */}
-        <div className="flex gap-1.5 flex-wrap">
-          {STATUS_OPTIONS.map(s => (
-            <button
-              key={s}
-              onClick={() => setStatus(s)}
-              className={`px-3 py-2 text-label rounded-xl border transition-colors ${
-                status === s
-                  ? 'bg-navy text-white border-navy'
-                  : 'bg-white text-admin-ink-2 border-admin-line hover:border-navy/30'
-              }`}
-            >
-              {STATUS_LABELS[s]}
-            </button>
-          ))}
+        <div className="flex flex-col gap-1">
+          <span className="text-micro font-semibold text-admin-muted uppercase tracking-wider">Statut</span>
+          <div className="flex gap-1.5 flex-wrap">
+            {STATUS_OPTIONS.map(s => (
+              <button
+                key={s}
+                onClick={() => setStatus(s)}
+                className={`px-3 py-2 text-label rounded-xl border transition-colors ${
+                  status === s
+                    ? 'bg-navy text-white border-navy'
+                    : 'bg-white text-admin-ink-2 border-admin-line hover:border-navy/30'
+                }`}
+              >
+                {STATUS_LABELS[s]}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 

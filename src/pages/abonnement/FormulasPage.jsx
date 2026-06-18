@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Check, Zap, Star, Crown } from 'lucide-react'
+import { Check, Zap, Star, Crown, ChevronLeft } from 'lucide-react'
 import { WakanectLogo } from '@/components/brand/WakanectLogo'
 import { cn } from '@/lib/utils'
 
@@ -149,9 +149,18 @@ export function FormulasPage() {
 
   return (
     <div className="min-h-dvh bg-navy-deep">
-      <div className="page-container py-6 flex flex-col gap-6">
+      <div className="sticky top-0 z-20 px-4 py-3">
+        <button
+          onClick={() => navigate(-1)}
+          className="p-2 -ml-2 rounded-xl text-white/60 hover:text-white hover:bg-white/8 transition-colors"
+          aria-label="Retour"
+        >
+          <ChevronLeft size={20} />
+        </button>
+      </div>
+      <div className="page-container py-2 flex flex-col gap-6">
         {/* Header */}
-        <div className="flex flex-col items-center gap-3 text-center pt-4">
+        <div className="flex flex-col items-center gap-3 text-center">
           <WakanectLogo variant="mark" className="h-10 w-10" />
           <div>
             <h1 className="font-display font-bold text-h1 text-white">Choisissez votre formule</h1>

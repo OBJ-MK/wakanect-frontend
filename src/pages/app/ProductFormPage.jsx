@@ -40,12 +40,12 @@ function TagInput({ label, tags, onAdd, onRemove, placeholder, colorClass = 'bg-
           onChange={e => setVal(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), add())}
           placeholder={placeholder}
-          className="flex-1 px-3 py-2 rounded-xl bg-white/8 border border-white/10 text-white placeholder:text-white/35 text-label focus:outline-none focus:border-orange/50"
+          className="flex-1 px-3 py-2 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-default)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] text-label focus:outline-none focus:border-orange/50 dark:bg-navy/60 dark:border-white/10"
         />
         <button
           type="button"
           onClick={add}
-          className="px-3 py-2 rounded-xl bg-white/10 text-white/70 text-label hover:bg-white/18 transition-colors"
+          className="px-3 py-2 rounded-xl bg-[var(--bg-surface-2)] text-[var(--text-secondary)] text-label hover:opacity-80 transition-colors dark:bg-white/10 dark:text-white/70"
         >
           <Plus size={14} />
         </button>
@@ -209,7 +209,7 @@ export function ProductFormPage() {
               <select
                 value={form.category}
                 onChange={set('category')}
-                className="w-full rounded-2xl px-4 py-3 text-body bg-navy/60 border border-white/10 text-white focus:outline-none focus:ring-2 focus:ring-orange/40 focus:border-orange"
+                className="w-full rounded-2xl px-4 py-3 text-body bg-[var(--bg-surface)] border border-[var(--border-default)] text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-orange/40 focus:border-orange dark:bg-navy/60 dark:border-white/10"
               >
                 <option value="">Choisir une catégorie...</option>
                 {CATEGORIES.filter(c => c !== 'Tout').map(c => (
@@ -251,7 +251,7 @@ export function ProductFormPage() {
                 onChange={set('description')}
                 placeholder="Décrivez le produit..."
                 rows={3}
-                className="w-full rounded-2xl px-4 py-3 text-body bg-navy/60 border border-white/10 text-white placeholder:text-white/35 focus:outline-none focus:ring-2 focus:ring-orange/40 focus:border-orange resize-none"
+                className="w-full rounded-2xl px-4 py-3 text-body bg-[var(--bg-surface)] border border-[var(--border-default)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-orange/40 focus:border-orange resize-none dark:bg-navy/60 dark:border-white/10"
               />
             </div>
           </div>

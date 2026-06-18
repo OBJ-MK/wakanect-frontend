@@ -1,81 +1,34 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Check, Zap, Star, Crown, ChevronLeft } from 'lucide-react'
+import { Check, Zap, Star, Crown, ChevronLeft, RefreshCw } from 'lucide-react'
 import { WakanectLogo } from '@/components/brand/WakanectLogo'
+import { usePlans } from '@/hooks/usePlans'
 import { cn } from '@/lib/utils'
 
-const PERIODS = [
-  { key: 'month', label: 'Mois', discount: null },
-  { key: 'quarter', label: 'Trimestre', discount: '-10%' },
-  { key: 'semester', label: 'Semestre', discount: '-15%' },
-  { key: 'year', label: 'An', discount: '-20%' },
-]
+// Métadonnées visuelles par plan — uniquement icône et CTA, jamais de prix.
+const PLAN_VISUAL = {
+  free:    { icon: Zap,   iconBg: 'bg-white/10',   iconColor: 'text-white/60', cta: 'Commencer gratuitement' },
+  pro:     { icon: Star,  iconBg: 'bg-orange/15',  iconColor: 'text-orange',   cta: 'Choisir Pro' },
+  premium: { icon: Crown, iconBg: 'bg-amber/15',   iconColor: 'text-amber',    cta: 'Choisir Premium' },
+}
 
-const PLANS = [
-  {
-    key: 'free',
-    name: 'Gratuit',
-    icon: Zap,
-    iconBg: 'bg-white/10',
-    iconColor: 'text-white/60',
-    prices: { month: 0, quarter: 0, semester: 0, year: 0 },
-    features: [
-      '1 boutique en ligne',
-      'Jusqu\'à 20 produits',
-      'WhatsApp → catalogue (IA)',
-      'Gestion des commandes',
-    ],
-    missing: ['Catalogue illimité', 'Support prioritaire', 'Statistiques avancées'],
-    cta: 'Commencer gratuitement',
-    highlight: false,
-  },
-  {
-    key: 'pro',
-    name: 'Pro',
-    icon: Star,
-    iconBg: 'bg-orange/15',
-    iconColor: 'text-orange',
-    prices: { month: 8500, quarter: 23000, semester: 43000, year: 82000 },
-    features: [
-      '1 boutique en ligne',
-      'Catalogue illimité',
-      'WhatsApp → catalogue (IA)',
-      'Gestion des commandes',
-      'Statistiques avancées',
-      'Support standard',
-    ],
-    missing: ['Priorité fonctionnalités'],
-    cta: 'Choisir Pro',
-    highlight: true,
-  },
-  {
-    key: 'premium',
-    name: 'Premium',
-    icon: Crown,
-    iconBg: 'bg-amber/15',
-    iconColor: 'text-amber',
-    prices: { month: 14900, quarter: 40000, semester: 75000, year: 142000 },
-    features: [
-      'Tout ce qui est dans Pro',
-      'Priorité 1 mois sur les nouvelles fonctionnalités',
-      'Support prioritaire',
-    ],
-    missing: [],
-    cta: 'Choisir Premium',
-    highlight: false,
-  },
+const PERIOD_KEYS = [
+  { key: 'month',    label: 'Mois' },
+  { key: 'quarter',  label: 'Trimestre' },
+  { key: 'semester', label: 'Semestre' },
+  { key: 'year',     label: 'An' },
 ]
 
 function PlanCard({ plan, period, onSelect }) {
-  const price = plan.prices[period]
-  const periodLabel = PERIODS.find(p => p.key === period)?.label?.toLowerCase() ?? 'mois'
+  const visual   = PLAN_VISUAL[plan.key] ?? PLAN_VISUAL.pro
+  const Icon     = visual.icon
+  const price    = plan.prices[period] ?? 0
+  const periodLabel = PERIOD_KEYS.find(p => p.key === period)?.label?.toLowerCase() ?? 'mois'
 
   return (
     <div className={cn(
       'glass rounded-3xl p-5 flex flex-col gap-4 border transition-all',
-      plan.highlight
-        ? 'border-orange/30 shadow-orange-glow'
-        : 'border-white/8',
+      plan.highlight ? 'border-orange/30 shadow-orange-glow' : 'border-white/8',
     )}>
       {plan.highlight && (
         <div className="self-start px-3 py-1 rounded-full bg-orange text-white text-micro font-bold uppercase tracking-wider">
@@ -84,8 +37,8 @@ function PlanCard({ plan, period, onSelect }) {
       )}
 
       <div className="flex items-center gap-3">
-        <div className={`w-10 h-10 rounded-2xl ${plan.iconBg} flex items-center justify-center`}>
-          <plan.icon size={20} className={plan.iconColor} />
+        <div className={`w-10 h-10 rounded-2xl ${visual.iconBg} flex items-center justify-center shrink-0`}>
+          <Icon size={20} className={visual.iconColor} />
         </div>
         <p className="font-display font-bold text-h3 text-white">{plan.name}</p>
       </div>
@@ -94,12 +47,13 @@ function PlanCard({ plan, period, onSelect }) {
         {price === 0 ? (
           <p className="font-display font-bold text-h1 text-white">Gratuit</p>
         ) : (
-          <div>
+          <>
             <p className="font-display font-bold text-h1 text-white">
-              {price.toLocaleString('fr-FR')} <span className="text-h3 text-white/50 font-medium">FCFA</span>
+              {price.toLocaleString('fr-FR')}{' '}
+              <span className="text-h3 text-white/50 font-medium">FCFA</span>
             </p>
             <p className="text-micro text-white/40">/ {periodLabel}</p>
-          </div>
+          </>
         )}
       </div>
 
@@ -110,16 +64,10 @@ function PlanCard({ plan, period, onSelect }) {
             <p className="text-label text-white/70">{f}</p>
           </div>
         ))}
-        {plan.missing.map(f => (
-          <div key={f} className="flex items-start gap-2 opacity-40">
-            <div className="w-3 h-0.5 bg-white/30 mt-2 shrink-0" />
-            <p className="text-label text-white/50">{f}</p>
-          </div>
-        ))}
       </div>
 
       <button
-        onClick={() => onSelect(plan)}
+        onClick={() => onSelect(plan, price)}
         className={cn(
           'w-full py-3 rounded-2xl font-semibold text-body transition-all active:scale-[0.98]',
           plan.highlight
@@ -129,8 +77,45 @@ function PlanCard({ plan, period, onSelect }) {
               : 'glass border border-white/20 text-white hover:bg-white/10',
         )}
       >
-        {plan.cta}
+        {visual.cta}
       </button>
+    </div>
+  )
+}
+
+function PeriodSelector({ period, onChange, discounts }) {
+  return (
+    <div className="flex gap-1 glass rounded-2xl p-1">
+      {PERIOD_KEYS.map(p => {
+        const label = discounts?.[p.key] ?? null
+        return (
+          <button
+            key={p.key}
+            onClick={() => onChange(p.key)}
+            className={cn(
+              'flex-1 flex flex-col items-center py-2 rounded-xl transition-all text-micro font-semibold',
+              period === p.key ? 'bg-orange text-white' : 'text-white/50 hover:text-white/80',
+            )}
+          >
+            {p.label}
+            {label && (
+              <span className={cn('text-[10px]', period === p.key ? 'text-white/80' : 'text-emerald')}>
+                {label}
+              </span>
+            )}
+          </button>
+        )
+      })}
+    </div>
+  )
+}
+
+function LoadingSkeleton() {
+  return (
+    <div className="flex flex-col gap-4 animate-pulse">
+      {[0, 1, 2].map(i => (
+        <div key={i} className="glass rounded-3xl p-5 h-56 border border-white/8" />
+      ))}
     </div>
   )
 }
@@ -138,14 +123,19 @@ function PlanCard({ plan, period, onSelect }) {
 export function FormulasPage() {
   const [period, setPeriod] = useState('month')
   const navigate = useNavigate()
+  const { data, loading, error, refetch } = usePlans()
 
-  function selectPlan(plan) {
-    if (plan.prices[period] === 0) {
+  function selectPlan(plan, price) {
+    if (price === 0) {
       navigate('/app')
     } else {
-      navigate('/abonnement/paiement', { state: { plan: plan.key, period } })
+      navigate('/abonnement/paiement', {
+        state: { plan: plan.key, period, price, planName: plan.name },
+      })
     }
   }
+
+  const trialDays = data?.plans?.find(p => p.key === 'free')?.features?.[0]?.match(/(\d+) jours/)?.[1] ?? '14'
 
   return (
     <div className="min-h-dvh bg-navy-deep">
@@ -158,13 +148,16 @@ export function FormulasPage() {
           <ChevronLeft size={20} />
         </button>
       </div>
+
       <div className="page-container py-2 flex flex-col gap-6">
         {/* Header */}
         <div className="flex flex-col items-center gap-3 text-center">
           <WakanectLogo variant="mark" className="h-10 w-10" />
           <div>
             <h1 className="font-display font-bold text-h1 text-white">Choisissez votre formule</h1>
-            <p className="text-label text-white/50 mt-1">14 jours d'essai gratuit · Sans engagement</p>
+            <p className="text-label text-white/50 mt-1">
+              {trialDays} jours d'essai gratuit · Sans engagement
+            </p>
           </div>
         </div>
 
@@ -174,50 +167,51 @@ export function FormulasPage() {
             <Check size={16} className="text-emerald" />
           </div>
           <p className="text-label text-white/70 flex-1">
-            <span className="text-emerald font-semibold">14 jours d'essai gratuit</span> — toutes fonctionnalités débloquées
+            <span className="text-emerald font-semibold">{trialDays} jours d'essai gratuit</span>
+            {' '}— toutes fonctionnalités débloquées
           </p>
         </div>
 
-        {/* Period selector */}
-        <div className="flex gap-1 glass rounded-2xl p-1">
-          {PERIODS.map(p => (
+        {/* Error */}
+        {error && (
+          <div className="glass rounded-3xl p-5 border border-red-500/20 flex flex-col items-center gap-3 text-center">
+            <p className="text-label text-white/60">Impossible de charger les formules</p>
             <button
-              key={p.key}
-              onClick={() => setPeriod(p.key)}
-              className={cn(
-                'flex-1 flex flex-col items-center py-2 rounded-xl transition-all text-micro font-semibold',
-                period === p.key
-                  ? 'bg-orange text-white'
-                  : 'text-white/50 hover:text-white/80',
-              )}
+              onClick={refetch}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 text-white text-label hover:bg-white/15 transition-colors"
             >
-              {p.label}
-              {p.discount && (
-                <span className={cn(
-                  'text-[10px]',
-                  period === p.key ? 'text-white/80' : 'text-emerald',
-                )}>
-                  {p.discount}
-                </span>
-              )}
+              <RefreshCw size={14} />
+              Réessayer
             </button>
-          ))}
-        </div>
+          </div>
+        )}
+
+        {/* Period selector */}
+        {!error && (
+          <PeriodSelector
+            period={period}
+            onChange={setPeriod}
+            discounts={data?.discounts}
+          />
+        )}
 
         {/* Plans */}
-        <div className="flex flex-col gap-4">
-          {PLANS.map(plan => (
-            <PlanCard
-              key={plan.key}
-              plan={plan}
-              period={period}
-              onSelect={selectPlan}
-            />
-          ))}
-        </div>
+        {loading && <LoadingSkeleton />}
+        {!loading && !error && (
+          <div className="flex flex-col gap-4">
+            {(data?.plans ?? []).map(plan => (
+              <PlanCard
+                key={plan.key}
+                plan={plan}
+                period={period}
+                onSelect={selectPlan}
+              />
+            ))}
+          </div>
+        )}
 
         <p className="text-micro text-white/25 text-center pb-4">
-          Les prix sont indiqués en FCFA. Votre pays est détecté automatiquement.
+          Les prix sont en FCFA, détectés automatiquement selon votre pays ({data?.country ?? '…'}).
         </p>
       </div>
     </div>

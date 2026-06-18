@@ -30,26 +30,21 @@ const METHODS = [
   },
 ]
 
-const PLAN_LABELS = { free: 'Gratuit', pro: 'Pro', premium: 'Premium' }
 const PERIOD_LABELS = { month: 'Mensuel', quarter: 'Trimestriel', semester: 'Semestriel', year: 'Annuel' }
-const PRICES = {
-  pro: { month: 8500, quarter: 23000, semester: 43000, year: 82000 },
-  premium: { month: 14900, quarter: 40000, semester: 75000, year: 142000 },
-}
 
 export function AbonnementPaiementPage() {
   const navigate = useNavigate()
   const { state } = useLocation()
-  const plan = state?.plan ?? 'pro'
-  const period = state?.period ?? 'month'
+  const plan     = state?.plan     ?? 'pro'
+  const period   = state?.period   ?? 'month'
+  // Prix transmis par FormulasPage depuis /api/plans — aucune valeur en dur ici.
+  const price    = state?.price    ?? 0
+  const planLabel  = state?.planName ?? plan
+  const periodLabel = PERIOD_LABELS[period] ?? period
 
   const [method, setMethod] = useState('wave')
-  const [phone, setPhone] = useState('')
+  const [phone, setPhone]   = useState('')
   const [loading, setLoading] = useState(false)
-
-  const price = PRICES[plan]?.[period] ?? 0
-  const planLabel = PLAN_LABELS[plan] ?? plan
-  const periodLabel = PERIOD_LABELS[period] ?? period
 
   async function pay() {
     setLoading(true)

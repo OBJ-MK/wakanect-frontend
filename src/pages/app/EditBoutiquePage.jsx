@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/Button'
 import { getInitials } from '@/lib/utils'
 import { slugify } from '@/lib/formatters'
 import { merchantService } from '@/services/merchantService'
+import { PUBLIC_BASE } from '@/lib/constants'
 
 export function EditBoutiquePage() {
   const { merchant, setMerchant } = useAuthStore()
@@ -118,7 +119,7 @@ export function EditBoutiquePage() {
                 placeholder="ma-boutique"
                 value={form.slug}
                 onChange={setSlug}
-                hint={`wakanect.com/boutique/${form.slug || '...'}`}
+                hint={`${PUBLIC_BASE}/boutique/${form.slug || '...'}`.replace(/^https?:\/\//, '')}
                 required
               />
             </div>

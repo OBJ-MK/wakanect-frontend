@@ -1,5 +1,9 @@
 export const API_BASE = import.meta.env.VITE_API_URL
 
+export const PUBLIC_BASE =
+  import.meta.env.VITE_PUBLIC_URL ||
+  (typeof window !== 'undefined' ? window.location.origin : '')
+
 export const ORDER_STATUSES = {
   NEW: 'Nouvelle',
   CONFIRMED: 'Confirmée',

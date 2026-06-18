@@ -8,6 +8,7 @@ import {
 import { useAuth } from '@/hooks/useAuth'
 import { useAuthStore } from '@/store/authStore'
 import { getInitials } from '@/lib/utils'
+import { PUBLIC_BASE } from '@/lib/constants'
 
 function useDarkMode() {
   const [dark, setDark] = useState(() =>
@@ -54,7 +55,9 @@ export function ProfilePage() {
   const { merchant } = useAuthStore()
   const [dark, toggleDark] = useDarkMode()
 
-  const boutiqueUrl = merchant?.slug ? `wakanect.com/boutique/${merchant.slug}` : null
+  const boutiqueUrl = merchant?.slug
+    ? `${PUBLIC_BASE}/boutique/${merchant.slug}`.replace(/^https?:\/\//, '')
+    : null
 
   return (
     <div className="min-h-screen bg-navy-deep">

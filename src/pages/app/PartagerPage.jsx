@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { ChevronLeft, Copy, Check, MessageCircle, Share2 } from 'lucide-react'
 import { useAuthStore } from '@/store/authStore'
 import { buildWhatsAppLink } from '@/lib/utils'
+import { PUBLIC_BASE } from '@/lib/constants'
 
 function QRPlaceholder({ url }) {
   return (
@@ -33,8 +34,8 @@ export function PartagerPage() {
   const [copiedLink, setCopiedLink] = useState(false)
 
   const boutiqueUrl = merchant?.slug
-    ? `https://wakanect.com/boutique/${merchant.slug}`
-    : 'https://wakanect.com/boutique/ma-boutique'
+    ? `${PUBLIC_BASE}/boutique/${merchant.slug}`
+    : `${PUBLIC_BASE}/boutique/ma-boutique`
 
   const shopName = merchant?.shop_name ?? 'ma boutique'
   const waNumber = merchant?.whatsapp_number ?? ''
@@ -81,7 +82,7 @@ export function PartagerPage() {
           <div className="text-center">
             <p className="font-display font-bold text-h3 text-white">{shopName}</p>
             <p className="text-label text-white/45 mt-0.5">
-              {merchant?.slug ? `wakanect.com/boutique/${merchant.slug}` : boutiqueUrl.replace('https://', '')}
+              {boutiqueUrl.replace(/^https?:\/\//, '')}
             </p>
           </div>
         </div>
@@ -90,7 +91,7 @@ export function PartagerPage() {
         <div className="glass rounded-3xl px-4 py-4 flex items-center gap-3">
           <div className="flex-1 min-w-0">
             <p className="text-micro text-white/40 mb-0.5">Lien de votre boutique</p>
-            <p className="text-label text-orange truncate">{boutiqueUrl.replace('https://', '')}</p>
+            <p className="text-label text-orange truncate">{boutiqueUrl.replace(/^https?:\/\//, '')}</p>
           </div>
           <button
             onClick={copyLink}

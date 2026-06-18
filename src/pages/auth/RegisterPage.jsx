@@ -5,6 +5,7 @@ import { slugify } from '@/lib/formatters'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { Store, User, Phone, Lock, AtSign } from 'lucide-react'
+import { PUBLIC_BASE } from '@/lib/constants'
 
 export function RegisterPage() {
   const { handleRegister, loading, error } = useAuth()
@@ -59,7 +60,7 @@ export function RegisterPage() {
           value={form.slug}
           onChange={set('slug')}
           icon={<AtSign size={16} />}
-          hint={form.slug ? `wakanect.com/boutique/${form.slug}` : 'Généré automatiquement'}
+          hint={form.slug ? `${PUBLIC_BASE}/boutique/${form.slug}`.replace(/^https?:\/\//, '') : 'Généré automatiquement'}
           required
         />
 

@@ -1,11 +1,15 @@
 import { Link } from 'react-router-dom';
 import { useReveal } from '../hooks/useReveal';
+import { usePlans } from '@/hooks/usePlans';
 import SectionHeading from './ui/SectionHeading';
 import Button from './ui/Button';
 import Icon from './Icon';
 
+// `price` sert de repli si l'API /api/plans est indisponible — sinon le prix
+// mensuel réel (éditable via l'admin) est affiché à la place.
 const PLANS = [
   {
+    key: 'free',
     name: 'Gratuit',
     price: '0',
     cycle: 'pour toujours',
@@ -15,6 +19,7 @@ const PLANS = [
     variant: 'ghost',
   },
   {
+    key: 'pro',
     name: 'Pro',
     price: '50 000',
     cycle: 'XOF / mois',
@@ -31,6 +36,7 @@ const PLANS = [
     featured: true,
   },
   {
+    key: 'premium',
     name: 'Premium',
     price: '200 000',
     cycle: 'XOF / mois',
@@ -64,6 +70,13 @@ function Cell({ v }) {
 
 export default function Pricing() {
   const scope = useReveal();
+  const { data } = usePlans();
+
+  function priceFor(p) {
+    const live = data?.plans?.find(pl => pl.key === p.key)?.prices?.month;
+    if (live == null) return p.price; // repli pendant le chargement ou si l'API échoue
+    return live === 0 ? '0' : live.toLocaleString('fr-FR');
+  }
 
   return (
     <section id="pricing" ref={scope} className="relative py-24 sm:py-32">
@@ -94,7 +107,7 @@ export default function Pricing() {
               <h3 className="font-display text-xl font-bold text-cream">{p.name}</h3>
               <p className="mt-1 text-sm text-cream/55">{p.desc}</p>
               <div className="mt-5 flex items-baseline gap-1.5">
-                <span className="font-display text-4xl font-extrabold text-cream">{p.price}</span>
+                <span className="font-display text-4xl font-extrabold text-cream">{priceFor(p)}</span>
                 <span className="text-sm text-amber">{p.cycle}</span>
               </div>
 

@@ -7,6 +7,7 @@ import { ProtectedRoute } from './ProtectedRoute'
 import { AdminRoute } from './AdminRoute'
 
 const AdminApp = lazy(() => import('@/pages/admin/AdminApp'))
+const LandingPage = lazy(() => import('@/landing/LandingPage'))
 
 function AdminFallback() {
   return (
@@ -70,17 +71,25 @@ export const router = createBrowserRouter([
     element: <OnboardingPage />,
   },
 
-  // Auth
+  // Landing publique — page d'accueil, lazy (chunk isolé, jamais téléchargé par l'app/admin)
   {
     path: '/',
+    element: (
+      <Suspense fallback={<AdminFallback />}>
+        <LandingPage />
+      </Suspense>
+    ),
+  },
+
+  // Auth
+  {
     element: <AuthLayout />,
     children: [
-      { index: true, element: <LoginPage /> },
-      { path: 'login', element: <LoginPage /> },
-      { path: 'register', element: <RegisterPage /> },
-      { path: 'compte-cree', element: <CompteCreePage /> },
-      { path: 'mot-de-passe-oublie', element: <ForgotPasswordPage /> },
-      { path: 'reinitialiser', element: <ResetPasswordPage /> },
+      { path: '/login', element: <LoginPage /> },
+      { path: '/register', element: <RegisterPage /> },
+      { path: '/compte-cree', element: <CompteCreePage /> },
+      { path: '/mot-de-passe-oublie', element: <ForgotPasswordPage /> },
+      { path: '/reinitialiser', element: <ResetPasswordPage /> },
     ],
   },
 

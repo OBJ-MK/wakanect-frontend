@@ -1,0 +1,118 @@
+/* Landing page styles — scoped under .landing-root so they never leak into the
+   merchant app / admin console (which have their own .glass, etc.). */
+
+.landing-root {
+  --navy: #0f1c3f;
+  --navy-dark: #0a0e1a;
+  --orange: #ec5e2a;
+  --amber: #ffb347;
+  --cream: #fff8f4;
+  --wa: #25d366;
+
+  min-height: 100dvh;
+  background-color: var(--navy-dark);
+  color: var(--cream);
+  font-family: 'Inter', system-ui, sans-serif;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: clip;
+}
+
+.landing-root section[id],
+.landing-root #footer {
+  scroll-margin-top: 5.5rem;
+}
+
+.landing-root ::selection {
+  background: var(--orange);
+  color: var(--cream);
+}
+
+.landing-root .skip-link {
+  position: fixed;
+  left: 1rem;
+  top: -200%;
+  z-index: 200;
+  padding: 0.75rem 1.25rem;
+  background: var(--orange);
+  color: var(--cream);
+  border-radius: 10px;
+  font-weight: 600;
+  transition: top 0.2s ease;
+}
+.landing-root .skip-link:focus { top: 1rem; }
+
+.landing-root .container-x {
+  width: 100%;
+  max-width: 1280px;
+  margin-inline: auto;
+  padding-inline: clamp(1.25rem, 5vw, 4rem);
+}
+
+.landing-root .glass {
+  background: rgba(255, 248, 244, 0.045);
+  border: 1px solid rgba(255, 248, 244, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.landing-root .eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--amber);
+}
+
+.landing-root .link-underline {
+  background-image: linear-gradient(var(--orange), var(--orange));
+  background-size: 0% 1.5px;
+  background-repeat: no-repeat;
+  background-position: left bottom;
+  transition: background-size 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.landing-root .link-underline:hover { background-size: 100% 1.5px; }
+
+.landing-root [data-node].is-active {
+  border-color: var(--orange);
+  background: var(--orange);
+  color: var(--cream);
+  box-shadow: 0 0 28px -6px rgba(236, 94, 42, 0.8);
+}
+
+.landing-root .gradient-warm {
+  background-image: linear-gradient(135deg, var(--orange), var(--amber));
+}
+.landing-root .text-gradient-warm {
+  background: linear-gradient(135deg, #ff7a4d 0%, var(--amber) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.landing-root .grain::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  mix-blend-mode: overlay;
+  z-index: 1;
+}
+
+.landing-root .reveal-init {
+  opacity: 0;
+  transform: translateY(28px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-root .reveal-init {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}

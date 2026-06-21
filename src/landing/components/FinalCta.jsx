@@ -1,11 +1,15 @@
 import { Link } from 'react-router-dom';
 import { useReveal } from '../hooks/useReveal';
+import { usePlans } from '@/hooks/usePlans';
 import Button from './ui/Button';
 import Icon from './Icon';
 import { LogoMark } from './Logo';
 
 export default function FinalCta() {
   const scope = useReveal();
+  const { data } = usePlans();
+  const trialDays = data?.trial?.days ?? 14;
+
   return (
     <section ref={scope} className="relative py-20 sm:py-28">
       <div className="container-x">
@@ -24,7 +28,7 @@ export default function FinalCta() {
               Prêt à lancer votre boutique ?
             </h2>
             <p data-reveal className="mx-auto mt-5 max-w-lg text-lg text-cream/65">
-              Gratuit pendant 7 jours sur le plan Pro. Aucune carte bancaire requise.
+              Accès Premium complet pendant {trialDays} jours — sans carte bancaire.
               Votre premier produit est en ligne en quelques minutes.
             </p>
             <div data-reveal className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">

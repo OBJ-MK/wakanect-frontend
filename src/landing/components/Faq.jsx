@@ -1,42 +1,60 @@
 import { useState } from 'react';
 import { useReveal } from '../hooks/useReveal';
+import { usePlans } from '@/hooks/usePlans';
 import SectionHeading from './ui/SectionHeading';
 import Icon from './Icon';
 
-const ITEMS = [
-  {
-    q: "Pourquoi aucun compte client n'est requis ?",
-    a: "Les comptes créent de la friction. En Afrique de l'Ouest, les clients veulent acheter vite, sans mot de passe. La confirmation de paiement Wave suffit : plus simple, plus de conversions.",
-  },
-  {
-    q: 'Comment fonctionne le parsing des produits ?',
-    a: "Trois niveaux : regex (gratuit), Cloudflare Workers AI (Pro), puis Claude Haiku (Premium). Si un niveau n'est pas assez confiant, il escalade. Vous voyez toujours le score et corrigez si besoin.",
-  },
-  {
-    q: "Où va l'argent de mes clients ?",
-    a: "Directement sur votre compte Wave. Wakanect n'intervient jamais dans la transaction. Zéro commission sur les ventes — vous ne payez que votre abonnement.",
-  },
-  {
-    q: 'Combien de boutiques puis-je créer ?',
-    a: 'Cela dépend du plan : Gratuit = 1, Pro = 5, Premium = 20. Chacune a sa propre URL publique et son catalogue.',
-  },
-  {
-    q: 'Que se passe-t-il une fois mon quota de scans atteint ?',
-    a: "Vos produits déjà validés restent publiés indéfiniment. Seul le nombre de nouveaux messages analysés est limité chaque mois.",
-  },
-  {
-    q: 'En quelle langue fonctionne le parsing ?',
-    a: 'Français au lancement. Le moteur comprend les variantes locales de prix (25k, 25 mille, vingt-cinq mille). Bambara et Pulaar arrivent en phase 2.',
-  },
-  {
-    q: 'Y a-t-il une période d’essai ?',
-    a: "Le plan Gratuit l'est pour toujours (10 scans/mois). Le plan Pro offre 7 jours gratuits, sans carte bancaire.",
-  },
-];
+function empLabel(max) {
+  if (max === 0)  return 'aucun';
+  if (max === -1) return 'sans limite';
+  return String(max);
+}
+
+function buildItems(data) {
+  const trialDays = data?.trial?.days ?? 14;
+  const plans     = data?.plans;
+  const [free, pro, prem] = plans ?? [];
+
+  return [
+    {
+      q: "Pourquoi aucun compte client n'est requis ?",
+      a: "Les comptes créent de la friction. En Afrique de l'Ouest, les clients veulent acheter vite, sans mot de passe. La confirmation de paiement Wave suffit : plus simple, plus de conversions.",
+    },
+    {
+      q: 'Comment fonctionne le parsing des produits ?',
+      a: "Trois niveaux : regex (Gratuit), Cloudflare Workers AI (Pro), puis Claude Haiku (Premium). Si un niveau n'est pas assez confiant, il escalade. Vous voyez toujours le score et corrigez si besoin.",
+    },
+    {
+      q: "Où va l'argent de mes clients ?",
+      a: "Directement sur votre compte Wave. Wakanect n'intervient jamais dans la transaction. Zéro commission sur les ventes — vous ne payez que votre abonnement.",
+    },
+    {
+      q: "Combien d'employés puis-je ajouter ?",
+      a: plans
+        ? `Cela dépend de votre plan : Gratuit = ${empLabel(free.max_employees)}, Pro = ${empLabel(pro.max_employees)}, Premium = ${empLabel(prem.max_employees)}. Chaque employé peut scanner les messages et gérer les commandes selon les permissions que vous lui accordez.`
+        : "Cela dépend de votre plan : Gratuit = aucun, Pro = 2, Premium = 50. Chaque employé peut scanner les messages et gérer les commandes selon les permissions que vous lui accordez.",
+    },
+    {
+      q: 'Que se passe-t-il une fois mon quota de scans atteint ?',
+      a: "Vos produits déjà validés restent publiés indéfiniment. Seul le nombre de nouveaux messages analysés est limité chaque mois.",
+    },
+    {
+      q: 'En quelle langue fonctionne le parsing ?',
+      a: 'Français au lancement. Le moteur comprend les variantes locales de prix (25k, 25 mille, vingt-cinq mille). Bambara et Pulaar arrivent en phase 2.',
+    },
+    {
+      q: "Y a-t-il une période d'essai ?",
+      a: `Oui — ${trialDays} jours d'accès complet (niveau Premium), sans carte bancaire. Après l'essai, vous choisissez un plan payant ou restez sur le plan Gratuit.`,
+    },
+  ];
+}
 
 export default function Faq() {
   const scope = useReveal();
   const [open, setOpen] = useState(0);
+  const { data } = usePlans();
+
+  const items = buildItems(data);
 
   return (
     <section id="faq" ref={scope} className="relative py-24 sm:py-32">
@@ -56,7 +74,7 @@ export default function Faq() {
         </div>
 
         <ul className="flex flex-col gap-3">
-          {ITEMS.map((item, i) => {
+          {items.map((item, i) => {
             const isOpen = open === i;
             return (
               <li key={item.q} data-reveal className="glass overflow-hidden rounded-2xl">

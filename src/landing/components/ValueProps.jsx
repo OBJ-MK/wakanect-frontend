@@ -6,29 +6,29 @@ import Img from './ui/Img';
 
 const CARDS = [
   {
-    icon: 'zap',
-    title: 'Parsing en temps réel',
-    desc: "L'IA extrait nom, prix, tailles et couleurs. Vous validez, c'est en ligne.",
+    icon: ‘zap’,
+    title: ‘Parsing en temps réel’,
+    desc: "L’IA extrait nom, prix, tailles et couleurs. Vous validez, c’est en ligne.",
   },
   {
-    icon: 'card',
-    title: 'Paiement Wave direct',
-    desc: 'Les clients paient au commerçant. Aucun compte, aucune commission.',
+    icon: ‘card’,
+    title: ‘Paiement Wave direct’,
+    desc: ‘Les clients paient le commerçant directement. Wakanect ne prélève rien sur vos ventes.’,
   },
   {
-    icon: 'store',
-    title: 'Boutique multi-tenant',
-    desc: 'Une URL publique unique, prête à partager. Aucune configuration technique.',
+    icon: ‘store’,
+    title: ‘Vitrine publique’,
+    desc: ‘Une URL publique unique pour chaque boutique, prête à partager. Aucune configuration technique.’,
   },
   {
-    icon: 'smartphone',
-    title: 'Pensé pour la 3G',
-    desc: 'Léger, rapide, hors-ligne. Optimisé pour les réseaux ouest-africains.',
+    icon: ‘smartphone’,
+    title: ‘Pensé pour la 3G’,
+    desc: ‘Léger, rapide, hors-ligne. Optimisé pour les réseaux ouest-africains.’,
   },
   {
-    icon: 'globe',
-    title: 'Paiements locaux',
-    desc: 'Wave aujourd’hui. Orange Money et Airtel Money bientôt.',
+    icon: ‘globe’,
+    title: ‘Paiements locaux’,
+    desc: ‘Wave aujourd’hui. Orange Money et Airtel Money bientôt.’,
   },
 ];
 

@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { gsap, prefersReducedMotion } from '../lib/gsap';
+import { usePlans } from '@/hooks/usePlans';
 import Button from './ui/Button';
 import Icon from './Icon';
 import HeroVisual from './HeroVisual';
@@ -14,6 +15,11 @@ const LINES = [
 
 export default function Hero() {
   const root = useRef(null);
+  const { data } = usePlans();
+
+  // Valeurs issues de /api/plans, avec fallback raisonnable
+  const trialDays  = data?.trial?.days  ?? 14;
+  const trialScans = data?.plans?.[0]?.scan_quota ?? 100;
 
   useEffect(() => {
     if (prefersReducedMotion) return;
@@ -80,7 +86,7 @@ export default function Hero() {
           >
             Wakanect transforme vos messages produit en boutique en ligne publiée.
             Vos clients commandent sans compte et paient avec Wave.
-            <span className="text-cream"> Zéro friction, zéro commission.</span>
+            <span className="text-cream"> Zéro friction, 0 % sur vos ventes.</span>
           </p>
 
           <div data-hero-fade className="mt-9 flex flex-col gap-3 sm:flex-row">
@@ -95,8 +101,8 @@ export default function Hero() {
 
           <dl data-hero-fade className="mt-10 flex flex-wrap items-center gap-x-8 gap-y-4">
             {[
-              ['10', 'scans offerts / mois'],
-              ['0', 'commission client'],
+              [trialScans.toLocaleString('fr-FR'), `scans — essai ${trialDays} jours`],
+              ['0 %', 'prélevé sur vos ventes'],
               ['1,2s', 'pour publier'],
             ].map(([n, l]) => (
               <div key={l} className="flex items-baseline gap-2">

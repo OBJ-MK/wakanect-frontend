@@ -18,24 +18,40 @@ function supportLabel(flags) {
   return flags?.priority_support ? 'Prioritaire 24h' : 'Email';
 }
 
+// Formate un quota en nombre localisé ; retourne '—' si la valeur n'est pas un nombre fini.
+function safeLocale(v) {
+  const n = Number(v);
+  return Number.isFinite(n) ? n.toLocaleString('fr-FR') : '—';
+}
+
+// Vérifie que les 3 plans attendus sont présents par clé (free/pro/premium).
+function hasRequiredPlans(plans) {
+  if (!Array.isArray(plans)) return false;
+  return ['free', 'pro', 'premium'].every(k => plans.some(p => p.key === k));
+}
+
 function buildMatrix(plans) {
-  const [free, pro, prem] = plans;
+  // Lookup par clé : insensible à l'ordre et au nombre d'entrées
+  const byKey = Object.fromEntries(plans.map(p => [p.key, p]));
+  const free  = byKey.free;
+  const pro   = byKey.pro;
+  const prem  = byKey.premium;
   return [
     ['Scans / mois',
-      free.scan_quota.toLocaleString('fr-FR'),
-      pro.scan_quota.toLocaleString('fr-FR'),
-      prem.scan_quota.toLocaleString('fr-FR')],
+      safeLocale(free?.scan_quota),
+      safeLocale(pro?.scan_quota),
+      safeLocale(prem?.scan_quota)],
     ['Parsing regex',  true,  true,  true],
     ['Cloudflare AI',  false, true,  true],
     ['Claude Haiku',   false, true,  true],
     ['Employés',
-      empLabel(free.max_employees),
-      empLabel(pro.max_employees),
-      empLabel(prem.max_employees)],
+      empLabel(free?.max_employees ?? 0),
+      empLabel(pro?.max_employees  ?? 0),
+      empLabel(prem?.max_employees ?? 0)],
     ['Support',
-      supportLabel(free.features_flags),
-      supportLabel(pro.features_flags),
-      supportLabel(prem.features_flags)],
+      supportLabel(free?.features_flags),
+      supportLabel(pro?.features_flags),
+      supportLabel(prem?.features_flags)],
   ];
 }
 
@@ -85,7 +101,7 @@ export default function Pricing() {
   const trialDays = data?.trial?.days ?? 14;
 
   const plansToDisplay = useMemo(() => {
-    if (!data?.plans) return FALLBACK_PLANS;
+    if (!hasRequiredPlans(data?.plans)) return FALLBACK_PLANS;
     return data.plans.map(p => ({
       key:          p.key,
       name:         p.name,
@@ -110,7 +126,7 @@ export default function Pricing() {
   }, [data, trialDays]);
 
   const matrix = useMemo(
-    () => (data?.plans ? buildMatrix(data.plans) : FALLBACK_MATRIX),
+    () => (hasRequiredPlans(data?.plans) ? buildMatrix(data.plans) : FALLBACK_MATRIX),
     [data]
   );
 

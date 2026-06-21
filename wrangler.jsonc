@@ -1,8 +1,10 @@
 {
   "name": "wakanect-frontend",
   "compatibility_date": "2026-06-18",
+  "main": "src/worker.js",
   "assets": {
     "directory": "dist",
-    "not_found_handling": "single-page-application"
+    "not_found_handling": "single-page-application",
+    "binding": "ASSETS"
   }
 }

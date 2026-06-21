@@ -6,8 +6,20 @@ import { cn } from '@/lib/utils'
 import { useStock } from '@/hooks/useStock'
 import { FilterChips } from '@/components/features/catalogue/FilterChips'
 
+function ProductCardSkeleton() {
+  return (
+    <div className="glass rounded-3xl overflow-hidden flex flex-col animate-pulse">
+      <div className="aspect-square bg-navy-light" />
+      <div className="p-3 flex flex-col gap-1.5">
+        <div className="h-4 bg-white/10 rounded w-full" />
+        <div className="h-4 bg-white/10 rounded w-1/2" />
+      </div>
+    </div>
+  )
+}
+
 function ProductCard({ product }) {
-  const lowStock = product.stock > 0 && product.stock <= 5
+  const lowStock  = product.stock > 0 && product.stock <= 5
   const outOfStock = product.stock === 0
   const thumb = product.images?.[0] ?? product.image_url ?? null
 
@@ -22,6 +34,8 @@ function ProductCard({ product }) {
             src={thumb}
             alt={product.name}
             className="w-full h-full object-cover"
+            loading="lazy"
+            decoding="async"
           />
         ) : (
           <div className="flex flex-col items-center gap-2 text-white/20">
@@ -39,7 +53,6 @@ function ProductCard({ product }) {
           <Edit3 size={14} />
         </Link>
 
-        {/* Stock badge */}
         {lowStock && (
           <div className="absolute bottom-2 left-2 flex items-center gap-1 px-2 py-1 rounded-lg bg-amber/20 backdrop-blur-xs">
             <AlertTriangle size={10} className="text-amber" />
@@ -70,15 +83,15 @@ function ProductCard({ product }) {
 }
 
 export function CatalogueMarchandPage() {
-  const [search, setSearch] = useState('')
+  const [search, setSearch]               = useState('')
   const [activeCategory, setActiveCategory] = useState('Tout')
-  const { products, loading } = useStock()
+  const { products, total, hasMore, loadMore, loading, loadingMore } = useStock()
 
   const categories = ['Tout', ...new Set(products.map(p => p.category).filter(Boolean))]
 
   const filtered = products.filter(p => {
     const matchSearch = p.name.toLowerCase().includes(search.toLowerCase())
-    const matchCat = activeCategory === 'Tout' || p.category === activeCategory
+    const matchCat    = activeCategory === 'Tout' || p.category === activeCategory
     return matchSearch && matchCat
   })
 
@@ -93,6 +106,9 @@ export function CatalogueMarchandPage() {
             <div className="flex items-center gap-2 flex-1">
               <LayoutGrid size={18} className="text-orange" />
               <h1 className="font-display font-bold text-h2 text-white">Mon catalogue</h1>
+              {total > 0 && (
+                <span className="text-micro text-white/40">({total})</span>
+              )}
             </div>
             <Link
               to="/app/catalogue/ajouter"
@@ -140,8 +156,8 @@ export function CatalogueMarchandPage() {
 
         {/* Product grid */}
         {loading ? (
-          <div className="flex justify-center py-16">
-            <div className="w-8 h-8 rounded-full border-2 border-orange/30 border-t-orange animate-spin" />
+          <div className="grid grid-cols-2 gap-3">
+            {Array.from({ length: 6 }).map((_, i) => <ProductCardSkeleton key={i} />)}
           </div>
         ) : filtered.length === 0 ? (
           <div className="flex flex-col items-center py-20 text-center">
@@ -168,9 +184,29 @@ export function CatalogueMarchandPage() {
             )}
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-3">
-            {filtered.map(p => <ProductCard key={p.id} product={p} />)}
-          </div>
+          <>
+            <div className="grid grid-cols-2 gap-3">
+              {filtered.map(p => <ProductCard key={p.id} product={p} />)}
+            </div>
+
+            {/* Load more — n'apparaît que si des produits non encore chargés existent */}
+            {hasMore && !search && activeCategory === 'Tout' && (
+              <button
+                onClick={loadMore}
+                disabled={loadingMore}
+                className="w-full py-3 rounded-2xl glass border border-white/10 text-label text-white/60 hover:text-white hover:border-orange/40 transition-colors disabled:opacity-50"
+              >
+                {loadingMore ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <span className="w-4 h-4 rounded-full border-2 border-orange/30 border-t-orange animate-spin" />
+                    Chargement…
+                  </span>
+                ) : (
+                  `Voir plus (${total - products.length} restants)`
+                )}
+              </button>
+            )}
+          </>
         )}
       </div>
     </div>

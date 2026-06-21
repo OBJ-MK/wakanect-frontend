@@ -13,7 +13,13 @@ function empLabel(max) {
 function buildItems(data) {
   const trialDays = data?.trial?.days ?? 14;
   const plans     = data?.plans;
-  const [free, pro, prem] = plans ?? [];
+
+  // Lookup par clé pour éviter tout crash si l'ordre ou le nombre de plans change
+  const planMap = plans ? Object.fromEntries(plans.map(p => [p.key, p])) : {};
+  const free    = planMap.free;
+  const pro     = planMap.pro;
+  const prem    = planMap.premium;
+  const hasAll  = free && pro && prem;
 
   return [
     {
@@ -30,7 +36,7 @@ function buildItems(data) {
     },
     {
       q: "Combien d'employés puis-je ajouter ?",
-      a: plans
+      a: hasAll
         ? `Cela dépend de votre plan : Gratuit = ${empLabel(free.max_employees)}, Pro = ${empLabel(pro.max_employees)}, Premium = ${empLabel(prem.max_employees)}. Chaque employé peut scanner les messages et gérer les commandes selon les permissions que vous lui accordez.`
         : "Cela dépend de votre plan : Gratuit = aucun, Pro = 2, Premium = 50. Chaque employé peut scanner les messages et gérer les commandes selon les permissions que vous lui accordez.",
     },

@@ -1,5 +1,5 @@
 {
-  "name": "wakanect-frontend",
+  "name": "wakanect",
   "compatibility_date": "2026-06-18",
   "main": "src/worker.js",
   "assets": {

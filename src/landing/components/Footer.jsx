@@ -16,7 +16,7 @@ const COLS = [
     links: [
       ['Documentation', '/documentation'],
       ['API Reference', '/documentation'],
-      ['Centre d’aide', '/documentation'],
+      ["Centre d'aide", '/documentation'],
       ['Blog', '/blog'],
     ],
   },

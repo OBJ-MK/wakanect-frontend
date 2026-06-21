@@ -13,19 +13,19 @@ const STEPS = [
   {
     n: '02',
     icon: 'cpu',
-    title: 'L’IA structure tout',
+    title: "L'IA structure tout",
     desc: 'Nom, prix, tailles, couleurs et stock sont extraits automatiquement, avec un score de confiance transparent.',
   },
   {
     n: '03',
     icon: 'checkCircle',
     title: 'Vous validez',
-    desc: 'Un coup d’œil, un ajustement si besoin, et c’est confirmé. Pas de rejet, pas de friction.',
+    desc: "Un coup d'œil, un ajustement si besoin, et c'est confirmé. Pas de rejet, pas de friction.",
   },
   {
     n: '04',
     icon: 'rocket',
-    title: 'C’est en ligne',
+    title: "C'est en ligne",
     desc: 'Le produit est publié sur votre boutique. Vos clients commandent sans compte et paient avec Wave.',
   },
 ];

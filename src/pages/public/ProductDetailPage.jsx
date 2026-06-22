@@ -73,7 +73,7 @@ function PhotoCarousel({ images, name }) {
 export function ProductDetailPage() {
   const { slug, id } = useParams()
   const navigate = useNavigate()
-  const { boutique } = useTenant()
+  const { boutique, loading } = useTenant()
 
   const product = boutique?.products?.find(p => p.id === id) ?? null
   const shopPhone = boutique?.whatsapp_number ?? ''
@@ -83,6 +83,27 @@ export function ProductDetailPage() {
   const [qty, setQty] = useState(1)
 
   const outOfStock = product ? product.stock === 0 : true
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-cream dark:bg-navy-deep animate-pulse">
+        <div className="sticky top-0 z-20 bg-white/80 dark:bg-navy/80 backdrop-blur-glass border-b border-navy/8 dark:border-white/8 px-4 py-3">
+          <div className="max-w-lg mx-auto flex items-center gap-3">
+            <Link to={`/boutique/${slug}`} className="p-2 -ml-2 rounded-xl text-navy/60 dark:text-white/60">
+              <ChevronLeft size={20} />
+            </Link>
+            <div className="h-5 w-40 bg-navy/10 dark:bg-white/10 rounded" />
+          </div>
+        </div>
+        <div className="aspect-[3/4] w-full bg-cream-dark dark:bg-navy-light" />
+        <div className="max-w-lg mx-auto px-4 py-5 flex flex-col gap-4">
+          <div className="h-3 w-20 bg-navy/8 dark:bg-white/8 rounded" />
+          <div className="h-7 w-3/4 bg-navy/10 dark:bg-white/10 rounded" />
+          <div className="h-8 w-1/3 bg-navy/10 dark:bg-white/10 rounded" />
+        </div>
+      </div>
+    )
+  }
 
   if (!product) {
     return (

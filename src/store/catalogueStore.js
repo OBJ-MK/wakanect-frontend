@@ -3,8 +3,13 @@ import { create } from 'zustand'
 export const useCatalogueStore = create((set, get) => ({
   cart: [],
   boutique: null,
+  boutiqueCache: {},
 
   setBoutique: (boutique) => set({ boutique }),
+
+  setBoutiqueCache: (slug, data) => set(state => ({
+    boutiqueCache: { ...state.boutiqueCache, [slug]: data },
+  })),
 
   addToCart: (product, selectedColor = null, quantity = 1) => {
     const cart = get().cart

@@ -3,27 +3,52 @@ import { useParams } from 'react-router-dom'
 import { catalogueService } from '@/services/catalogueService'
 import { useCatalogueStore } from '@/store/catalogueStore'
 
-/**
- * Charge la boutique publique en mode infinite scroll.
- * Page 1 → meta boutique + premiers produits.
- * loadMore() → produits suivants accumulés dans `products`.
- */
 export function useTenant() {
   const { slug } = useParams()
-  const { setBoutique } = useCatalogueStore()
+  const setBoutique = useCatalogueStore(s => s.setBoutique)
+  const setBoutiqueCache = useCatalogueStore(s => s.setBoutiqueCache)
 
-  const [boutiqueMeta, setBoutiqueMeta] = useState(null)
-  const [products, setProducts]         = useState([])
-  const [page, setPage]                 = useState(1)
-  const [total, setTotal]               = useState(0)
-  const [hasMore, setHasMore]           = useState(false)
-  const [loading, setLoading]           = useState(true)
-  const [loadingMore, setLoadingMore]   = useState(false)
-  const [error, setError]               = useState(null)
+  // Lazy initializers : lit le cache Zustand synchroniquement sur le premier rendu.
+  // Résultat : retour sur une page déjà visitée = données dispo immédiatement, loading=false.
+  const [boutiqueMeta, setBoutiqueMeta] = useState(
+    () => useCatalogueStore.getState().boutiqueCache[slug]?.boutique ?? null
+  )
+  const [products, setProducts] = useState(
+    () => useCatalogueStore.getState().boutiqueCache[slug]?.products ?? []
+  )
+  const [page, setPage] = useState(
+    () => useCatalogueStore.getState().boutiqueCache[slug]?.page ?? 1
+  )
+  const [total, setTotal] = useState(
+    () => useCatalogueStore.getState().boutiqueCache[slug]?.total ?? 0
+  )
+  const [hasMore, setHasMore] = useState(
+    () => useCatalogueStore.getState().boutiqueCache[slug]?.hasMore ?? false
+  )
+  const [loading, setLoading] = useState(
+    () => !useCatalogueStore.getState().boutiqueCache[slug]
+  )
+  const [loadingMore, setLoadingMore] = useState(false)
+  const [error, setError] = useState(null)
 
   useEffect(() => {
     if (!slug) return
-    // Réinitialise l'état quand le slug change (navigation inter-boutiques)
+
+    const cached = useCatalogueStore.getState().boutiqueCache[slug]
+    if (cached) {
+      // Cache hit — restaure l'état local et met à jour le store (nécessaire pour ProductCard.slug)
+      setBoutiqueMeta(cached.boutique)
+      setProducts(cached.products)
+      setTotal(cached.total)
+      setHasMore(cached.hasMore)
+      setPage(cached.page)
+      setBoutique({ ...cached.boutique, products: cached.products })
+      setLoading(false)
+      setError(null)
+      return
+    }
+
+    // Cache miss — fetch réseau
     setLoading(true)
     setError(null)
     setProducts([])
@@ -38,8 +63,8 @@ export function useTenant() {
         setTotal(t)
         setHasMore(h)
         setPage(1)
-        // Le store a besoin de slug + meta pour la navigation du panier
         setBoutique({ ...shopMeta, products: p })
+        setBoutiqueCache(slug, { boutique: shopMeta, products: p, total: t, hasMore: h, page: 1 })
       })
       .catch(e => setError(e.message))
       .finally(() => setLoading(false))
@@ -55,11 +80,10 @@ export function useTenant() {
       setProducts(prev => [...prev, ...newProds])
       setHasMore(data.hasMore ?? false)
       setPage(nextPage)
-    } catch { /* ignore — l'utilisateur peut réessayer en scrollant */ }
+    } catch { /* ignore — scroll retry */ }
     finally { setLoadingMore(false) }
   }, [loadingMore, hasMore, slug, page])
 
-  // Recompose la boutique avec les produits accumulés (compatibilité avec les consumers)
   const boutique = boutiqueMeta ? { ...boutiqueMeta, products } : null
 
   return { boutique, products, total, hasMore, loadMore, loading, loadingMore, error, slug }

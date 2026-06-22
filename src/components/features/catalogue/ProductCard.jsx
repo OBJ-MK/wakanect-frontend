@@ -32,12 +32,12 @@ export function ProductCard({ product }) {
       className="flex flex-col rounded-3xl bg-white dark:bg-navy overflow-hidden shadow-card border border-[var(--border-default)] cursor-pointer hover:shadow-md transition-shadow"
     >
       {/* Image */}
-      <div className="relative aspect-square bg-cream-dark dark:bg-navy-light overflow-hidden">
+      <div className="relative aspect-[3/4] bg-cream-dark dark:bg-navy-light overflow-hidden">
         {product.image_url ? (
           <img
             src={product.image_url}
             alt={product.name}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-contain"
             loading="lazy"
           />
         ) : (

@@ -28,12 +28,12 @@ function PhotoCarousel({ images, name }) {
   function next() { setIdx(i => (i + 1) % count) }
 
   return (
-    <div className="relative bg-navy-light aspect-square w-full overflow-hidden">
+    <div className="relative bg-cream dark:bg-navy-light aspect-[3/4] w-full overflow-hidden">
       {images?.length > 0 ? (
         <img
           src={images[idx]}
           alt={`${name} — photo ${idx + 1}`}
-          className="w-full h-full object-cover"
+          className="w-full h-full object-contain"
         />
       ) : (
         <div className="w-full h-full flex flex-col items-center justify-center gap-3 text-white/20">

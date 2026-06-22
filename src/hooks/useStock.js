@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { stockService } from '@/services/stockService'
 
-export function useStock() {
+export function useStock({ category = '', search = '' } = {}) {
   const [products, setProducts]       = useState([])
   const [total, setTotal]             = useState(0)
   const [page, setPage]               = useState(1)
@@ -10,8 +10,20 @@ export function useStock() {
   const [loadingMore, setLoadingMore] = useState(false)
   const [error, setError]             = useState(null)
 
+  // Debounce search 350ms (Décision 2)
+  const [debouncedSearch, setDebouncedSearch] = useState(search)
   useEffect(() => {
-    stockService.list(1)
+    const timer = setTimeout(() => setDebouncedSearch(search), 350)
+    return () => clearTimeout(timer)
+  }, [search])
+
+  useEffect(() => {
+    setLoading(true)
+    setProducts([])
+    setPage(1)
+    setHasMore(false)
+
+    stockService.list(1, { category, search: debouncedSearch })
       .then(data => {
         const items = Array.isArray(data) ? data : (data?.products ?? data?.rows ?? [])
         const t = data?.total ?? items.length
@@ -22,14 +34,14 @@ export function useStock() {
       })
       .catch(e => setError(e.message))
       .finally(() => setLoading(false))
-  }, [])
+  }, [category, debouncedSearch])
 
   const loadMore = useCallback(async () => {
     if (loadingMore || !hasMore) return
     const next = page + 1
     setLoadingMore(true)
     try {
-      const data = await stockService.list(next)
+      const data = await stockService.list(next, { category, search: debouncedSearch })
       const items = Array.isArray(data) ? data : (data?.products ?? data?.rows ?? [])
       const newTotal = data?.total ?? total
       setProducts(prev => [...prev, ...items])
@@ -38,7 +50,7 @@ export function useStock() {
       setPage(next)
     } catch { /* silent */ }
     finally { setLoadingMore(false) }
-  }, [loadingMore, hasMore, page, total])
+  }, [loadingMore, hasMore, page, total, category, debouncedSearch])
 
   async function updateStock(id, data) {
     await stockService.updateStock(id, data)

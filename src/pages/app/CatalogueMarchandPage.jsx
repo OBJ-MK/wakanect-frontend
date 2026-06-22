@@ -44,7 +44,6 @@ function ProductCard({ product }) {
           </div>
         )}
 
-        {/* Edit button overlay */}
         <Link
           to={`/app/catalogue/${product.id}/modifier`}
           className="absolute top-2 right-2 w-8 h-8 rounded-xl bg-navy/70 backdrop-blur-glass flex items-center justify-center text-white/70 hover:text-white hover:bg-navy/90 active:scale-95 transition-all"
@@ -85,15 +84,14 @@ function ProductCard({ product }) {
 export function CatalogueMarchandPage() {
   const [search, setSearch]               = useState('')
   const [activeCategory, setActiveCategory] = useState('Tout')
-  const { products, total, hasMore, loadMore, loading, loadingMore } = useStock()
 
-  const categories = ['Tout', ...new Set(products.map(p => p.category).filter(Boolean))]
-
-  const filtered = products.filter(p => {
-    const matchSearch = p.name.toLowerCase().includes(search.toLowerCase())
-    const matchCat    = activeCategory === 'Tout' || p.category === activeCategory
-    return matchSearch && matchCat
+  const { products, total, hasMore, loadMore, loading, loadingMore } = useStock({
+    category: activeCategory !== 'Tout' ? activeCategory : '',
+    search,
   })
+
+  // Catégories dérivées des produits courants (sans filtre actif = liste complète)
+  const categories = ['Tout', ...new Set(products.map(p => p.category).filter(Boolean))]
 
   const lowStockCount = products.filter(p => p.stock > 0 && p.stock <= 5).length
 
@@ -132,7 +130,6 @@ export function CatalogueMarchandPage() {
       </div>
 
       <div className="page-container py-4 flex flex-col gap-4">
-        {/* Filtre catégorie */}
         {categories.length > 1 && (
           <FilterChips
             categories={categories}
@@ -141,7 +138,6 @@ export function CatalogueMarchandPage() {
           />
         )}
 
-        {/* Stock bas quick link */}
         {lowStockCount > 0 && (
           <Link
             to="/app/stock-bas"
@@ -154,17 +150,16 @@ export function CatalogueMarchandPage() {
           </Link>
         )}
 
-        {/* Product grid */}
         {loading ? (
           <div className="grid grid-cols-2 gap-3">
             {Array.from({ length: 6 }).map((_, i) => <ProductCardSkeleton key={i} />)}
           </div>
-        ) : filtered.length === 0 ? (
+        ) : products.length === 0 ? (
           <div className="flex flex-col items-center py-20 text-center">
             <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-4">
               <Package size={28} className="text-white/20" />
             </div>
-            {search ? (
+            {search || activeCategory !== 'Tout' ? (
               <>
                 <p className="text-body font-semibold text-white/60">Aucun produit trouvé</p>
                 <p className="text-label text-white/35 mt-1">Essayez un autre terme de recherche</p>
@@ -186,11 +181,10 @@ export function CatalogueMarchandPage() {
         ) : (
           <>
             <div className="grid grid-cols-2 gap-3">
-              {filtered.map(p => <ProductCard key={p.id} product={p} />)}
+              {products.map(p => <ProductCard key={p.id} product={p} />)}
             </div>
 
-            {/* Load more — n'apparaît que si des produits non encore chargés existent */}
-            {hasMore && !search && activeCategory === 'Tout' && (
+            {hasMore && (
               <button
                 onClick={loadMore}
                 disabled={loadingMore}

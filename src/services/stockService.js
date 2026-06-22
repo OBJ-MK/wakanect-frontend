@@ -1,7 +1,12 @@
 import { api } from './api'
 
 export const stockService = {
-  list: (page = 1, limit = 50) => api.get(`/api/stock/products?page=${page}&limit=${limit}`),
+  list: (page = 1, { category, search } = {}, limit = 50) => {
+    const params = new URLSearchParams({ page, limit })
+    if (category) params.set('category', category)
+    if (search && search.trim()) params.set('search', search.trim())
+    return api.get(`/api/stock/products?${params}`)
+  },
   getPending: () => api.get('/api/stock/pending'),
   applyPending: (id, data) => api.post(`/api/stock/apply/${id}`, data),
   ignorePending: (id) => api.post(`/api/stock/ignore/${id}`),

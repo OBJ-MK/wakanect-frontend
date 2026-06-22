@@ -8,7 +8,6 @@ import { CartSheet } from './CartSheet'
 import { buildWhatsAppLink } from '@/lib/utils'
 import { WakanectLogo } from '@/components/brand/WakanectLogo'
 
-// Skeleton d'une carte produit — donne une perception de contenu immédiat
 function ProductCardSkeleton() {
   return (
     <div className="flex flex-col rounded-3xl bg-white dark:bg-navy overflow-hidden border border-[var(--border-default)] animate-pulse">
@@ -23,12 +22,22 @@ function ProductCardSkeleton() {
 }
 
 export function CataloguePage() {
-  const { boutique, products, total, hasMore, loadMore, loading, loadingMore, error } = useTenant()
   const [activeCategory, setActiveCategory] = useState('Tout')
-  const [cartOpen, setCartOpen]             = useState(false)
+  const [categoryOptions, setCategoryOptions] = useState(['Tout'])
+  const [cartOpen, setCartOpen] = useState(false)
   const sentinelRef = useRef(null)
 
-  // Infinite scroll : déclenche loadMore quand la sentinelle entre dans le viewport
+  const { boutique, products, total, hasMore, loadMore, loading, loadingMore, error } =
+    useTenant({ category: activeCategory })
+
+  // Fige les catégories à partir du premier fetch sans filtre (Décision 1)
+  useEffect(() => {
+    if (activeCategory === 'Tout' && products.length > 0) {
+      setCategoryOptions(['Tout', ...new Set(products.map(p => p.category).filter(Boolean))])
+    }
+  }, [products]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Infinite scroll
   useEffect(() => {
     const el = sentinelRef.current
     if (!el || !hasMore) return
@@ -67,12 +76,6 @@ export function CataloguePage() {
     )
   }
 
-  const categories = ['Tout', ...new Set(products.map(p => p.category).filter(Boolean))]
-
-  const displayedProducts = activeCategory === 'Tout'
-    ? products
-    : products.filter(p => p.category === activeCategory)
-
   const waLink = boutique?.whatsapp_number
     ? buildWhatsAppLink(boutique.whatsapp_number, `Bonjour, j'ai une question sur votre boutique ${boutique.shop_name}.`)
     : null
@@ -106,20 +109,18 @@ export function CataloguePage() {
       </div>
 
       <div className="max-w-lg mx-auto px-4 py-4 flex flex-col gap-4">
-        {/* Category filter */}
+        {/* Category filter — catégories figées au premier fetch */}
         <FilterChips
-          categories={categories}
+          categories={categoryOptions}
           active={activeCategory}
           onChange={setActiveCategory}
         />
 
-        {/* Product grid */}
-        <ProductGrid products={displayedProducts} />
+        {/* Product grid — résultats server-side, pas de filtrage client */}
+        <ProductGrid products={products} />
 
-        {/* Sentinelle pour l'infinite scroll — invisible, déclenchée par l'IntersectionObserver */}
         <div ref={sentinelRef} />
 
-        {/* Spinner de chargement suivant — n'apparaît qu'après le premier rendu */}
         {loadingMore && (
           <div className="flex justify-center py-4">
             <div className="w-6 h-6 rounded-full border-2 border-orange/30 border-t-orange animate-spin" />
@@ -139,10 +140,7 @@ export function CataloguePage() {
         </a>
       </div>
 
-      {/* Cart FAB */}
       <CartFab onOpen={() => setCartOpen(true)} />
-
-      {/* Cart sheet */}
       <CartSheet isOpen={cartOpen} onClose={() => setCartOpen(false)} />
     </div>
   )

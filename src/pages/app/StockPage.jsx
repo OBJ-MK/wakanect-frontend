@@ -51,7 +51,7 @@ function StockRow({ product, onSave }) {
                 min="0"
                 value={qty}
                 onChange={e => setQty(e.target.value)}
-                className="w-20 px-2 py-1 rounded-xl bg-white/10 border border-white/15 text-white text-label text-center focus:outline-none focus:border-orange"
+                className="w-20 px-2 py-1 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-strong)] text-[var(--text-primary)] text-label text-center focus:outline-none focus:border-orange dark:bg-white/10 dark:border-white/15 dark:text-white"
               />
             </div>
             <div className="flex items-center gap-1.5">
@@ -61,7 +61,7 @@ function StockRow({ product, onSave }) {
                 min="0"
                 value={price}
                 onChange={e => setPrice(e.target.value)}
-                className="w-28 px-2 py-1 rounded-xl bg-white/10 border border-white/15 text-white text-label text-center focus:outline-none focus:border-orange"
+                className="w-28 px-2 py-1 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-strong)] text-[var(--text-primary)] text-label text-center focus:outline-none focus:border-orange dark:bg-white/10 dark:border-white/15 dark:text-white"
               />
             </div>
             <button
@@ -126,16 +126,14 @@ export function StockPage() {
           <div className="flex items-center gap-3 mb-3">
             <h1 className="font-display font-bold text-h2 text-white flex-1">Stock</h1>
           </div>
-          <div className="relative">
-            <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/40" />
-            <input
-              type="search"
-              placeholder="Rechercher un produit..."
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              className="w-full pl-9 pr-4 py-2.5 rounded-2xl bg-white/8 border border-white/10 text-white placeholder:text-white/35 text-body focus:outline-none focus:border-orange/50"
-            />
-          </div>
+          <Input
+            icon={<Search size={16} />}
+            type="search"
+            placeholder="Rechercher un produit..."
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            className="py-2.5"
+          />
         </div>
       </div>
 

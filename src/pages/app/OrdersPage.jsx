@@ -6,6 +6,7 @@ import { StatusBadge } from '@/components/ui/StatusBadge'
 import { PaymentBadge } from '@/components/features/orders/PaymentBadge'
 import { formatFCFA, formatRelativeTime } from '@/lib/formatters'
 import { cn } from '@/lib/utils'
+import { Input } from '@/components/ui/Input'
 
 const STATUS_FILTERS = ['Toutes', 'Nouvelle', 'Confirmée', 'Livrée', 'Annulée']
 
@@ -105,16 +106,15 @@ export function OrdersPage() {
               <span className="text-micro text-white/40">{total} au total</span>
             )}
           </div>
-          <div className="relative mb-3">
-            <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/40" />
-            <input
-              type="search"
-              placeholder="Rechercher un client..."
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              className="w-full pl-9 pr-4 py-2.5 rounded-2xl bg-white/8 border border-white/10 text-white placeholder:text-white/35 text-body focus:outline-none focus:border-orange/50"
-            />
-          </div>
+          <Input
+            icon={<Search size={16} />}
+            type="search"
+            placeholder="Rechercher un client..."
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            containerClassName="mb-3"
+            className="py-2.5"
+          />
           <div
             className="flex gap-2 overflow-x-auto no-scrollbar pb-0.5"
             role="group"

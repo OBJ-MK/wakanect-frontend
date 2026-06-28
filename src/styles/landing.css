@@ -116,3 +116,13 @@
     transform: none !important;
   }
 }
+
+/* ─── THÈME LANDING — CHOIX D'ARCHITECTURE DÉLIBÉRÉ ────────────────────────
+   La landing est une vitrine commerciale dont le fond est TOUJOURS sombre,
+   indépendamment du thème choisi par l'utilisateur dans l'app marchande.
+   Ces deux règles empêchent les overrides light-mode de globals.css
+   (sélecteur :root:not(.dark)) de réécrire bg-navy / bg-navy-deep à l'intérieur
+   de .landing-root. Ne pas supprimer sans valider ce choix avec l'équipe.
+─────────────────────────────────────────────────────────────────────────── */
+.landing-root .bg-navy      { background-color: var(--navy) !important; }
+.landing-root .bg-navy-deep { background-color: var(--navy-dark) !important; }

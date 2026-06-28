@@ -4,6 +4,7 @@ import { ChevronLeft, Check, MessageCircle, Copy } from 'lucide-react'
 import { cn, buildWhatsAppLink } from '@/lib/utils'
 import { useAuthStore } from '@/store/authStore'
 import { employeeService } from '@/services/employeeService'
+import { Input } from '@/components/ui/Input'
 
 const ALL_PERMS_KEYS = [
   'dashboard.view', 'products.send', 'products.publish', 'products.edit',
@@ -69,18 +70,6 @@ function FieldGroup({ label, children, hint }) {
   )
 }
 
-function TextInput({ value, onChange, placeholder, type = 'text', required }) {
-  return (
-    <input
-      type={type}
-      value={value}
-      onChange={onChange}
-      placeholder={placeholder}
-      required={required}
-      className="bg-white/6 border border-white/10 rounded-2xl px-4 py-3 text-white placeholder-white/25 text-body focus:outline-none focus:border-white/30 transition-colors"
-    />
-  )
-}
 
 export function AjouterEmployePage() {
   const { merchant } = useAuthStore()
@@ -231,13 +220,13 @@ export function AjouterEmployePage() {
         {/* Informations */}
         <div className="glass rounded-3xl p-4 flex flex-col gap-4">
           <FieldGroup label="Nom">
-            <TextInput required value={form.name} onChange={set('name')} placeholder="Ex : Moussa Sow" />
+            <Input required value={form.name} onChange={set('name')} placeholder="Ex : Moussa Sow" />
           </FieldGroup>
           <FieldGroup label="Numéro de téléphone" hint="Identifiant de connexion + envoi de produits.">
-            <TextInput required type="tel" value={form.phone} onChange={set('phone')} placeholder="+221 …" />
+            <Input required type="tel" value={form.phone} onChange={set('phone')} placeholder="+221 …" />
           </FieldGroup>
           <FieldGroup label="Mot de passe">
-            <TextInput required value={form.password} onChange={set('password')} placeholder="Définis un mot de passe" />
+            <Input required value={form.password} onChange={set('password')} placeholder="Définis un mot de passe" />
           </FieldGroup>
         </div>
 

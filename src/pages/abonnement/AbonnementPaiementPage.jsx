@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate, useLocation, Link } from 'react-router-dom'
 import { ChevronLeft, CreditCard, Smartphone, Lock } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { Input } from '@/components/ui/Input'
 
 const METHODS = [
   {
@@ -118,16 +119,13 @@ export function AbonnementPaiementPage() {
             <label className="text-label font-semibold text-white/60">
               Numéro de téléphone {method === 'wave' ? 'Wave' : 'Orange Money'}
             </label>
-            <div className="relative">
-              <Smartphone size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/40" />
-              <input
-                type="tel"
-                value={phone}
-                onChange={e => setPhone(e.target.value)}
-                placeholder="+221 77 000 00 00"
-                className="w-full pl-9 pr-4 py-3 rounded-2xl bg-navy/60 border border-white/10 text-white placeholder:text-white/35 text-body focus:outline-none focus:ring-2 focus:ring-orange/40 focus:border-orange"
-              />
-            </div>
+            <Input
+              icon={<Smartphone size={16} />}
+              type="tel"
+              value={phone}
+              onChange={e => setPhone(e.target.value)}
+              placeholder="+221 77 000 00 00"
+            />
           </div>
         )}
 

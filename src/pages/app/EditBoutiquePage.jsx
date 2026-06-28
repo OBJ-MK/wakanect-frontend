@@ -150,7 +150,7 @@ export function EditBoutiquePage() {
                 onChange={set('description')}
                 placeholder="Présentez votre boutique en quelques mots..."
                 rows={3}
-                className="w-full rounded-2xl px-4 py-3 text-body bg-navy/60 border border-white/10 text-white placeholder:text-white/35 focus:outline-none focus:ring-2 focus:ring-orange/40 focus:border-orange resize-none"
+                className="w-full rounded-2xl px-4 py-3 text-body bg-[var(--bg-surface)] border border-[var(--border-default)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-orange/40 focus:border-orange resize-none dark:bg-navy/60 dark:border-white/10"
               />
             </div>
           </div>

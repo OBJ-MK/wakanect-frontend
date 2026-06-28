@@ -5,6 +5,7 @@ import { formatFCFA } from '@/lib/formatters'
 import { cn } from '@/lib/utils'
 import { useStock } from '@/hooks/useStock'
 import { FilterChips } from '@/components/features/catalogue/FilterChips'
+import { Input } from '@/components/ui/Input'
 
 function ProductCardSkeleton() {
   return (
@@ -116,16 +117,14 @@ export function CatalogueMarchandPage() {
               <Plus size={18} />
             </Link>
           </div>
-          <div className="relative">
-            <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/40" />
-            <input
-              type="search"
-              placeholder="Rechercher un produit..."
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              className="w-full pl-9 pr-4 py-2.5 rounded-2xl bg-white/8 border border-white/10 text-white placeholder:text-white/35 text-body focus:outline-none focus:border-orange/50"
-            />
-          </div>
+          <Input
+            icon={<Search size={16} />}
+            type="search"
+            placeholder="Rechercher un produit..."
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            className="py-2.5"
+          />
         </div>
       </div>
 

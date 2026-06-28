@@ -186,12 +186,13 @@ function PendingProductCard({ product, onPublish, onIgnore }) {
               ))}
             </div>
             <div className="flex gap-2">
-              <input
+              <Input
                 value={newSize}
                 onChange={e => setNewSize(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addSize())}
                 placeholder="Ex: M"
-                className="flex-1 px-3 py-2 rounded-xl bg-white/8 border border-white/10 text-white placeholder:text-white/35 text-label focus:outline-none focus:border-orange/50"
+                containerClassName="flex-1"
+                className="rounded-xl px-3 py-2 text-label"
               />
               <button
                 onClick={addSize}
@@ -216,12 +217,13 @@ function PendingProductCard({ product, onPublish, onIgnore }) {
               ))}
             </div>
             <div className="flex gap-2">
-              <input
+              <Input
                 value={newColor}
                 onChange={e => setNewColor(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addColor())}
                 placeholder="Ex: Noir"
-                className="flex-1 px-3 py-2 rounded-xl bg-white/8 border border-white/10 text-white placeholder:text-white/35 text-label focus:outline-none focus:border-orange/50"
+                containerClassName="flex-1"
+                className="rounded-xl px-3 py-2 text-label"
               />
               <button
                 onClick={addColor}

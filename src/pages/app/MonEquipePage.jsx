@@ -106,8 +106,12 @@ export function MonEquipePage() {
         <div>
           <p className="text-micro text-white/40 uppercase tracking-wider mb-2 px-1">Propriétaire</p>
           <div className="glass rounded-3xl p-4 flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange to-amber flex items-center justify-center shrink-0">
-              <span className="text-sm font-bold text-white">{getInitials(merchant?.owner_name ?? 'W')}</span>
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange to-amber flex items-center justify-center shrink-0 overflow-hidden">
+              {merchant?.logo_url ? (
+                <img src={merchant.logo_url} alt="Logo" className="w-full h-full object-cover" />
+              ) : (
+                <span className="text-sm font-bold text-white">{getInitials(merchant?.owner_name ?? 'W')}</span>
+              )}
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-body font-semibold text-white">{merchant?.owner_name ?? 'Propriétaire'}</p>

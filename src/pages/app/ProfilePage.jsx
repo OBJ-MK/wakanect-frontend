@@ -67,10 +67,14 @@ export function ProfilePage() {
           <h1 className="font-display font-bold text-h2 text-white mb-5">Profil</h1>
 
           <div className="flex items-center gap-4">
-            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-orange to-amber flex items-center justify-center shrink-0">
-              <span className="font-display font-bold text-h2 text-white">
-                {getInitials(merchant?.owner_name ?? 'W')}
-              </span>
+            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-orange to-amber flex items-center justify-center shrink-0 overflow-hidden">
+              {merchant?.logo_url ? (
+                <img src={merchant.logo_url} alt="Logo" className="w-full h-full object-cover" />
+              ) : (
+                <span className="font-display font-bold text-h2 text-white">
+                  {getInitials(merchant?.owner_name ?? 'W')}
+                </span>
+              )}
             </div>
             <div className="flex-1 min-w-0">
               <p className="font-display font-bold text-h3 text-white">

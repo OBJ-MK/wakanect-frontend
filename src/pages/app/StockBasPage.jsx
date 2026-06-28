@@ -1,17 +1,45 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
-import { ChevronLeft, AlertTriangle, Package, Plus, Minus } from 'lucide-react'
+import { ChevronLeft, AlertTriangle, Package, Plus, Minus, Loader2, Check } from 'lucide-react'
 import { formatFCFA } from '@/lib/formatters'
 import { stockService } from '@/services/stockService'
 
 function StockRow({ product }) {
-  const [qty, setQty] = useState(product.stock)
+  const [qty, setQty]           = useState(product.stock)
+  const [saving, setSaving]     = useState(false)
+  const [saved, setSaved]       = useState(false)
+  const [saveError, setSaveError] = useState(null)
+  const prevQty  = useRef(product.stock)
+  const timerRef = useRef(null)
+
+  useEffect(() => () => clearTimeout(timerRef.current), [])
+
+  function updateQty(next) {
+    setQty(next)
+    setSaved(false)
+    setSaveError(null)
+    clearTimeout(timerRef.current)
+    timerRef.current = setTimeout(async () => {
+      setSaving(true)
+      try {
+        await stockService.updateStock(product.id, { stock: next })
+        prevQty.current = next
+        setSaved(true)
+        setTimeout(() => setSaved(false), 1500)
+      } catch (err) {
+        setSaveError(err.message)
+        setQty(prevQty.current)
+      } finally {
+        setSaving(false)
+      }
+    }, 600)
+  }
 
   return (
     <div className="flex items-center gap-3 px-4 py-4 border-b border-white/6 last:border-0">
       <div className="w-12 h-12 rounded-2xl bg-navy-light flex items-center justify-center shrink-0">
-        {product.imageUrl ? (
-          <img src={product.imageUrl} alt="" className="w-full h-full object-cover rounded-2xl" />
+        {product.image_url ? (
+          <img src={product.image_url} alt="" className="w-full h-full object-cover rounded-2xl" />
         ) : (
           <Package size={18} className="text-white/30" />
         )}
@@ -24,22 +52,37 @@ function StockRow({ product }) {
           <span className="text-micro text-amber font-semibold">Stock bas</span>
           <span className="text-micro text-white/35">{formatFCFA(product.price)}</span>
         </div>
+        {saveError && (
+          <p className="text-micro text-red-400 mt-0.5">{saveError}</p>
+        )}
       </div>
 
       <div className="flex items-center gap-2 shrink-0">
         <button
-          onClick={() => setQty(q => Math.max(0, q - 1))}
-          className="w-7 h-7 rounded-xl bg-white/8 text-white/70 flex items-center justify-center hover:bg-white/15 active:scale-95 transition-all"
+          onClick={() => updateQty(Math.max(0, qty - 1))}
+          disabled={saving}
+          className="w-7 h-7 rounded-xl bg-white/8 text-white/70 flex items-center justify-center hover:bg-white/15 active:scale-95 transition-all disabled:opacity-40"
           aria-label="Diminuer"
         >
           <Minus size={12} />
         </button>
-        <span className={`text-body font-bold min-w-[2ch] text-center ${qty <= 2 ? 'text-red-400' : 'text-amber'}`}>
-          {qty}
-        </span>
+
+        <div className="min-w-[2ch] flex items-center justify-center">
+          {saving ? (
+            <Loader2 size={14} className="animate-spin text-white/50" />
+          ) : (
+            <span className={`text-body font-bold text-center transition-colors ${
+              saved ? 'text-emerald-400' : qty <= 2 ? 'text-red-400' : 'text-amber'
+            }`}>
+              {saved ? <Check size={14} /> : qty}
+            </span>
+          )}
+        </div>
+
         <button
-          onClick={() => setQty(q => q + 1)}
-          className="w-7 h-7 rounded-xl bg-orange/20 text-orange flex items-center justify-center hover:bg-orange/30 active:scale-95 transition-all"
+          onClick={() => updateQty(qty + 1)}
+          disabled={saving}
+          className="w-7 h-7 rounded-xl bg-orange/20 text-orange flex items-center justify-center hover:bg-orange/30 active:scale-95 transition-all disabled:opacity-40"
           aria-label="Augmenter"
         >
           <Plus size={12} />

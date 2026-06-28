@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { ChevronLeft, Camera, Check } from 'lucide-react'
+import { ChevronLeft, Camera, Check, Loader2 } from 'lucide-react'
 import { useAuthStore } from '@/store/authStore'
 import { Input } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
@@ -20,9 +20,10 @@ export function EditBoutiquePage() {
     description: merchant?.description ?? '',
     _slugEdited: false,
   })
-  const [saving, setSaving]       = useState(false)
-  const [error, setError]         = useState(null)
-  const [logoPreview, setLogoPreview] = useState(null)
+  const [saving, setSaving]           = useState(false)
+  const [error, setError]             = useState(null)
+  const [logoPreview, setLogoPreview] = useState(merchant?.logoUrl ?? null)
+  const [logoUploading, setLogoUploading] = useState(false)
 
   const set = (key) => (e) => {
     const value = e.target.value
@@ -87,15 +88,27 @@ export function EditBoutiquePage() {
                   </span>
                 )}
               </div>
-              <label className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-orange flex items-center justify-center text-white cursor-pointer hover:bg-orange-hi transition-colors">
-                <Camera size={13} />
+              <label className={`absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-orange flex items-center justify-center text-white transition-colors ${logoUploading ? 'opacity-60 cursor-wait' : 'cursor-pointer hover:bg-orange-hi'}`}>
+                {logoUploading ? <Loader2 size={13} className="animate-spin" /> : <Camera size={13} />}
                 <input
                   type="file"
-                  accept="image/*"
+                  accept="image/jpeg,image/png,image/webp"
                   className="sr-only"
-                  onChange={e => {
+                  disabled={logoUploading}
+                  onChange={async e => {
                     const f = e.target.files?.[0]
-                    if (f) setLogoPreview(URL.createObjectURL(f))
+                    if (!f) return
+                    setLogoUploading(true)
+                    setError(null)
+                    try {
+                      const { logoUrl } = await merchantService.uploadLogo(f)
+                      setLogoPreview(logoUrl)
+                      setMerchant({ ...merchant, logoUrl })
+                    } catch (err) {
+                      setError(err.message)
+                    } finally {
+                      setLogoUploading(false)
+                    }
                   }}
                 />
               </label>
@@ -159,7 +172,7 @@ export function EditBoutiquePage() {
             <p className="text-sm text-red-400 text-center px-2">{error}</p>
           )}
 
-          <Button type="submit" size="lg" fullWidth loading={saving}>
+          <Button type="submit" size="lg" fullWidth loading={saving} disabled={logoUploading}>
             <Check size={16} />
             Enregistrer
           </Button>

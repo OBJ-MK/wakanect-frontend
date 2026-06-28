@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import {
-  ChevronLeft, Camera, X, Plus, Check, Clock
+  ChevronLeft, X, Plus, Check, Clock, Loader2, Star
 } from 'lucide-react'
 import { Input } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
@@ -54,23 +54,124 @@ function TagInput({ label, tags, onAdd, onRemove, placeholder, colorClass = 'bg-
   )
 }
 
-function ReadOnlyImages({ images }) {
-  if (!images?.length) return null
+function ImageManager({ productId, images, onChange, onError }) {
+  const [uploading, setUploading] = useState(false)
+  const [deletingId, setDeletingId] = useState(null)
+  const [settingPrimaryId, setSettingPrimaryId] = useState(null)
+
+  const busy = uploading || deletingId !== null || settingPrimaryId !== null
+
+  async function handleAdd(e) {
+    const f = e.target.files?.[0]
+    if (!f) return
+    setUploading(true)
+    onError(null)
+    try {
+      const { product } = await stockService.uploadImage(productId, f)
+      onChange(product.images)
+    } catch (err) {
+      onError(err.message)
+    } finally {
+      setUploading(false)
+      e.target.value = ''
+    }
+  }
+
+  async function handleDelete(imgId) {
+    setDeletingId(imgId)
+    onError(null)
+    try {
+      const { product } = await stockService.deleteImage(productId, imgId)
+      onChange(product.images)
+    } catch (err) {
+      onError(err.message)
+    } finally {
+      setDeletingId(null)
+    }
+  }
+
+  async function handleSetPrimary(imgId) {
+    setSettingPrimaryId(imgId)
+    onError(null)
+    try {
+      const { product } = await stockService.setPrimaryImage(productId, imgId)
+      onChange(product.images)
+    } catch (err) {
+      onError(err.message)
+    } finally {
+      setSettingPrimaryId(null)
+    }
+  }
+
   return (
     <div className="flex flex-col gap-2">
-      <label className="text-label font-semibold text-white/60">
-        Photos <span className="text-white/35 font-normal">(gestion photos bientôt)</span>
-      </label>
+      <label className="text-label font-semibold text-white/60">Photos</label>
       <div className="flex gap-2 overflow-x-auto pb-1">
-        {images.map((url, i) => (
-          <img
-            key={i}
-            src={url}
-            alt=""
-            className="h-20 w-20 rounded-2xl object-cover shrink-0 border border-white/10"
-          />
+        {images.map((img, idx) => (
+          <div key={img.id ?? `img-${idx}`} className="relative shrink-0">
+            <img
+              src={img.url}
+              alt=""
+              className={`h-20 w-20 rounded-2xl object-cover border-2 transition-all ${
+                img.isPrimary ? 'border-orange' : 'border-white/10'
+              }`}
+            />
+
+            {/* Étoile — définir comme principale */}
+            {!img.isPrimary && img.id && (
+              <button
+                type="button"
+                onClick={() => !busy && handleSetPrimary(img.id)}
+                disabled={busy}
+                title="Définir comme principale"
+                className="absolute bottom-1 left-1 w-5 h-5 rounded-full bg-black/60 flex items-center justify-center text-white/60 hover:text-orange disabled:opacity-40 transition-colors"
+              >
+                {settingPrimaryId === img.id
+                  ? <Loader2 size={10} className="animate-spin" />
+                  : <Star size={10} />}
+              </button>
+            )}
+
+            {/* Badge principale */}
+            {img.isPrimary && (
+              <div className="absolute bottom-1 left-1/2 -translate-x-1/2 px-1.5 py-0.5 rounded-full bg-orange text-white text-[9px] leading-none whitespace-nowrap">
+                principale
+              </div>
+            )}
+
+            {/* Supprimer */}
+            {img.id && (
+              <button
+                type="button"
+                onClick={() => !busy && handleDelete(img.id)}
+                disabled={busy}
+                className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-red-500 flex items-center justify-center text-white hover:bg-red-600 disabled:opacity-40 transition-colors"
+              >
+                {deletingId === img.id
+                  ? <Loader2 size={10} className="animate-spin" />
+                  : <X size={10} />}
+              </button>
+            )}
+          </div>
         ))}
+
+        {/* Bouton ajouter */}
+        <label className={`shrink-0 h-20 w-20 rounded-2xl border-2 border-dashed border-white/20 flex items-center justify-center transition-all ${
+          busy ? 'opacity-40 cursor-wait' : 'cursor-pointer hover:border-white/40 hover:text-white/60'
+        } text-white/40`}>
+          {uploading ? <Loader2 size={20} className="animate-spin" /> : <Plus size={20} />}
+          <input
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            className="sr-only"
+            disabled={busy}
+            onChange={handleAdd}
+          />
+        </label>
       </div>
+      {images.length === 0 && (
+        <p className="text-micro text-white/35">Appuyez sur + pour ajouter une photo</p>
+      )}
     </div>
   )
 }
@@ -110,7 +211,7 @@ export function ProductFormPage() {
           description: product.description ?? '',
           sizes:       product.sizes       ?? [],
           colors:      product.colors      ?? [],
-          images:      product.images      ?? (product.image_url ? [product.image_url] : []),
+          images:      product.images      ?? [],
         })
       })
       .catch(() => {/* form stays empty — don't crash */})
@@ -169,8 +270,15 @@ export function ProductFormPage() {
       <form onSubmit={isEdit ? handleSubmit : e => e.preventDefault()}>
         <div className="page-container py-5 flex flex-col gap-5">
 
-          {/* Images — read-only en édition, section retirée en création */}
-          {isEdit && <ReadOnlyImages images={form.images} />}
+          {/* Gestion des images (édition uniquement) */}
+          {isEdit && (
+            <ImageManager
+              productId={id}
+              images={form.images}
+              onChange={images => setForm(f => ({ ...f, images }))}
+              onError={setError}
+            />
+          )}
 
           {/* Core fields */}
           <div className="glass rounded-3xl p-4 flex flex-col gap-4">

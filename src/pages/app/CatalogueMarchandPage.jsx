@@ -22,7 +22,7 @@ function ProductCardSkeleton() {
 function ProductCard({ product }) {
   const lowStock  = product.stock > 0 && product.stock <= 5
   const outOfStock = product.stock === 0
-  const thumb = product.images?.[0] ?? product.image_url ?? null
+  const thumb = product.images?.[0]?.url ?? product.image_url ?? null
 
   return (
     <div className={cn(

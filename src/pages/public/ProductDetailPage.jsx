@@ -31,7 +31,7 @@ function PhotoCarousel({ images, name }) {
     <div className="relative bg-cream dark:bg-navy-light aspect-[3/4] w-full overflow-hidden">
       {images?.length > 0 ? (
         <img
-          src={images[idx]}
+          src={images[idx]?.url}
           alt={`${name} — photo ${idx + 1}`}
           className="w-full h-full object-contain"
         />

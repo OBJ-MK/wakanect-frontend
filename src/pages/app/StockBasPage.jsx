@@ -1,39 +1,11 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { ChevronLeft, AlertTriangle, Package, Plus, Minus, Loader2, Check } from 'lucide-react'
 import { formatFCFA } from '@/lib/formatters'
 import { stockService } from '@/services/stockService'
 
-function StockRow({ product }) {
-  const [qty, setQty]           = useState(product.stock)
-  const [saving, setSaving]     = useState(false)
-  const [saved, setSaved]       = useState(false)
-  const [saveError, setSaveError] = useState(null)
-  const prevQty  = useRef(product.stock)
-  const timerRef = useRef(null)
-
-  useEffect(() => () => clearTimeout(timerRef.current), [])
-
-  function updateQty(next) {
-    setQty(next)
-    setSaved(false)
-    setSaveError(null)
-    clearTimeout(timerRef.current)
-    timerRef.current = setTimeout(async () => {
-      setSaving(true)
-      try {
-        await stockService.updateStock(product.id, { stock: next })
-        prevQty.current = next
-        setSaved(true)
-        setTimeout(() => setSaved(false), 1500)
-      } catch (err) {
-        setSaveError(err.message)
-        setQty(prevQty.current)
-      } finally {
-        setSaving(false)
-      }
-    }, 600)
-  }
+function StockRow({ product, qty, onChange }) {
+  const dirty = qty !== product.stock
 
   return (
     <div className="flex items-center gap-3 px-4 py-4 border-b border-white/6 last:border-0">
@@ -52,37 +24,26 @@ function StockRow({ product }) {
           <span className="text-micro text-amber font-semibold">Stock bas</span>
           <span className="text-micro text-white/35">{formatFCFA(product.price)}</span>
         </div>
-        {saveError && (
-          <p className="text-micro text-red-400 mt-0.5">{saveError}</p>
-        )}
       </div>
 
       <div className="flex items-center gap-2 shrink-0">
         <button
-          onClick={() => updateQty(Math.max(0, qty - 1))}
-          disabled={saving}
-          className="w-7 h-7 rounded-xl bg-white/8 text-white/70 flex items-center justify-center hover:bg-white/15 active:scale-95 transition-all disabled:opacity-40"
+          onClick={() => onChange(product.id, Math.max(0, qty - 1))}
+          className="w-7 h-7 rounded-xl bg-white/8 text-white/70 flex items-center justify-center hover:bg-white/15 active:scale-95 transition-all"
           aria-label="Diminuer"
         >
           <Minus size={12} />
         </button>
 
-        <div className="min-w-[2ch] flex items-center justify-center">
-          {saving ? (
-            <Loader2 size={14} className="animate-spin text-white/50" />
-          ) : (
-            <span className={`text-body font-bold text-center transition-colors ${
-              saved ? 'text-emerald-400' : qty <= 2 ? 'text-red-400' : 'text-amber'
-            }`}>
-              {saved ? <Check size={14} /> : qty}
-            </span>
-          )}
-        </div>
+        <span className={`min-w-[2ch] text-body font-bold text-center transition-colors ${
+          dirty ? 'text-orange' : qty <= 2 ? 'text-red-400' : 'text-amber'
+        }`}>
+          {qty}
+        </span>
 
         <button
-          onClick={() => updateQty(qty + 1)}
-          disabled={saving}
-          className="w-7 h-7 rounded-xl bg-orange/20 text-orange flex items-center justify-center hover:bg-orange/30 active:scale-95 transition-all disabled:opacity-40"
+          onClick={() => onChange(product.id, qty + 1)}
+          className="w-7 h-7 rounded-xl bg-orange/20 text-orange flex items-center justify-center hover:bg-orange/30 active:scale-95 transition-all"
           aria-label="Augmenter"
         >
           <Plus size={12} />
@@ -96,6 +57,10 @@ export function StockBasPage() {
   const [products, setProducts] = useState([])
   const [loading, setLoading]   = useState(true)
   const [error, setError]       = useState(null)
+  const [overrides, setOverrides] = useState({})
+  const [saveErrors, setSaveErrors] = useState({})
+  const [saving, setSaving]     = useState(false)
+  const [savedMsg, setSavedMsg] = useState(false)
 
   useEffect(() => {
     stockService.listLowStock()
@@ -107,8 +72,64 @@ export function StockBasPage() {
       .finally(() => setLoading(false))
   }, [])
 
+  const dirtyIds = products
+    .filter(p => overrides[p.id] !== undefined && overrides[p.id] !== p.stock)
+    .map(p => p.id)
+  const hasDirty = dirtyIds.length > 0
+
+  useEffect(() => {
+    if (!hasDirty) return
+    const handler = e => { e.preventDefault(); e.returnValue = '' }
+    window.addEventListener('beforeunload', handler)
+    return () => window.removeEventListener('beforeunload', handler)
+  }, [hasDirty])
+
+  function handleChange(id, qty) {
+    setOverrides(prev => ({ ...prev, [id]: qty }))
+    setSaveErrors(prev => { const n = { ...prev }; delete n[id]; return n })
+  }
+
+  async function handleSave() {
+    setSaving(true)
+    setSavedMsg(false)
+    const results = await Promise.allSettled(
+      dirtyIds.map(id =>
+        stockService.updateStock(id, { stock: overrides[id] })
+          .then(() => ({ id, ok: true }))
+          .catch(err => ({ id, ok: false, error: err.message }))
+      )
+    )
+    const newErrors = {}
+    const successIds = []
+    for (const r of results) {
+      const { id, ok, error } = r.value
+      if (ok) successIds.push(id)
+      else newErrors[id] = error
+    }
+    setOverrides(prev => {
+      const n = { ...prev }
+      successIds.forEach(id => delete n[id])
+      return n
+    })
+    setSaveErrors(newErrors)
+    setSaving(false)
+    if (Object.keys(newErrors).length === 0) {
+      setSavedMsg(true)
+      setTimeout(() => setSavedMsg(false), 2000)
+      setLoading(true)
+      stockService.listLowStock()
+        .then(data => {
+          const items = Array.isArray(data) ? data : (data?.products ?? [])
+          setProducts(items)
+          setOverrides({})
+        })
+        .catch(() => {})
+        .finally(() => setLoading(false))
+    }
+  }
+
   return (
-    <div className="min-h-screen bg-navy-deep">
+    <div className="min-h-screen bg-navy-deep pb-28">
       <div className="sticky top-0 z-20 glass border-b border-white/6 px-4 py-3">
         <div className="max-w-lg mx-auto flex items-center gap-3">
           <Link
@@ -153,7 +174,35 @@ export function StockBasPage() {
           </div>
         ) : (
           <div className="glass rounded-3xl overflow-hidden">
-            {products.map(p => <StockRow key={p.id} product={p} />)}
+            {products.map(p => (
+              <StockRow
+                key={p.id}
+                product={p}
+                qty={overrides[p.id] ?? p.stock}
+                onChange={handleChange}
+              />
+            ))}
+          </div>
+        )}
+
+        {Object.keys(saveErrors).length > 0 && (
+          <div className="glass rounded-2xl px-4 py-3 border border-red-500/30">
+            <p className="text-label text-red-400 font-semibold mb-1">
+              Erreur sur {Object.keys(saveErrors).length} produit(s)
+            </p>
+            {Object.entries(saveErrors).map(([id, msg]) => {
+              const p = products.find(p => p.id === id)
+              return (
+                <p key={id} className="text-micro text-red-400/80">{p?.name ?? id} : {msg}</p>
+              )
+            })}
+          </div>
+        )}
+
+        {savedMsg && (
+          <div className="flex items-center gap-2 justify-center py-2">
+            <Check size={14} className="text-emerald-400" />
+            <span className="text-label text-emerald-400">Stock mis à jour</span>
           </div>
         )}
 
@@ -164,6 +213,21 @@ export function StockBasPage() {
           Comment ajouter du stock via WhatsApp ?
         </Link>
       </div>
+
+      {hasDirty && (
+        <div className="fixed bottom-0 left-0 right-0 z-30 p-4 glass border-t border-white/8">
+          <div className="max-w-lg mx-auto">
+            <button
+              onClick={handleSave}
+              disabled={saving}
+              className="w-full py-3.5 rounded-2xl bg-orange text-white font-semibold text-body flex items-center justify-center gap-2 hover:bg-orange-hi active:scale-[0.98] transition-all disabled:opacity-60"
+            >
+              {saving ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} />}
+              {saving ? 'Enregistrement…' : `Enregistrer (${dirtyIds.length})`}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

@@ -1,4 +1,11 @@
 import { API_BASE } from '@/lib/constants'
+import { useAuthStore } from '@/store/authStore'
+
+const SUBSCRIPTION_CODES = new Set([
+  'SUBSCRIPTION_INACTIVE',
+  'SUBSCRIPTION_EXPIRED',
+  'NO_SUBSCRIPTION',
+])
 
 function getToken() {
   return localStorage.getItem('waka_token')
@@ -24,6 +31,11 @@ async function request(path, options = {}) {
     const err = new Error(message)
     err.status = res.status
     err.code   = payload.code ?? null
+
+    if (res.status === 403 && SUBSCRIPTION_CODES.has(payload.code)) {
+      useAuthStore.getState().triggerPaywall()
+    }
+
     throw err
   }
 

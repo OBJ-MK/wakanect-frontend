@@ -59,10 +59,9 @@ import { NotFoundPage } from '@/pages/public/NotFoundPage'
 
 // Abonnement
 import { FormulasPage } from '@/pages/abonnement/FormulasPage'
-import { AbonnementPaiementPage } from '@/pages/abonnement/AbonnementPaiementPage'
 import { EssaiTerminePage } from '@/pages/abonnement/EssaiTerminePage'
 import { AbonnementSuccesPage } from '@/pages/abonnement/AbonnementSuccesPage'
-import { AbonnementEchecPage } from '@/pages/abonnement/AbonnementEchecPage'
+import { AbonnementAnnulePage } from '@/pages/abonnement/AbonnementAnnulePage'
 
 export const router = createBrowserRouter([
   // Onboarding (before auth)
@@ -133,10 +132,6 @@ export const router = createBrowserRouter([
     element: <FormulasPage />,
   },
   {
-    path: '/abonnement/paiement',
-    element: <AbonnementPaiementPage />,
-  },
-  {
     path: '/abonnement/essai-termine',
     element: <EssaiTerminePage />,
   },
@@ -145,8 +140,8 @@ export const router = createBrowserRouter([
     element: <AbonnementSuccesPage />,
   },
   {
-    path: '/abonnement/echec',
-    element: <AbonnementEchecPage />,
+    path: '/abonnement/annule',
+    element: <AbonnementAnnulePage />,
   },
 
   // Public boutique (no auth)

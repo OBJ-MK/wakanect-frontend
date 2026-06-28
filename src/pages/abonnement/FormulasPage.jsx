@@ -1,15 +1,15 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Check, Zap, Star, Crown, ChevronLeft, RefreshCw } from 'lucide-react'
+import { Check, Zap, Star, Crown, ChevronLeft, RefreshCw, Loader2, Clock } from 'lucide-react'
 import { WakanectLogo } from '@/components/brand/WakanectLogo'
 import { usePlans } from '@/hooks/usePlans'
+import { subscriptionService } from '@/services/subscriptionService'
 import { cn } from '@/lib/utils'
 
-// Métadonnées visuelles par plan — uniquement icône et CTA, jamais de prix.
 const PLAN_VISUAL = {
-  free:    { icon: Zap,   iconBg: 'bg-white/10',   iconColor: 'text-white/60', cta: 'Commencer gratuitement' },
-  pro:     { icon: Star,  iconBg: 'bg-orange/15',  iconColor: 'text-orange',   cta: 'Choisir Pro' },
-  premium: { icon: Crown, iconBg: 'bg-amber/15',   iconColor: 'text-amber',    cta: 'Choisir Premium' },
+  free:    { icon: Zap,   iconBg: 'bg-white/10',  iconColor: 'text-white/60', cta: 'Commencer gratuitement' },
+  pro:     { icon: Star,  iconBg: 'bg-orange/15', iconColor: 'text-orange',   cta: 'Choisir Pro' },
+  premium: { icon: Crown, iconBg: 'bg-amber/15',  iconColor: 'text-amber',    cta: 'Choisir Premium' },
 }
 
 const PERIOD_KEYS = [
@@ -19,11 +19,13 @@ const PERIOD_KEYS = [
   { key: 'year',     label: 'An' },
 ]
 
-function PlanCard({ plan, period, onSelect }) {
-  const visual   = PLAN_VISUAL[plan.key] ?? PLAN_VISUAL.pro
-  const Icon     = visual.icon
-  const price    = plan.prices[period] ?? 0
+function PlanCard({ plan, period, currentPlan, checkingOut, onSelect }) {
+  const visual      = PLAN_VISUAL[plan.key] ?? PLAN_VISUAL.pro
+  const Icon        = visual.icon
+  const price       = plan.prices[period] ?? 0
   const periodLabel = PERIOD_KEYS.find(p => p.key === period)?.label?.toLowerCase() ?? 'mois'
+  const isCurrent   = plan.key === currentPlan
+  const isLoading   = checkingOut === plan.key
 
   return (
     <div className={cn(
@@ -67,17 +69,21 @@ function PlanCard({ plan, period, onSelect }) {
       </div>
 
       <button
-        onClick={() => onSelect(plan, price)}
+        onClick={() => onSelect(plan)}
+        disabled={isCurrent || !!checkingOut}
         className={cn(
-          'w-full py-3 rounded-2xl font-semibold text-body transition-all active:scale-[0.98]',
-          plan.highlight
-            ? 'bg-orange text-white hover:bg-orange-hi shadow-orange-glow'
-            : price === 0
-              ? 'bg-white/10 text-white hover:bg-white/18'
-              : 'glass border border-white/20 text-white hover:bg-white/10',
+          'w-full py-3 rounded-2xl font-semibold text-body transition-all active:scale-[0.98] flex items-center justify-center gap-2',
+          isCurrent
+            ? 'bg-white/5 text-white/30 cursor-default'
+            : plan.highlight
+              ? 'bg-orange text-white hover:bg-orange-hi shadow-orange-glow disabled:opacity-60'
+              : price === 0
+                ? 'bg-white/10 text-white hover:bg-white/18 disabled:opacity-60'
+                : 'glass border border-white/20 text-white hover:bg-white/10 disabled:opacity-60',
         )}
       >
-        {visual.cta}
+        {isLoading && <Loader2 size={16} className="animate-spin" />}
+        {isCurrent ? 'Formule actuelle' : visual.cta}
       </button>
     </div>
   )
@@ -121,21 +127,45 @@ function LoadingSkeleton() {
 }
 
 export function FormulasPage() {
-  const [period, setPeriod] = useState('month')
-  const navigate = useNavigate()
+  const [period, setPeriod]         = useState('month')
+  const [checkingOut, setCheckingOut] = useState(null)
+  const [checkoutError, setCheckoutError] = useState(null)
+  const [sub, setSub]               = useState(null)
+  const navigate                    = useNavigate()
   const { data, loading, error, refetch } = usePlans()
 
-  function selectPlan(plan, price) {
-    if (price === 0) {
+  useEffect(() => {
+    if (!localStorage.getItem('waka_token')) return
+    subscriptionService.getSubscription()
+      .then(setSub)
+      .catch(() => {})
+  }, [])
+
+  const trialDaysLeft = (() => {
+    if (sub?.status !== 'essai' || !sub?.endsAt) return null
+    const diff = new Date(sub.endsAt) - Date.now()
+    return Math.max(0, Math.ceil(diff / 86_400_000))
+  })()
+
+  const currentPlan = sub?.plan ?? null
+
+  async function selectPlan(plan) {
+    if (plan.prices[period] === 0) {
       navigate('/app')
-    } else {
-      navigate('/abonnement/paiement', {
-        state: { plan: plan.key, period, price, planName: plan.name },
-      })
+      return
+    }
+    setCheckoutError(null)
+    setCheckingOut(plan.key)
+    try {
+      const { url } = await subscriptionService.createCheckout({ plan: plan.key, period })
+      window.location.href = url
+    } catch (err) {
+      setCheckoutError(err.message ?? 'Erreur lors de la redirection vers le paiement')
+      setCheckingOut(null)
     }
   }
 
-  const trialDays = data?.plans?.find(p => p.key === 'free')?.features?.[0]?.match(/(\d+) jours/)?.[1] ?? '14'
+  const trialDays = data?.trial?.days ?? 14
 
   return (
     <div className="min-h-dvh bg-navy-deep">
@@ -161,18 +191,37 @@ export function FormulasPage() {
           </div>
         </div>
 
-        {/* Trial banner */}
-        <div className="glass rounded-3xl px-4 py-3 border border-emerald/20 flex items-center gap-3">
-          <div className="w-8 h-8 rounded-xl bg-emerald/15 flex items-center justify-center">
-            <Check size={16} className="text-emerald" />
+        {/* Bandeau essai si statut trial */}
+        {trialDaysLeft !== null ? (
+          <div className="glass rounded-3xl px-4 py-3 border border-amber/20 flex items-center gap-3">
+            <div className="w-8 h-8 rounded-xl bg-amber/15 flex items-center justify-center shrink-0">
+              <Clock size={16} className="text-amber" />
+            </div>
+            <p className="text-label text-white/70 flex-1">
+              <span className="text-amber font-semibold">Essai · {trialDaysLeft} jour{trialDaysLeft !== 1 ? 's' : ''} restant{trialDaysLeft !== 1 ? 's' : ''}</span>
+              {' '}— abonnez-vous pour continuer sans interruption
+            </p>
           </div>
-          <p className="text-label text-white/70 flex-1">
-            <span className="text-emerald font-semibold">{trialDays} jours d'essai gratuit</span>
-            {' '}— toutes fonctionnalités débloquées
-          </p>
-        </div>
+        ) : (
+          <div className="glass rounded-3xl px-4 py-3 border border-emerald/20 flex items-center gap-3">
+            <div className="w-8 h-8 rounded-xl bg-emerald/15 flex items-center justify-center shrink-0">
+              <Check size={16} className="text-emerald" />
+            </div>
+            <p className="text-label text-white/70 flex-1">
+              <span className="text-emerald font-semibold">{trialDays} jours d'essai gratuit</span>
+              {' '}— toutes fonctionnalités débloquées
+            </p>
+          </div>
+        )}
 
-        {/* Error */}
+        {/* Checkout error */}
+        {checkoutError && (
+          <div className="glass rounded-2xl px-4 py-3 border border-red-500/20">
+            <p className="text-label text-red-400 text-center">{checkoutError}</p>
+          </div>
+        )}
+
+        {/* Error plans */}
         {error && (
           <div className="glass rounded-3xl p-5 border border-red-500/20 flex flex-col items-center gap-3 text-center">
             <p className="text-label text-white/60">Impossible de charger les formules</p>
@@ -198,21 +247,19 @@ export function FormulasPage() {
         {/* Plans */}
         {loading && <LoadingSkeleton />}
         {!loading && !error && (
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-4 pb-6">
             {(data?.plans ?? []).map(plan => (
               <PlanCard
                 key={plan.key}
                 plan={plan}
                 period={period}
+                currentPlan={currentPlan}
+                checkingOut={checkingOut}
                 onSelect={selectPlan}
               />
             ))}
           </div>
         )}
-
-        <p className="text-micro text-white/25 text-center pb-4">
-          Les prix sont en FCFA, détectés automatiquement selon votre pays ({data?.country ?? '…'}).
-        </p>
       </div>
     </div>
   )

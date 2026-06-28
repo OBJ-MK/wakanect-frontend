@@ -7,6 +7,7 @@ export const useAuthStore = create(
       token: null,
       merchant: null,
       isAuthenticated: false,
+      paywallPending: false,
 
       login: (token, merchant) => set({ token, merchant, isAuthenticated: true }),
       logout: () => {
@@ -14,6 +15,8 @@ export const useAuthStore = create(
         set({ token: null, merchant: null, isAuthenticated: false })
       },
       setMerchant: (merchant) => set({ merchant }),
+      triggerPaywall: () => set({ paywallPending: true }),
+      clearPaywall:   () => set({ paywallPending: false }),
     }),
     {
       name: 'waka-auth',

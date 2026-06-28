@@ -50,11 +50,22 @@
   padding-inline: clamp(1.25rem, 5vw, 4rem);
 }
 
+/* Spécificité (0,2,0) — suffit en dark mode où aucun override globals.css ne s'applique. */
 .landing-root .glass {
   background: rgba(255, 248, 244, 0.045);
   border: 1px solid rgba(255, 248, 244, 0.1);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
+}
+
+/* Spécificité (0,4,0) — nécessaire pour battre :root:not(.dark) .glass (0,3,0) de globals.css
+   en mode clair. Isole TOUS les éléments glass de la landing d'un coup, sans patch par composant. */
+:root:not(.dark) .landing-root .glass {
+  background: rgba(255, 248, 244, 0.045);
+  border: 1px solid rgba(255, 248, 244, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: none;
 }
 
 .landing-root .eyebrow {

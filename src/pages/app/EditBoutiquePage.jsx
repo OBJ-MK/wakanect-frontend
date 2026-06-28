@@ -22,7 +22,7 @@ export function EditBoutiquePage() {
   })
   const [saving, setSaving]           = useState(false)
   const [error, setError]             = useState(null)
-  const [logoPreview, setLogoPreview] = useState(merchant?.logoUrl ?? null)
+  const [logoPreview, setLogoPreview] = useState(merchant?.logo_url ?? null)
   const [logoUploading, setLogoUploading] = useState(false)
 
   const set = (key) => (e) => {
@@ -103,7 +103,7 @@ export function EditBoutiquePage() {
                     try {
                       const { logoUrl } = await merchantService.uploadLogo(f)
                       setLogoPreview(logoUrl)
-                      setMerchant({ ...merchant, logoUrl })
+                      setMerchant({ ...merchant, logo_url: logoUrl })
                     } catch (err) {
                       setError(err.message)
                     } finally {

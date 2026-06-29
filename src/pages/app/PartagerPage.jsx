@@ -1,30 +1,15 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ChevronLeft, Copy, Check, MessageCircle, Share2 } from 'lucide-react'
+import { QRCodeSVG } from 'qrcode.react'
 import { useAuthStore } from '@/store/authStore'
 import { buildWhatsAppLink } from '@/lib/utils'
 import { PUBLIC_BASE } from '@/lib/constants'
 
-function QRPlaceholder({ url }) {
+function QRSkeleton() {
   return (
-    <div className="w-44 h-44 rounded-3xl bg-white p-3 flex items-center justify-center mx-auto">
-      {/* Simple SVG QR placeholder pattern */}
-      <svg viewBox="0 0 100 100" className="w-full h-full" aria-label="QR code de la boutique">
-        <rect width="100" height="100" fill="white" />
-        {/* Top-left finder */}
-        <rect x="5" y="5" width="30" height="30" fill="none" stroke="#0F1C3F" strokeWidth="5" rx="2" />
-        <rect x="13" y="13" width="14" height="14" fill="#0F1C3F" rx="1" />
-        {/* Top-right finder */}
-        <rect x="65" y="5" width="30" height="30" fill="none" stroke="#0F1C3F" strokeWidth="5" rx="2" />
-        <rect x="73" y="13" width="14" height="14" fill="#0F1C3F" rx="1" />
-        {/* Bottom-left finder */}
-        <rect x="5" y="65" width="30" height="30" fill="none" stroke="#0F1C3F" strokeWidth="5" rx="2" />
-        <rect x="13" y="73" width="14" height="14" fill="#0F1C3F" rx="1" />
-        {/* Data dots */}
-        {[44,50,56,44,56,50,44,56].map((x, i) => (
-          <rect key={i} x={x} y={i % 2 === 0 ? 44 : 50} width="6" height="6" fill="#0F1C3F" rx="1" />
-        ))}
-      </svg>
+    <div className="w-48 h-48 rounded-3xl bg-white/10 animate-pulse flex items-center justify-center mx-auto">
+      <span className="text-white/30 text-label">QR en attente…</span>
     </div>
   )
 }
@@ -78,7 +63,19 @@ export function PartagerPage() {
         <div className="glass rounded-4xl p-6 flex flex-col items-center gap-4">
           <div className="absolute top-0 left-0 right-0 h-0.5 gradient-thread opacity-60 rounded-t-4xl" />
           <p className="text-micro text-white/45 uppercase tracking-wider">QR code de votre boutique</p>
-          <QRPlaceholder url={boutiqueUrl} />
+          {merchant?.slug ? (
+            <div className="w-48 h-48 rounded-3xl bg-white p-3 flex items-center justify-center mx-auto">
+              <QRCodeSVG
+                value={boutiqueUrl}
+                size={168}
+                level="M"
+                fgColor="#0F1C3F"
+                bgColor="#ffffff"
+              />
+            </div>
+          ) : (
+            <QRSkeleton />
+          )}
           <div className="text-center">
             <p className="font-display font-bold text-h3 text-white">{shopName}</p>
             <p className="text-label text-white/45 mt-0.5">

@@ -15,3 +15,12 @@ createRoot(root).render(
     <App />
   </StrictMode>
 )
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').then(
+      (reg) => console.log('[SW] enregistré, scope:', reg.scope),
+      (err) => console.error('[SW] échec enregistrement:', err),
+    );
+  });
+}

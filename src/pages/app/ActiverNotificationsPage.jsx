@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { Bell } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -37,6 +37,27 @@ export function ActiverNotificationsPage() {
   const [enabled, setEnabled] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+
+  // Au montage : si déjà abonné, refléter l'état ET re-synchroniser le backend
+  // (filet de fiabilité si un POST /subscribe avait échoué une fois)
+  useEffect(() => {
+    let active = true
+    async function detecterAbonnementExistant() {
+      if (!('serviceWorker' in navigator) || !('PushManager' in window) || !('Notification' in window)) return
+      if (Notification.permission !== 'granted') return
+      try {
+        const reg = await navigator.serviceWorker.ready
+        const sub = await reg.pushManager.getSubscription()
+        if (active && sub) {
+          setEnabled(true)
+          // re-sync best-effort, idempotent (upsert backend par endpoint) ; ne touche jamais le toggle
+          api.post('/api/push/subscribe', { subscription: sub }).catch(() => {})
+        }
+      } catch (e) { /* noop */ }
+    }
+    detecterAbonnementExistant()
+    return () => { active = false }
+  }, [])
 
   async function handleActivate() {
     setError('')

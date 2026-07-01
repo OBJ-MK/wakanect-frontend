@@ -46,22 +46,31 @@ export function CheckoutPage() {
     setErrors({})
     setLoading(true)
     try {
+      // Contrat back POST /api/orders/public :
+      // { slug, customer: { name, phone, address, notes }, items: [{ productId, quantity }] }
+      // (prix et total recalculés côté back)
+      const noteParts = [
+        `Réception : ${form.delivery_mode}`,
+        `Paiement : ${form.payment_method}`,
+      ]
+      if (form.note.trim()) noteParts.push(form.note.trim())
+      const colorParts = cart
+        .filter(i => i.selectedColor)
+        .map(i => `${i.name} : ${i.selectedColor}`)
+      if (colorParts.length) noteParts.push(`Couleurs — ${colorParts.join(', ')}`)
+
       await catalogueService.createOrder({
         slug,
-        customer_name: form.name,
-        customer_phone: form.phone,
-        delivery_mode: form.delivery_mode,
-        delivery_address: form.delivery_mode === 'Livraison' ? form.address : null,
-        note: form.note || null,
-        payment_method: form.payment_method,
+        customer: {
+          name: form.name.trim(),
+          phone: form.phone.trim(),
+          address: form.delivery_mode === 'Livraison' ? form.address.trim() : '',
+          notes: noteParts.join(' · '),
+        },
         items: cart.map(i => ({
-          product_id: i.id,
-          name: i.name,
-          price: i.price,
+          productId: i.id,
           quantity: i.quantity,
-          color: i.selectedColor,
         })),
-        total,
       })
       clearCart()
       navigate(`/boutique/${slug}/confirmation`)

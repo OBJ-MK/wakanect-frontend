@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { TrendingUp, Users, AlertTriangle, Percent } from 'lucide-react'
+import { TrendingUp, Users, AlertTriangle, Percent, Wallet } from 'lucide-react'
 import { adminApi } from '@/services/adminApi'
 import { useAdminQuery } from '@/hooks/useAdminQuery'
 import { KpiCard } from '@/components/admin/KpiCard'
@@ -69,14 +69,21 @@ export default function AbonnementsAdminPage() {
 
       {/* KPIs */}
       {loading ? (
-        <KpiSkeleton count={4} />
+        <KpiSkeleton count={5} />
       ) : (
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
+          <KpiCard
+            label="Revenu encaissé"
+            value={fmtCurrency(data?.revenueTotal)}
+            sub="Paiements confirmés"
+            icon={Wallet}
+            variant="accent"
+          />
           <KpiCard
             label="MRR"
             value={fmtCurrency(data?.mrr)}
+            sub="Équivalent mensuel"
             icon={TrendingUp}
-            variant="accent"
           />
           <KpiCard
             label="Essais actifs"

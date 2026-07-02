@@ -7,6 +7,8 @@ import {
 } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { useAuthStore } from '@/store/authStore'
+import { usePermissions } from '@/hooks/usePermissions'
+import { PERM } from '@/lib/permissions'
 import { getInitials } from '@/lib/utils'
 import { PUBLIC_BASE } from '@/lib/constants'
 
@@ -53,6 +55,7 @@ function SettingRow({ icon: Icon, label, description, action, danger = false, to
 export function ProfilePage() {
   const { handleLogout } = useAuth()
   const { merchant } = useAuthStore()
+  const { can } = usePermissions()
   const [dark, toggleDark] = useDarkMode()
 
   const boutiqueUrl = merchant?.slug
@@ -95,13 +98,15 @@ export function ProfilePage() {
         {/* Boutique */}
         <div className="glass rounded-3xl overflow-hidden">
           <p className="text-micro text-white/40 uppercase tracking-wider px-4 pt-4 pb-2">Boutique</p>
-          <SettingRow
-            icon={Store}
-            label="Informations boutique"
-            description="Logo, nom, lien, numéro, adresse"
-            to="/app/profil/boutique"
-            action={<ChevronRight size={16} className="text-white/30 shrink-0" />}
-          />
+          {can(PERM.SHOP_MANAGE) && (
+            <SettingRow
+              icon={Store}
+              label="Informations boutique"
+              description="Logo, nom, lien, numéro, adresse"
+              to="/app/profil/boutique"
+              action={<ChevronRight size={16} className="text-white/30 shrink-0" />}
+            />
+          )}
           <SettingRow
             icon={Share2}
             label="Partager ma boutique"
@@ -116,26 +121,30 @@ export function ProfilePage() {
             to="/app/profil/comment-ajouter"
             action={<ChevronRight size={16} className="text-white/30 shrink-0" />}
           />
-          <SettingRow
-            icon={Users}
-            label="Mon équipe"
-            description="Employés · accès & permissions"
-            to="/app/equipe"
-            action={<ChevronRight size={16} className="text-white/30 shrink-0" />}
-          />
+          {can(PERM.TEAM_MANAGE) && (
+            <SettingRow
+              icon={Users}
+              label="Mon équipe"
+              description="Employés · accès & permissions"
+              to="/app/equipe"
+              action={<ChevronRight size={16} className="text-white/30 shrink-0" />}
+            />
+          )}
         </div>
 
         {/* Abonnement */}
-        <div className="glass rounded-3xl overflow-hidden">
-          <p className="text-micro text-white/40 uppercase tracking-wider px-4 pt-4 pb-2">Abonnement</p>
-          <SettingRow
-            icon={CreditCard}
-            label="Mon abonnement"
-            description="Plan actuel · Facturation"
-            to="/app/profil/abonnement"
-            action={<ChevronRight size={16} className="text-white/30 shrink-0" />}
-          />
-        </div>
+        {can(PERM.BILLING_MANAGE) && (
+          <div className="glass rounded-3xl overflow-hidden">
+            <p className="text-micro text-white/40 uppercase tracking-wider px-4 pt-4 pb-2">Abonnement</p>
+            <SettingRow
+              icon={CreditCard}
+              label="Mon abonnement"
+              description="Plan actuel · Facturation"
+              to="/app/profil/abonnement"
+              action={<ChevronRight size={16} className="text-white/30 shrink-0" />}
+            />
+          </div>
+        )}
 
         {/* Preferences */}
         <div className="glass rounded-3xl overflow-hidden">

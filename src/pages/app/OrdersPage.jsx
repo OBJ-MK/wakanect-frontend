@@ -7,6 +7,8 @@ import { PaymentBadge } from '@/components/features/orders/PaymentBadge'
 import { formatFCFA, formatRelativeTime } from '@/lib/formatters'
 import { FilterBar } from '@/components/features/catalogue/FilterBar'
 import { Pagination } from '@/components/ui/Pagination'
+import { usePermissions } from '@/hooks/usePermissions'
+import { PERM } from '@/lib/permissions'
 
 const STATUS_FILTERS = ['Toutes', 'Nouvelle', 'Confirmée', 'Livrée', 'Annulée']
 
@@ -49,6 +51,7 @@ export function OrdersPage() {
 
   const [selected, setSelected]       = useState(null)
   const [statusUpdating, setStatusUpdating] = useState(false)
+  const { ensure } = usePermissions()
 
   const selectedOrder = selected ? (fetchedOrders.find(o => o.id === selected) ?? null) : null
 
@@ -66,6 +69,11 @@ export function OrdersPage() {
 
   async function handleStatusUpdate(status) {
     if (!selected) return
+    // Blocage dès le clic : annulation vs confirmation/livraison
+    const perm = status === 'Annulée' || status === 'cancelled'
+      ? PERM.ORDERS_CANCEL
+      : PERM.ORDERS_CONFIRM
+    if (!ensure(perm)) return
     setStatusUpdating(true)
     try {
       await changeStatus(selected, status)
@@ -76,6 +84,7 @@ export function OrdersPage() {
 
   async function handleMarkPaid() {
     if (!selected) return
+    if (!ensure(PERM.ORDERS_MARK_PAID)) return
     setStatusUpdating(true)
     try {
       await markPaid(selected)

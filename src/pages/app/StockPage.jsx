@@ -5,10 +5,13 @@ import { formatFCFA } from '@/lib/formatters'
 import { Input } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
 import { cn } from '@/lib/utils'
+import { usePermissions } from '@/hooks/usePermissions'
+import { PERM } from '@/lib/permissions'
 
 const MOCK_PRODUCTS = []
 
 function StockRow({ product, onSave }) {
+  const { ensure } = usePermissions()
   const [editing, setEditing] = useState(false)
   const [qty, setQty] = useState(String(product.stock))
   const [price, setPrice] = useState(String(product.price))
@@ -98,7 +101,8 @@ function StockRow({ product, onSave }) {
 
       {!editing && (
         <button
-          onClick={() => setEditing(true)}
+          // Blocage dès le clic si l'employé n'a pas stock.edit
+          onClick={() => ensure(PERM.STOCK_EDIT) && setEditing(true)}
           className="p-2 rounded-xl text-white/40 hover:text-white hover:bg-white/8 transition-colors shrink-0"
           aria-label="Modifier"
         >

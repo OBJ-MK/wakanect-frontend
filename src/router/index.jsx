@@ -5,6 +5,8 @@ import { AppShell } from '@/components/layout/AppShell'
 import { PublicLayout } from '@/components/layout/PublicLayout'
 import { ProtectedRoute } from './ProtectedRoute'
 import { AdminRoute } from './AdminRoute'
+import { RequirePermission } from './RequirePermission'
+import { PERM } from '@/lib/permissions'
 
 const AdminApp = lazy(() => import('@/pages/admin/AdminApp'))
 const LandingPage = lazy(() => import('@/landing/LandingPage'))
@@ -105,22 +107,22 @@ export const router = createBrowserRouter([
           { path: 'commandes/:id', element: <OrdersPage /> },
           { path: 'stock', element: <StockPage /> },
           { path: 'stock-bas', element: <StockBasPage /> },
-          { path: 'validation', element: <ValidationPage /> },
+          { path: 'validation', element: <RequirePermission perm={PERM.PRODUCTS_PUBLISH}><ValidationPage /></RequirePermission> },
           { path: 'notifications', element: <NotificationsPage /> },
           { path: 'catalogue', element: <CatalogueMarchandPage /> },
-          { path: 'catalogue/ajouter', element: <ProductFormPage /> },
-          { path: 'catalogue/:id/modifier', element: <ProductFormPage /> },
+          { path: 'catalogue/ajouter', element: <RequirePermission perm={PERM.PRODUCTS_EDIT}><ProductFormPage /></RequirePermission> },
+          { path: 'catalogue/:id/modifier', element: <RequirePermission perm={PERM.PRODUCTS_EDIT}><ProductFormPage /></RequirePermission> },
           { path: 'profil', element: <ProfilePage /> },
-          { path: 'profil/boutique', element: <EditBoutiquePage /> },
+          { path: 'profil/boutique', element: <RequirePermission perm={PERM.SHOP_MANAGE}><EditBoutiquePage /></RequirePermission> },
           { path: 'profil/partager', element: <PartagerPage /> },
           { path: 'profil/aide', element: <AidePage /> },
           { path: 'profil/comment-ajouter', element: <CommentAjouterPage /> },
-          { path: 'profil/abonnement', element: <MonAbonnementPage /> },
+          { path: 'profil/abonnement', element: <RequirePermission perm={PERM.BILLING_MANAGE}><MonAbonnementPage /></RequirePermission> },
           { path: 'profil/installer', element: <InstallerAppPage /> },
           { path: 'notifications/activer', element: <ActiverNotificationsPage /> },
-          { path: 'equipe', element: <MonEquipePage /> },
-          { path: 'equipe/ajouter', element: <AjouterEmployePage /> },
-          { path: 'equipe/:id', element: <FicheEmployePage /> },
+          { path: 'equipe', element: <RequirePermission perm={PERM.TEAM_MANAGE}><MonEquipePage /></RequirePermission> },
+          { path: 'equipe/ajouter', element: <RequirePermission perm={PERM.TEAM_MANAGE}><AjouterEmployePage /></RequirePermission> },
+          { path: 'equipe/:id', element: <RequirePermission perm={PERM.TEAM_MANAGE}><FicheEmployePage /></RequirePermission> },
         ],
       },
     ],

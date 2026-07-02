@@ -29,7 +29,7 @@ export function Button({
   return (
     <button
       className={cn(
-        'inline-flex items-center justify-center font-display font-semibold',
+        'inline-flex items-center justify-center font-display font-semibold py-3',
         'transition-all duration-150 focus-visible:ring-2 focus-visible:ring-orange focus-visible:ring-offset-2',
         'disabled:opacity-50 disabled:pointer-events-none select-none tap-highlight-none',
         variants[variant],

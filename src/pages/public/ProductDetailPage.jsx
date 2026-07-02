@@ -1,10 +1,9 @@
 import { useState } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
-import { ChevronLeft, ChevronRight, MessageCircle, ShoppingBag, Package, Minus, Plus } from 'lucide-react'
+import { ChevronLeft, ChevronRight, ShoppingBag, Package, Minus, Plus } from 'lucide-react'
 import { useTenant } from '@/hooks/useTenant'
 import { useCatalogueStore } from '@/store/catalogueStore'
 import { formatFCFA } from '@/lib/formatters'
-import { buildWhatsAppLink } from '@/lib/utils'
 import { cn } from '@/lib/utils'
 
 
@@ -78,7 +77,6 @@ export function ProductDetailPage() {
   const addToCartStore = useCatalogueStore(s => s.addToCart)
 
   const product = boutique?.products?.find(p => p.id === id) ?? null
-  const shopPhone = boutique?.whatsapp_number ?? ''
 
   const [selectedColor, setSelectedColor] = useState(null)
   const [selectedSize, setSelectedSize] = useState(null)
@@ -137,10 +135,6 @@ export function ProductDetailPage() {
   }
 
   const colorAvailable = (color) => product.colors?.includes(color)
-
-  function buildWaMsg(color) {
-    return `Bonjour, je souhaite commander "${product.name}"${color ? ` en ${color}` : ''}. Est-ce disponible ?`
-  }
 
   function addToCart() {
     addToCartStore(product, activeColor, qty)
@@ -213,19 +207,6 @@ export function ProductDetailPage() {
                 </button>
               ))}
             </div>
-
-            {/* Ask for unavailable color on WA */}
-            {shopPhone && (
-              <a
-                href={buildWhatsAppLink(shopPhone, buildWaMsg(null))}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 mt-3 text-label text-wa-green hover:opacity-75 transition-opacity"
-              >
-                <MessageCircle size={14} />
-                Demander une autre couleur sur WhatsApp
-              </a>
-            )}
           </div>
         )}
 

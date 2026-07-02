@@ -1,14 +1,21 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import { stockService } from '@/services/stockService'
+import { useListCacheStore, buildListKey } from '@/store/listCacheStore'
 
-export function useStock({ category = '', search = '' } = {}) {
-  const [products, setProducts]       = useState([])
-  const [total, setTotal]             = useState(0)
-  const [page, setPage]               = useState(1)
-  const [hasMore, setHasMore]         = useState(false)
-  const [loading, setLoading]         = useState(true)
-  const [loadingMore, setLoadingMore] = useState(false)
-  const [error, setError]             = useState(null)
+export function useStock({
+  category = '',
+  search = '',
+  priceMin = '',
+  priceMax = '',
+  sort = '',
+  page = 1,
+  limit = 50,
+} = {}) {
+  const [products, setProducts] = useState([])
+  const [total, setTotal]       = useState(0)
+  const [pages, setPages]       = useState(1)
+  const [loading, setLoading]   = useState(true)
+  const [error, setError]       = useState(null)
 
   // Debounce search 350ms (Décision 2)
   const [debouncedSearch, setDebouncedSearch] = useState(search)
@@ -17,47 +24,51 @@ export function useStock({ category = '', search = '' } = {}) {
     return () => clearTimeout(timer)
   }, [search])
 
-  useEffect(() => {
-    setLoading(true)
-    setProducts([])
-    setPage(1)
-    setHasMore(false)
+  // Clé de cache : filtres + page — une vue filtrée n'écrase jamais la vue non filtrée
+  const cacheKey = buildListKey('products', {
+    c: category, q: debouncedSearch, min: priceMin, max: priceMax, s: sort, l: limit, p: page,
+  })
 
-    stockService.list(1, { category, search: debouncedSearch })
+  useEffect(() => {
+    let cancelled = false
+
+    // Stale-while-revalidate : sert le cache immédiatement, revalide en arrière-plan
+    const cached = useListCacheStore.getState().getEntry(cacheKey)
+    if (cached) {
+      setProducts(cached.items)
+      setTotal(cached.total)
+      setPages(cached.pages)
+      setLoading(false)
+    } else {
+      setLoading(true)
+    }
+    setError(null)
+
+    stockService.list(page, { category, search: debouncedSearch, priceMin, priceMax, sort }, limit)
       .then(data => {
-        const items = Array.isArray(data) ? data : (data?.products ?? data?.rows ?? [])
-        const t = data?.total ?? items.length
+        if (cancelled) return
+        const items = data?.items ?? data?.products ?? data?.rows ?? []
+        const t  = data?.total ?? items.length
+        const pg = data?.pages ?? Math.max(1, Math.ceil(t / limit))
         setProducts(items)
         setTotal(t)
-        setHasMore(data?.hasMore ?? items.length < t)
-        setPage(1)
+        setPages(pg)
+        useListCacheStore.getState().setEntry(cacheKey, { items, total: t, pages: pg })
       })
-      .catch(e => setError(e.message))
-      .finally(() => setLoading(false))
-  }, [category, debouncedSearch])
+      .catch(e => { if (!cancelled && !cached) setError(e.message) })
+      .finally(() => { if (!cancelled) setLoading(false) })
 
-  const loadMore = useCallback(async () => {
-    if (loadingMore || !hasMore) return
-    const next = page + 1
-    setLoadingMore(true)
-    try {
-      const data = await stockService.list(next, { category, search: debouncedSearch })
-      const items = Array.isArray(data) ? data : (data?.products ?? data?.rows ?? [])
-      const newTotal = data?.total ?? total
-      setProducts(prev => [...prev, ...items])
-      setTotal(newTotal)
-      setHasMore(data?.hasMore ?? false)
-      setPage(next)
-    } catch { /* silent */ }
-    finally { setLoadingMore(false) }
-  }, [loadingMore, hasMore, page, total, category, debouncedSearch])
+    return () => { cancelled = true }
+  }, [cacheKey, page, limit, category, debouncedSearch, priceMin, priceMax, sort])
 
   async function updateStock(id, data) {
     await stockService.updateStock(id, data)
     setProducts(prev => prev.map(p => p.id === id ? { ...p, ...data } : p))
+    // Le stock a changé : invalide toutes les pages produits en cache
+    useListCacheStore.getState().clearPrefix('products|')
   }
 
-  return { products, total, hasMore, loadMore, loading, loadingMore, error, updateStock }
+  return { products, total, pages, loading, error, updateStock }
 }
 
 export function usePendingProducts() {

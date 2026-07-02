@@ -2,11 +2,14 @@ import { useState, useRef, useEffect } from 'react'
 import { MessageCircle } from 'lucide-react'
 import { useTenant } from '@/hooks/useTenant'
 import { ProductGrid } from '@/components/features/catalogue/ProductGrid'
-import { FilterChips } from '@/components/features/catalogue/FilterChips'
+import { FilterBar } from '@/components/features/catalogue/FilterBar'
+import { Pagination } from '@/components/ui/Pagination'
 import { CartFab } from '@/components/features/catalogue/CartFab'
 import { CartSheet } from './CartSheet'
 import { buildWhatsAppLink } from '@/lib/utils'
 import { WakanectLogo } from '@/components/brand/WakanectLogo'
+
+const DEFAULT_FILTERS = { search: '', category: 'Tout', priceMin: '', priceMax: '', sort: 'recent' }
 
 function ProductCardSkeleton() {
   return (
@@ -22,34 +25,39 @@ function ProductCardSkeleton() {
 }
 
 export function CataloguePage() {
-  const [activeCategory, setActiveCategory] = useState('Tout')
+  const [filters, setFilters] = useState(DEFAULT_FILTERS)
+  const [page, setPage] = useState(1)
   const [categoryOptions, setCategoryOptions] = useState(['Tout'])
   const [cartOpen, setCartOpen] = useState(false)
-  const sentinelRef = useRef(null)
+  const gridRef = useRef(null)
 
-  const { boutique, products, total, hasMore, loadMore, loading, loadingMore, error } =
-    useTenant({ category: activeCategory })
+  const isFiltered =
+    filters.search.trim() !== '' || filters.category !== 'Tout' ||
+    filters.priceMin !== '' || filters.priceMax !== ''
+
+  const { boutique, products, total, pages, loading, error } = useTenant({ ...filters, page })
 
   // Fige les catégories à partir du premier fetch sans filtre (Décision 1)
   useEffect(() => {
-    if (activeCategory === 'Tout' && products.length > 0) {
+    if (!isFiltered && page === 1 && products.length > 0 && categoryOptions.length === 1) {
       setCategoryOptions(['Tout', ...new Set(products.map(p => p.category).filter(Boolean))])
     }
   }, [products]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Infinite scroll
-  useEffect(() => {
-    const el = sentinelRef.current
-    if (!el || !hasMore) return
-    const obs = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting && !loadingMore) loadMore() },
-      { rootMargin: '300px' },
-    )
-    obs.observe(el)
-    return () => obs.disconnect()
-  }, [hasMore, loadMore, loadingMore])
+  // Tout changement de filtre repart en page 1 — uniquement setState → fetch → re-render
+  function updateFilters(partial) {
+    setFilters(prev => ({ ...prev, ...partial }))
+    setPage(1)
+  }
 
-  if (loading) {
+  // Scroll doux vers le haut de la GRILLE (pas de la page)
+  function changePage(n) {
+    setPage(n)
+    gridRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+
+  // Premier chargement : squelette pleine page tant que la boutique est inconnue
+  if (loading && !boutique) {
     return (
       <div className="min-h-screen bg-cream dark:bg-navy-deep">
         <div className="sticky top-0 z-20 bg-white/80 dark:bg-navy/80 backdrop-blur-glass border-b border-navy/8 dark:border-white/8 px-4 py-3">
@@ -67,7 +75,7 @@ export function CataloguePage() {
     )
   }
 
-  if (error) {
+  if (error && !boutique) {
     return (
       <div className="min-h-screen bg-cream flex flex-col items-center justify-center gap-4 px-4 text-center">
         <p className="text-h3 font-display font-bold text-navy">Boutique introuvable</p>
@@ -109,23 +117,27 @@ export function CataloguePage() {
       </div>
 
       <div className="max-w-lg mx-auto px-4 py-4 flex flex-col gap-4">
-        {/* Category filter — catégories figées au premier fetch */}
-        <FilterChips
+        {/* Barre de filtres — recherche débouncée, catégories figées, prix, tri */}
+        <FilterBar
+          filters={filters}
+          onChange={updateFilters}
+          onReset={() => { setFilters(DEFAULT_FILTERS); setPage(1) }}
           categories={categoryOptions}
-          active={activeCategory}
-          onChange={setActiveCategory}
+          total={loading ? null : total}
         />
 
-        {/* Product grid — résultats server-side, pas de filtrage client */}
-        <ProductGrid products={products} />
+        {/* Product grid — résultats server-side, seule la section liste se recharge */}
+        <div ref={gridRef} className="scroll-mt-24">
+          {loading ? (
+            <div className="grid grid-cols-2 gap-3">
+              {Array.from({ length: 6 }).map((_, i) => <ProductCardSkeleton key={i} />)}
+            </div>
+          ) : (
+            <ProductGrid products={products} />
+          )}
+        </div>
 
-        <div ref={sentinelRef} />
-
-        {loadingMore && (
-          <div className="flex justify-center py-4">
-            <div className="w-6 h-6 rounded-full border-2 border-orange/30 border-t-orange animate-spin" />
-          </div>
-        )}
+        <Pagination page={page} pages={pages} onChange={changePage} />
       </div>
 
       {/* Footer */}

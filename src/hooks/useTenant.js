@@ -1,103 +1,102 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import { catalogueService } from '@/services/catalogueService'
 import { useCatalogueStore } from '@/store/catalogueStore'
+import { useListCacheStore, buildListKey } from '@/store/listCacheStore'
 
-export function useTenant({ category = 'Tout', search = '' } = {}) {
+const PAGE_SIZE = 20
+
+export function useTenant({
+  category = 'Tout',
+  search = '',
+  priceMin = '',
+  priceMax = '',
+  sort = '',
+  page = 1,
+} = {}) {
   const { slug } = useParams()
   const setBoutique = useCatalogueStore(s => s.setBoutique)
-  const setBoutiqueCache = useCatalogueStore(s => s.setBoutiqueCache)
 
-  const isFiltered = category !== 'Tout' || search.trim() !== ''
+  // Debounce search 350ms (Décision 2)
+  const [debouncedSearch, setDebouncedSearch] = useState(search)
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(search), 350)
+    return () => clearTimeout(timer)
+  }, [search])
 
-  // Lazy initializers : lit le cache synchroniquement sur le premier rendu (seulement sans filtre).
+  // Clé de cache : slug + filtres + page — une vue filtrée n'écrase jamais le cache non filtré
+  const cacheKey = buildListKey('boutique', {
+    slug, c: category, q: debouncedSearch, min: priceMin, max: priceMax, s: sort, p: page,
+  })
+
+  // Lazy initializers : lit le cache synchroniquement sur le premier rendu
   const [boutiqueMeta, setBoutiqueMeta] = useState(
-    () => useCatalogueStore.getState().boutiqueCache[slug]?.boutique ?? null
+    () => useListCacheStore.getState().getEntry(cacheKey)?.boutique ?? null
   )
   const [products, setProducts] = useState(
-    () => isFiltered ? [] : (useCatalogueStore.getState().boutiqueCache[slug]?.products ?? [])
-  )
-  const [page, setPage] = useState(
-    () => isFiltered ? 1 : (useCatalogueStore.getState().boutiqueCache[slug]?.page ?? 1)
+    () => useListCacheStore.getState().getEntry(cacheKey)?.items ?? []
   )
   const [total, setTotal] = useState(
-    () => isFiltered ? 0 : (useCatalogueStore.getState().boutiqueCache[slug]?.total ?? 0)
+    () => useListCacheStore.getState().getEntry(cacheKey)?.total ?? 0
   )
-  const [hasMore, setHasMore] = useState(
-    () => isFiltered ? false : (useCatalogueStore.getState().boutiqueCache[slug]?.hasMore ?? false)
+  const [pages, setPages] = useState(
+    () => useListCacheStore.getState().getEntry(cacheKey)?.pages ?? 1
   )
   const [loading, setLoading] = useState(
-    () => isFiltered || !useCatalogueStore.getState().boutiqueCache[slug]
+    () => !useListCacheStore.getState().getEntry(cacheKey)
   )
-  const [loadingMore, setLoadingMore] = useState(false)
   const [error, setError] = useState(null)
 
   useEffect(() => {
     if (!slug) return
 
-    // Cache hit uniquement pour la vue sans filtre — évite qu'une vue filtrée écrase le cache
-    if (!isFiltered) {
-      const cached = useCatalogueStore.getState().boutiqueCache[slug]
-      if (cached) {
-        setBoutiqueMeta(cached.boutique)
-        setProducts(cached.products)
-        setTotal(cached.total)
-        setHasMore(cached.hasMore)
-        setPage(cached.page)
-        setBoutique({ ...cached.boutique, products: cached.products })
-        setLoading(false)
-        setError(null)
-        return
-      }
+    const cached = useListCacheStore.getState().getEntry(cacheKey)
+    if (cached) {
+      setBoutiqueMeta(cached.boutique)
+      setProducts(cached.items)
+      setTotal(cached.total)
+      setPages(cached.pages)
+      setBoutique({ ...cached.boutique, products: cached.items })
+      setLoading(false)
+      setError(null)
+      return
     }
 
+    let cancelled = false
     setLoading(true)
     setError(null)
-    setProducts([])
-    setPage(1)
-    setHasMore(false)
 
     const filters = {}
     if (category !== 'Tout') filters.category = category
-    if (search.trim()) filters.search = search.trim()
+    if (debouncedSearch.trim()) filters.search = debouncedSearch.trim()
+    if (priceMin !== '') filters.priceMin = priceMin
+    if (priceMax !== '') filters.priceMax = priceMax
+    if (sort) filters.sort = sort
 
-    catalogueService.getBoutique(slug, 1, 24, filters)
+    catalogueService.getBoutique(slug, page, PAGE_SIZE, filters)
       .then(data => {
-        const { products: p = [], total: t = 0, hasMore: h = false, ...shopMeta } = data
+        if (cancelled) return
+        const {
+          items, products: legacyProducts,
+          total: t = 0, pages: pg = 1,
+          page: _page, hasMore: _hasMore,
+          ...shopMeta
+        } = data
+        const p = items ?? legacyProducts ?? []
         setBoutiqueMeta(shopMeta)
         setProducts(p)
         setTotal(t)
-        setHasMore(h)
-        setPage(1)
+        setPages(pg)
         setBoutique({ ...shopMeta, products: p })
-        // N'écrit en cache que la vue sans filtre
-        if (!isFiltered) {
-          setBoutiqueCache(slug, { boutique: shopMeta, products: p, total: t, hasMore: h, page: 1 })
-        }
+        useListCacheStore.getState().setEntry(cacheKey, { boutique: shopMeta, items: p, total: t, pages: pg })
       })
-      .catch(e => setError(e.message))
-      .finally(() => setLoading(false))
-  }, [slug, category, search]) // eslint-disable-line react-hooks/exhaustive-deps
+      .catch(e => { if (!cancelled) setError(e.message) })
+      .finally(() => { if (!cancelled) setLoading(false) })
 
-  const loadMore = useCallback(async () => {
-    if (loadingMore || !hasMore || !slug) return
-    const nextPage = page + 1
-    setLoadingMore(true)
-    try {
-      const filters = {}
-      if (category !== 'Tout') filters.category = category
-      if (search.trim()) filters.search = search.trim()
-
-      const data = await catalogueService.getBoutique(slug, nextPage, 24, filters)
-      const newProds = data.products ?? []
-      setProducts(prev => [...prev, ...newProds])
-      setHasMore(data.hasMore ?? false)
-      setPage(nextPage)
-    } catch { /* ignore — scroll retry */ }
-    finally { setLoadingMore(false) }
-  }, [loadingMore, hasMore, slug, page, category, search])
+    return () => { cancelled = true }
+  }, [slug, cacheKey, page, category, debouncedSearch, priceMin, priceMax, sort]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const boutique = boutiqueMeta ? { ...boutiqueMeta, products } : null
 
-  return { boutique, products, total, hasMore, loadMore, loading, loadingMore, error, slug }
+  return { boutique, products, total, pages, loading, error, slug }
 }

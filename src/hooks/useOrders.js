@@ -1,68 +1,72 @@
 import { useState, useEffect, useCallback } from 'react'
 import { orderService } from '@/services/orderService'
 import { useOrderStore } from '@/store/orderStore'
+import { useListCacheStore, buildListKey } from '@/store/listCacheStore'
 
-export function useOrders() {
+const PAGE_SIZE = 20
+
+export function useOrders({ search = '', status = 'Toutes', sort = '', page = 1 } = {}) {
   const { orders, setOrders, updateOrderStatus, updateOrderPayment } = useOrderStore()
-  const [loading, setLoading]         = useState(true)
-  const [loadingMore, setLoadingMore] = useState(false)
-  const [hasMore, setHasMore]         = useState(false)
-  const [page, setPage]               = useState(1)
-  const [total, setTotal]             = useState(0)
-  const [error, setError]             = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [total, setTotal]     = useState(0)
+  const [pages, setPages]     = useState(1)
+  const [error, setError]     = useState(null)
+
+  // Debounce search 350ms (Décision 2)
+  const [debouncedSearch, setDebouncedSearch] = useState(search)
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(search), 350)
+    return () => clearTimeout(timer)
+  }, [search])
+
+  // Clé de cache : filtres + page — une vue filtrée n'écrase jamais la vue non filtrée
+  const cacheKey = buildListKey('orders', { st: status, q: debouncedSearch, s: sort, p: page })
+
+  const fetchList = useCallback(async ({ silent = false } = {}) => {
+    const cached = useListCacheStore.getState().getEntry(cacheKey)
+    if (cached && !silent) {
+      setOrders(cached.items)
+      setTotal(cached.total)
+      setPages(cached.pages)
+      setLoading(false)
+    } else if (!silent && !cached) {
+      setLoading(true)
+    }
+    try {
+      const data = await orderService.list(page, { status, search: debouncedSearch, sort }, PAGE_SIZE)
+      const items = data?.items ?? data?.orders ?? data?.rows ?? []
+      const t  = data?.total ?? items.length
+      const pg = data?.pages ?? Math.max(1, Math.ceil(t / PAGE_SIZE))
+      setOrders(items)
+      setTotal(t)
+      setPages(pg)
+      useListCacheStore.getState().setEntry(cacheKey, { items, total: t, pages: pg })
+      setError(null)
+    } catch (e) {
+      if (!silent && !useListCacheStore.getState().getEntry(cacheKey)) setError(e.message)
+    } finally {
+      setLoading(false)
+    }
+  }, [cacheKey, page, status, debouncedSearch, sort, setOrders])
 
   useEffect(() => {
-    let cancelled = false
-    orderService.list(1)
-      .then(data => {
-        if (cancelled) return
-        const items = Array.isArray(data) ? data : (data?.orders ?? data?.rows ?? [])
-        setOrders(items)
-        setTotal(data?.total ?? items.length)
-        setHasMore(data?.hasMore ?? false)
-        setPage(1)
-      })
-      .catch(e => { if (!cancelled) setError(e.message) })
-      .finally(() => { if (!cancelled) setLoading(false) })
-    return () => { cancelled = true }
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+    fetchList()
+  }, [fetchList])
 
-  const loadMore = useCallback(async () => {
-    if (loadingMore || !hasMore) return
-    const next = page + 1
-    setLoadingMore(true)
-    try {
-      const data = await orderService.list(next)
-      const items = Array.isArray(data) ? data : (data?.orders ?? data?.rows ?? [])
-      // useOrderStore.getState() donne la valeur courante sans risque de fermeture stale
-      setOrders([...useOrderStore.getState().orders, ...items])
-      setHasMore(data?.hasMore ?? false)
-      setPage(next)
-    } catch { /* silent */ }
-    finally { setLoadingMore(false) }
-  }, [loadingMore, hasMore, page, setOrders])
-
-  async function refetchSilent() {
-    try {
-      const data = await orderService.list(1)
-      const items = Array.isArray(data) ? data : (data?.rows ?? data?.orders ?? [])
-      setOrders(items)
-      setHasMore(data?.hasMore ?? false)
-      setPage(1)
-    } catch { /* silent background sync */ }
-  }
-
-  async function changeStatus(id, status) {
-    await orderService.updateStatus(id, status)
-    updateOrderStatus(id, status)
-    refetchSilent()
+  async function changeStatus(id, newStatus) {
+    await orderService.updateStatus(id, newStatus)
+    updateOrderStatus(id, newStatus)
+    // Le statut a changé : invalide toutes les pages commandes en cache
+    useListCacheStore.getState().clearPrefix('orders|')
+    fetchList({ silent: true })
   }
 
   async function markPaid(id) {
     await orderService.markPaid(id)
     updateOrderPayment(id)
-    refetchSilent()
+    useListCacheStore.getState().clearPrefix('orders|')
+    fetchList({ silent: true })
   }
 
-  return { orders, loading, loadingMore, hasMore, loadMore, total, error, changeStatus, markPaid }
+  return { orders, loading, total, pages, error, changeStatus, markPaid }
 }

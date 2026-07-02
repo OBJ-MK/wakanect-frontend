@@ -1,10 +1,13 @@
 import { api } from './api'
 
 export const stockService = {
-  list: (page = 1, { category, search } = {}, limit = 50) => {
+  list: (page = 1, { category, search, priceMin, priceMax, sort } = {}, limit = 50) => {
     const params = new URLSearchParams({ page, limit })
     if (category) params.set('category', category)
     if (search && search.trim()) params.set('search', search.trim())
+    if (priceMin !== undefined && priceMin !== '') params.set('priceMin', priceMin)
+    if (priceMax !== undefined && priceMax !== '') params.set('priceMax', priceMax)
+    if (sort) params.set('sort', sort)
     return api.get(`/api/stock/products?${params}`)
   },
   getPending: () => api.get('/api/stock/pending'),

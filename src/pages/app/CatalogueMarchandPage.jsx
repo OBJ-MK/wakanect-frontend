@@ -1,11 +1,13 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
-import { Plus, Edit3, LayoutGrid, AlertTriangle, Package, Search } from 'lucide-react'
+import { Plus, Edit3, LayoutGrid, AlertTriangle, Package } from 'lucide-react'
 import { formatFCFA } from '@/lib/formatters'
 import { cn } from '@/lib/utils'
 import { useStock } from '@/hooks/useStock'
-import { FilterChips } from '@/components/features/catalogue/FilterChips'
-import { Input } from '@/components/ui/Input'
+import { FilterBar } from '@/components/features/catalogue/FilterBar'
+import { Pagination } from '@/components/ui/Pagination'
+
+const DEFAULT_FILTERS = { search: '', category: 'Tout', priceMin: '', priceMax: '', sort: 'recent' }
 
 function ProductCardSkeleton() {
   return (
@@ -83,16 +85,43 @@ function ProductCard({ product }) {
 }
 
 export function CatalogueMarchandPage() {
-  const [search, setSearch]               = useState('')
-  const [activeCategory, setActiveCategory] = useState('Tout')
+  const [filters, setFilters] = useState(DEFAULT_FILTERS)
+  const [page, setPage]       = useState(1)
+  const [categoryOptions, setCategoryOptions] = useState(['Tout'])
+  const gridRef = useRef(null)
 
-  const { products, total, hasMore, loadMore, loading, loadingMore } = useStock({
-    category: activeCategory !== 'Tout' ? activeCategory : '',
-    search,
+  const isFiltered =
+    filters.search.trim() !== '' || filters.category !== 'Tout' ||
+    filters.priceMin !== '' || filters.priceMax !== ''
+
+  const { products, total, pages, loading } = useStock({
+    category: filters.category !== 'Tout' ? filters.category : '',
+    search:   filters.search,
+    priceMin: filters.priceMin,
+    priceMax: filters.priceMax,
+    sort:     filters.sort,
+    page,
+    limit: 20,
   })
 
-  // Catégories dérivées des produits courants (sans filtre actif = liste complète)
-  const categories = ['Tout', ...new Set(products.map(p => p.category).filter(Boolean))]
+  // Fige les catégories à partir du premier fetch sans filtre (Décision 1)
+  useEffect(() => {
+    if (!isFiltered && page === 1 && products.length > 0 && categoryOptions.length === 1) {
+      setCategoryOptions(['Tout', ...new Set(products.map(p => p.category).filter(Boolean))])
+    }
+  }, [products]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Tout changement de filtre repart en page 1 — uniquement setState → fetch → re-render
+  function updateFilters(partial) {
+    setFilters(prev => ({ ...prev, ...partial }))
+    setPage(1)
+  }
+
+  // Scroll doux vers le haut de la GRILLE (pas de la page)
+  function changePage(n) {
+    setPage(n)
+    gridRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
 
   const lowStockCount = products.filter(p => p.stock > 0 && p.stock <= 5).length
 
@@ -117,25 +146,17 @@ export function CatalogueMarchandPage() {
               <Plus size={18} />
             </Link>
           </div>
-          <Input
-            icon={<Search size={16} />}
-            type="search"
-            placeholder="Rechercher un produit..."
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            className="py-2.5"
-          />
         </div>
       </div>
 
       <div className="page-container py-4 flex flex-col gap-4">
-        {categories.length > 1 && (
-          <FilterChips
-            categories={categories}
-            active={activeCategory}
-            onChange={setActiveCategory}
-          />
-        )}
+        <FilterBar
+          filters={filters}
+          onChange={updateFilters}
+          onReset={() => { setFilters(DEFAULT_FILTERS); setPage(1) }}
+          categories={categoryOptions}
+          total={loading ? null : total}
+        />
 
         {lowStockCount > 0 && (
           <Link
@@ -150,7 +171,7 @@ export function CatalogueMarchandPage() {
         )}
 
         {loading ? (
-          <div className="grid grid-cols-2 gap-3">
+          <div ref={gridRef} className="grid grid-cols-2 gap-3">
             {Array.from({ length: 6 }).map((_, i) => <ProductCardSkeleton key={i} />)}
           </div>
         ) : products.length === 0 ? (
@@ -158,7 +179,7 @@ export function CatalogueMarchandPage() {
             <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-4">
               <Package size={28} className="text-white/20" />
             </div>
-            {search || activeCategory !== 'Tout' ? (
+            {isFiltered ? (
               <>
                 <p className="text-body font-semibold text-white/60">Aucun produit trouvé</p>
                 <p className="text-label text-white/35 mt-1">Essayez un autre terme de recherche</p>
@@ -179,26 +200,11 @@ export function CatalogueMarchandPage() {
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-2 gap-3">
+            <div ref={gridRef} className="grid grid-cols-2 gap-3 scroll-mt-24">
               {products.map(p => <ProductCard key={p.id} product={p} />)}
             </div>
 
-            {hasMore && (
-              <button
-                onClick={loadMore}
-                disabled={loadingMore}
-                className="w-full py-3 rounded-2xl glass border border-white/10 text-label text-white/60 hover:text-white hover:border-orange/40 transition-colors disabled:opacity-50"
-              >
-                {loadingMore ? (
-                  <span className="flex items-center justify-center gap-2">
-                    <span className="w-4 h-4 rounded-full border-2 border-orange/30 border-t-orange animate-spin" />
-                    Chargement…
-                  </span>
-                ) : (
-                  `Voir plus (${total - products.length} restants)`
-                )}
-              </button>
-            )}
+            <Pagination page={page} pages={pages} onChange={changePage} />
           </>
         )}
       </div>

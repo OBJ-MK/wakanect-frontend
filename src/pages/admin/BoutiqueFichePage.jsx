@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import {
-  ArrowLeft, Ban, Clock, RefreshCw, KeyRound, LogIn, RefreshCcw,
+  ArrowLeft, Ban, Clock, RefreshCw, LogIn, CheckCircle,
   User, Phone, Package, Activity,
 } from 'lucide-react'
 import { adminApi } from '@/services/adminApi'
@@ -64,6 +64,21 @@ export default function BoutiqueFichePage() {
     }
   }
 
+  const isSuspended = boutique?.status === 'suspended'
+
+  function handleSuspendToggle() {
+    const ok = window.confirm(
+      isSuspended
+        ? `Réactiver la boutique « ${boutique?.name} » ? Le commerçant retrouvera l'accès et la boutique publique sera de nouveau visible.`
+        : `Suspendre la boutique « ${boutique?.name} » ? Le commerçant ne pourra plus se connecter et la boutique publique sera inaccessible.`
+    )
+    if (!ok) return
+    runAction(
+      isSuspended ? 'reactivate' : 'suspend',
+      () => (isSuspended ? adminApi.reactivate(boutique.id) : adminApi.suspend(boutique.id)),
+    )
+  }
+
   if (error) return <ErrorState message={error} onRetry={refetch} />
 
   const sub = boutique?.subscription ?? {}
@@ -110,28 +125,16 @@ export default function BoutiqueFichePage() {
                 disabled={busy === 'impersonate'}
               />
               <ActionButton
-                icon={Ban}
-                label="Suspendre"
-                onClick={() => runAction('suspend', () => adminApi.suspend(boutique.id))}
-                variant="danger"
+                icon={isSuspended ? CheckCircle : Ban}
+                label={isSuspended ? 'Réactiver' : 'Suspendre'}
+                onClick={handleSuspendToggle}
+                variant={isSuspended ? 'default' : 'danger'}
                 disabled={!!busy}
               />
               <ActionButton
                 icon={Clock}
                 label="Prolonger essai"
                 onClick={() => runAction('extend', () => adminApi.extendTrial(boutique.id))}
-                disabled={!!busy}
-              />
-              <ActionButton
-                icon={KeyRound}
-                label="Reset mdp"
-                onClick={() => runAction('reset', () => adminApi.resetPassword(boutique.id))}
-                disabled={!!busy}
-              />
-              <ActionButton
-                icon={RefreshCcw}
-                label="Re-parsing"
-                onClick={() => runAction('reparsing', () => adminApi.changePlan(boutique.id, boutique.plan))}
                 disabled={!!busy}
               />
             </div>
@@ -232,28 +235,16 @@ export default function BoutiqueFichePage() {
             disabled={busy === 'impersonate'}
           />
           <ActionButton
-            icon={Ban}
-            label="Suspendre la boutique"
-            onClick={() => runAction('suspend', () => adminApi.suspend(boutique.id))}
-            variant="danger"
+            icon={isSuspended ? CheckCircle : Ban}
+            label={isSuspended ? 'Réactiver la boutique' : 'Suspendre la boutique'}
+            onClick={handleSuspendToggle}
+            variant={isSuspended ? 'default' : 'danger'}
             disabled={!!busy}
           />
           <ActionButton
             icon={Clock}
             label="Prolonger l'essai"
             onClick={() => runAction('extend', () => adminApi.extendTrial(boutique.id))}
-            disabled={!!busy}
-          />
-          <ActionButton
-            icon={KeyRound}
-            label="Reset mot de passe"
-            onClick={() => runAction('reset', () => adminApi.resetPassword(boutique.id))}
-            disabled={!!busy}
-          />
-          <ActionButton
-            icon={RefreshCcw}
-            label="Déclencher re-parsing"
-            onClick={() => runAction('reparsing', () => adminApi.changePlan(boutique.id, boutique.plan))}
             disabled={!!busy}
           />
         </div>

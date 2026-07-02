@@ -42,6 +42,9 @@ export const adminApi = {
   suspend: (id) =>
     api.post(`/api/admin/boutiques/${id}/suspend`),
 
+  reactivate: (id) =>
+    api.post(`/api/admin/boutiques/${id}/reactivate`),
+
   extendTrial: (id) =>
     api.post(`/api/admin/boutiques/${id}/extend-trial`),
 

@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { XCircle, Zap } from 'lucide-react'
-import { WakanectLogo } from '@/components/brand/WakanectLogo'
+import { WakanectLogo } from '@/components/brand/WakanectLogo' 
 
 export function AbonnementAnnulePage() {
   const navigate = useNavigate()

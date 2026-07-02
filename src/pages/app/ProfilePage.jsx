@@ -75,7 +75,7 @@ export function ProfilePage() {
                 <img src={merchant.logo_url} alt="Logo" className="w-full h-full object-cover" />
               ) : (
                 <span className="font-display font-bold text-h2 text-white">
-                  {getInitials(merchant?.owner_name ?? 'W')}
+                  {getInitials(merchant?.actor_name ?? merchant?.owner_name ?? 'W')}
                 </span>
               )}
             </div>
@@ -84,7 +84,7 @@ export function ProfilePage() {
                 {merchant?.shop_name ?? 'Ma boutique'}
               </p>
               <p className="text-label text-white/55 mt-0.5">
-                {merchant?.owner_name ?? ''}
+                {merchant?.actor_name ?? merchant?.owner_name ?? ''}
               </p>
               {boutiqueUrl && (
                 <p className="text-micro text-orange truncate mt-1">{boutiqueUrl}</p>

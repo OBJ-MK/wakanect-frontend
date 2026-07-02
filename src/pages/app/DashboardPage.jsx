@@ -79,7 +79,7 @@ export function DashboardPage() {
   const navigate = useNavigate()
 
   const data = stats || EMPTY_STATS
-  const firstName = merchant?.owner_name?.split(' ')[0] ?? 'commerçant'
+  const firstName = (merchant?.actor_name ?? merchant?.owner_name)?.split(' ')[0] ?? 'commerçant'
 
   // advanced_stats gate — source : plan_limits injecté au login par le backend
   const planLimits     = merchant?.plan_limits

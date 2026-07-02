@@ -116,7 +116,15 @@ export function CheckoutPage() {
             </p>
             {cart.map(item => (
               <div key={item.key} className="flex items-center gap-3 px-4 py-3 border-t border-navy/6 dark:border-white/6">
-                <Package size={15} className="text-navy/30 dark:text-white/30 shrink-0" />
+                <div className="w-10 h-10 rounded-xl bg-cream-dark dark:bg-navy-light overflow-hidden shrink-0">
+                  {item.image_url ? (
+                    <img src={item.image_url} alt={item.name} className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <Package size={15} className="text-navy/30 dark:text-white/30" />
+                    </div>
+                  )}
+                </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-body text-navy dark:text-white truncate">{item.name}</p>
                   {item.selectedColor && (

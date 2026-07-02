@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { ChevronLeft, ChevronRight, MessageCircle, ShoppingBag, Package, Minus, Plus } from 'lucide-react'
 import { useTenant } from '@/hooks/useTenant'
+import { useCatalogueStore } from '@/store/catalogueStore'
 import { formatFCFA } from '@/lib/formatters'
 import { buildWhatsAppLink } from '@/lib/utils'
 import { cn } from '@/lib/utils'
@@ -74,6 +75,7 @@ export function ProductDetailPage() {
   const { slug, id } = useParams()
   const navigate = useNavigate()
   const { boutique, loading } = useTenant()
+  const addToCartStore = useCatalogueStore(s => s.addToCart)
 
   const product = boutique?.products?.find(p => p.id === id) ?? null
   const shopPhone = boutique?.whatsapp_number ?? ''
@@ -130,6 +132,7 @@ export function ProductDetailPage() {
   }
 
   function addToCart() {
+    addToCartStore(product, selectedColor, qty)
     navigate(`/boutique/${slug}/commande`)
   }
 

@@ -47,7 +47,7 @@ export function CheckoutPage() {
     setLoading(true)
     try {
       // Contrat back POST /api/orders/public :
-      // { slug, customer: { name, phone, address, notes }, items: [{ productId, quantity }] }
+      // { slug, customer: { name, phone, address, notes }, items: [{ productId, quantity, color? }] }
       // (prix et total recalculés côté back)
       const noteParts = [
         `Réception : ${form.delivery_mode}`,
@@ -70,6 +70,7 @@ export function CheckoutPage() {
         items: cart.map(i => ({
           productId: i.id,
           quantity: i.quantity,
+          color: i.selectedColor || undefined,
         })),
       })
       clearCart()

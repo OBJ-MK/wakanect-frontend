@@ -80,11 +80,22 @@ export function ProductDetailPage() {
   const product = boutique?.products?.find(p => p.id === id) ?? null
   const shopPhone = boutique?.whatsapp_number ?? ''
 
-  const [selectedColor, setSelectedColor] = useState(product?.colors?.[0] ?? null)
+  const [selectedColor, setSelectedColor] = useState(null)
   const [selectedSize, setSelectedSize] = useState(null)
   const [qty, setQty] = useState(1)
 
   const outOfStock = product ? product.stock === 0 : true
+
+  // Variantes couleur avec quantités — les puces viennent des variantes si présentes
+  const variants = product?.variants ?? []
+  const hasVariants = variants.length > 0
+  const displayColors = hasVariants ? variants.map(v => v.color) : (product?.colors ?? [])
+
+  // Défaut : couleur à la quantité la plus abondante (à égalité, la première)
+  const defaultColor = hasVariants
+    ? variants.reduce((best, v) => (Number(v.quantity) > Number(best.quantity) ? v : best), variants[0]).color
+    : (product?.colors?.[0] ?? null)
+  const activeColor = selectedColor ?? defaultColor
 
   if (loading) {
     return (
@@ -132,7 +143,7 @@ export function ProductDetailPage() {
   }
 
   function addToCart() {
-    addToCartStore(product, selectedColor, qty)
+    addToCartStore(product, activeColor, qty)
     navigate(`/boutique/${slug}/commande`)
   }
 
@@ -177,19 +188,19 @@ export function ProductDetailPage() {
         </div>
 
         {/* Colors */}
-        {product.colors?.length > 0 && (
+        {displayColors.length > 0 && (
           <div>
             <p className="text-label font-semibold text-navy/70 dark:text-white/60 mb-2.5">
-              Couleur — <span className="font-normal">{selectedColor ?? 'Choisir'}</span>
+              Couleur — <span className="font-normal">{activeColor ?? 'Choisir'}</span>
             </p>
             <div className="flex flex-wrap gap-2.5">
-              {product.colors.map(color => (
+              {displayColors.map(color => (
                 <button
                   key={color}
                   onClick={() => setSelectedColor(color)}
                   className={cn(
                     'flex items-center gap-2 px-3 py-2 rounded-xl border transition-all text-label font-medium',
-                    selectedColor === color
+                    activeColor === color
                       ? 'border-orange bg-orange/10 text-orange dark:text-orange'
                       : 'border-navy/15 dark:border-white/15 text-navy/70 dark:text-white/60 hover:border-navy/30 dark:hover:border-white/30',
                   )}

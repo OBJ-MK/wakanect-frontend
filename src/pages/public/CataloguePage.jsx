@@ -93,6 +93,20 @@ export function CataloguePage() {
       {/* Header */}
       <div className="sticky top-0 z-20 bg-white/80 dark:bg-navy/80 backdrop-blur-glass border-b border-navy/8 dark:border-white/8 px-4 py-3">
         <div className="max-w-lg mx-auto flex items-center justify-between gap-3">
+          {/* Logo boutique — rond, fallback initiale sur fond navy */}
+          {boutique?.logo_url ? (
+            <img
+              src={boutique.logo_url}
+              alt={`Logo ${boutique?.shop_name || 'boutique'}`}
+              className="h-9 w-9 rounded-full object-cover shrink-0 border border-navy/8 dark:border-white/10"
+            />
+          ) : (
+            <div className="h-9 w-9 rounded-full bg-navy flex items-center justify-center shrink-0">
+              <span className="text-white text-label font-bold uppercase">
+                {boutique?.shop_name?.charAt(0) || '?'}
+              </span>
+            </div>
+          )}
           <div className="flex-1 min-w-0">
             <p className="font-display font-bold text-h3 text-navy dark:text-white truncate">
               {boutique?.shop_name}

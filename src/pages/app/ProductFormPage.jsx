@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
 import { CATEGORIES } from '@/lib/constants'
 import { stockService } from '@/services/stockService'
+import { VariantEditor, toCleanVariants, variantsSum } from '@/components/features/catalogue/VariantEditor'
 
 function TagInput({ label, tags, onAdd, onRemove, placeholder, colorClass = 'bg-orange/15 text-orange' }) {
   const [val, setVal] = useState('')
@@ -188,7 +189,7 @@ export function ProductFormPage() {
     category: '',
     description: '',
     sizes: [],
-    colors: [],
+    variants: [],
     images: [],
   })
   const [saving, setSaving] = useState(false)
@@ -210,7 +211,10 @@ export function ProductFormPage() {
           category:    product.category    ?? '',
           description: product.description ?? '',
           sizes:       product.sizes       ?? [],
-          colors:      product.colors      ?? [],
+          // Variantes existantes, sinon couleurs legacy → lignes sans quantité
+          variants:    product.variants?.length
+            ? product.variants.map(v => ({ color: v.color, quantity: String(v.quantity ?? 0) }))
+            : (product.colors ?? []).map(c => ({ color: c, quantity: '' })),
           images:      product.images      ?? [],
         })
       })
@@ -220,19 +224,26 @@ export function ProductFormPage() {
 
   const set = (key) => (e) => setForm(f => ({ ...f, [key]: e.target.value }))
 
+  // Variantes valides (couleur + quantité saisies) → stock global calculé
+  const hasVariants = toCleanVariants(form.variants).length > 0
+
   async function handleSubmit(e) {
     e.preventDefault()
     setError(null)
     setSaving(true)
     try {
+      const cleanVariants = toCleanVariants(form.variants)
       await stockService.update(id, {
         name:        form.name,
         price:       Number(form.price),
         description: form.description,
         category:    form.category,
-        stock:       Number(form.stock),
-        colors:      form.colors,
+        stock:       cleanVariants.length > 0
+          ? cleanVariants.reduce((sum, v) => sum + v.quantity, 0)
+          : Number(form.stock),
+        colors:      form.variants.map(v => v.color.trim()).filter(Boolean),
         sizes:       form.sizes,
+        variants:    cleanVariants,
       })
       setSuccess(true)
       setTimeout(() => navigate('/app/catalogue'), 800)
@@ -306,9 +317,12 @@ export function ProductFormPage() {
                 type="number"
                 min="0"
                 placeholder="12"
-                value={form.stock}
+                value={hasVariants ? String(variantsSum(form.variants)) : form.stock}
                 onChange={set('stock')}
-                required
+                disabled={hasVariants}
+                readOnly={hasVariants}
+                hint={hasVariants ? 'Somme des variantes' : undefined}
+                required={!hasVariants}
               />
             </div>
 
@@ -338,13 +352,9 @@ export function ProductFormPage() {
               placeholder="Ex: M, L, 42..."
               colorClass="bg-orange/15 text-orange"
             />
-            <TagInput
-              label="Couleurs"
-              tags={form.colors}
-              onAdd={v => setForm(f => ({ ...f, colors: [...f.colors, v] }))}
-              onRemove={v => setForm(f => ({ ...f, colors: f.colors.filter(c => c !== v) }))}
-              placeholder="Ex: Rouge, Noir..."
-              colorClass="bg-amber/15 text-amber"
+            <VariantEditor
+              variants={form.variants}
+              onChange={variants => setForm(f => ({ ...f, variants }))}
             />
           </div>
 

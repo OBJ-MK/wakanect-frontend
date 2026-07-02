@@ -5,6 +5,7 @@ import { usePendingProducts } from '@/hooks/useStock'
 import { WhatsAppBubble } from '@/components/features/parsing/WhatsAppBubble'
 import { ConfidenceBadge } from '@/components/features/parsing/ConfidenceBadge'
 import { LineActionBar } from '@/components/features/parsing/LineActionBar'
+import { VariantEditor, toCleanVariants, variantsSum } from '@/components/features/catalogue/VariantEditor'
 import { Input } from '@/components/ui/Input'
 import { formatFCFA } from '@/lib/formatters'
 import { CATEGORIES } from '@/lib/constants'
@@ -54,13 +55,16 @@ function PendingProductCard({ product, onPublish, onIgnore }) {
     quantity: String(product.quantity || 1),
     category: product.category || '',
     sizes: [...(product.sizes || [])],
-    colors: [...(product.colors || [])],
+    // Couleurs parsées → lignes de l'éditeur de variantes (quantité à saisir)
+    variants: (product.colors || []).map(c => ({ color: c, quantity: '' })),
   })
   const [loading, setLoading] = useState(false)
   const [newSize, setNewSize] = useState('')
-  const [newColor, setNewColor] = useState('')
 
   const set = (key) => (e) => setForm(f => ({ ...f, [key]: e.target.value }))
+
+  // Variantes valides (couleur + quantité saisies) → quantité globale calculée
+  const hasVariants = toCleanVariants(form.variants).length > 0
 
   function addSize() {
     const v = newSize.trim().toUpperCase()
@@ -74,24 +78,19 @@ function PendingProductCard({ product, onPublish, onIgnore }) {
     setForm(f => ({ ...f, sizes: f.sizes.filter(x => x !== s) }))
   }
 
-  function addColor() {
-    const v = newColor.trim()
-    if (v && !form.colors.includes(v)) {
-      setForm(f => ({ ...f, colors: [...f.colors, v] }))
-    }
-    setNewColor('')
-  }
-
-  function removeColor(c) {
-    setForm(f => ({ ...f, colors: f.colors.filter(x => x !== c) }))
-  }
-
   async function handlePublish() {
     setLoading(true)
+    const cleanVariants = toCleanVariants(form.variants)
     await onPublish(product.id, {
-      ...form,
+      name: form.name,
+      category: form.category,
+      sizes: form.sizes,
       price: parseInt(form.price, 10),
-      quantity: parseInt(form.quantity, 10),
+      quantity: cleanVariants.length > 0
+        ? cleanVariants.reduce((sum, v) => sum + v.quantity, 0)
+        : parseInt(form.quantity, 10),
+      colors: form.variants.map(v => v.color.trim()).filter(Boolean),
+      variants: cleanVariants,
     })
     setLoading(false)
   }
@@ -152,8 +151,11 @@ function PendingProductCard({ product, onPublish, onIgnore }) {
               label="Quantité"
               type="number"
               min="1"
-              value={form.quantity}
+              value={hasVariants ? String(variantsSum(form.variants)) : form.quantity}
               onChange={set('quantity')}
+              disabled={hasVariants}
+              readOnly={hasVariants}
+              hint={hasVariants ? 'Somme des variantes' : undefined}
               containerClassName="w-24 min-w-[80px] max-w-[96px]"
             />
           </div>
@@ -203,36 +205,10 @@ function PendingProductCard({ product, onPublish, onIgnore }) {
             </div>
           </div>
 
-          <div className="flex flex-col gap-1.5">
-            <label className="text-label font-semibold text-white/60">Couleurs</label>
-            <div className="flex flex-wrap gap-2 mb-2">
-              {form.colors.map(c => (
-                <button
-                  key={c}
-                  onClick={() => removeColor(c)}
-                  className="flex items-center gap-1 px-3 py-1 rounded-full bg-amber/15 text-amber text-label hover:bg-red-500/20 hover:text-red-400 transition-colors"
-                >
-                  {c} ×
-                </button>
-              ))}
-            </div>
-            <div className="flex gap-2">
-              <Input
-                value={newColor}
-                onChange={e => setNewColor(e.target.value)}
-                onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addColor())}
-                placeholder="Ex: Noir"
-                containerClassName="flex-1"
-                className="rounded-xl px-3 py-2 text-label"
-              />
-              <button
-                onClick={addColor}
-                className="px-3 py-2 rounded-xl bg-amber/15 text-amber text-label hover:bg-amber/25 transition-colors"
-              >
-                Ajouter
-              </button>
-            </div>
-          </div>
+          <VariantEditor
+            variants={form.variants}
+            onChange={variants => setForm(f => ({ ...f, variants }))}
+          />
         </div>
 
         <LineActionBar

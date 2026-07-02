@@ -2,6 +2,9 @@ import { useState, useRef, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { Bell, Search, X, LogOut } from 'lucide-react'
 import { useAuthStore } from '@/store/authStore'
+import { adminApi } from '@/services/adminApi'
+import { useAdminQuery } from '@/hooks/useAdminQuery'
+import { AlertsPanel } from '@/components/admin/AlertsPanel'
 
 const TITLES = {
   '/admin':                 'Vue d\'ensemble',
@@ -20,7 +23,14 @@ export function AdminTopBar() {
   const { merchant, logout } = useAuthStore()
   const [searchOpen, setSearchOpen] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
+  const [alertsOpen, setAlertsOpen] = useState(false)
   const menuRef = useRef(null)
+  const alertsRef = useRef(null)
+
+  // Alertes réelles — mêmes données que l'Overview (getAlerts backend)
+  const { data: overviewData } = useAdminQuery(() => adminApi.overview('7d'), [])
+  const alerts = overviewData?.alerts ?? []
+  const dangerCount = alerts.filter(a => a.level === 'danger' || a.level === 'error').length
 
   const title = Object.entries(TITLES)
     .filter(([path]) => pathname.startsWith(path))
@@ -43,6 +53,18 @@ export function AdminTopBar() {
     document.addEventListener('mousedown', onClickOutside)
     return () => document.removeEventListener('mousedown', onClickOutside)
   }, [menuOpen])
+
+  // Fermer le panneau alertes si clic hors
+  useEffect(() => {
+    if (!alertsOpen) return
+    function onClickOutside(e) {
+      if (alertsRef.current && !alertsRef.current.contains(e.target)) {
+        setAlertsOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', onClickOutside)
+    return () => document.removeEventListener('mousedown', onClickOutside)
+  }, [alertsOpen])
 
   function handleLogout() {
     logout()
@@ -74,14 +96,42 @@ export function AdminTopBar() {
           {searchOpen ? <X className="w-4 h-4" /> : <Search className="w-4 h-4" />}
         </button>
 
-        {/* Cloche alertes */}
-        <button
-          className="relative p-2 text-white/60 hover:text-white hover:bg-white/8 rounded-lg transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-orange"
-          aria-label="Alertes"
-        >
-          <Bell className="w-4 h-4" />
-          <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-danger rounded-full" />
-        </button>
+        {/* Cloche alertes — badge = alertes danger réelles, masqué si 0 */}
+        <div className="relative" ref={alertsRef}>
+          <button
+            onClick={() => setAlertsOpen(v => !v)}
+            className="relative p-2 text-white/60 hover:text-white hover:bg-white/8 rounded-lg transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-orange"
+            aria-label="Alertes"
+            aria-expanded={alertsOpen}
+          >
+            <Bell className="w-4 h-4" />
+            {dangerCount > 0 && (
+              <span className="absolute top-0.5 right-0.5 min-w-[16px] h-4 px-1 bg-danger rounded-full text-[10px] font-bold text-white flex items-center justify-center tabular-nums">
+                {dangerCount}
+              </span>
+            )}
+          </button>
+
+          {alertsOpen && (
+            <div className="absolute right-0 top-10 w-80 max-w-[calc(100vw-2rem)] bg-white border border-admin-line rounded-xl shadow-modal overflow-hidden">
+              <div className="px-4 py-3 border-b border-admin-line flex items-center justify-between">
+                <p className="text-label font-semibold text-navy">Alertes</p>
+                {alerts.length > 0 && (
+                  <span className="text-micro text-admin-muted tabular-nums">{alerts.length}</span>
+                )}
+              </div>
+              <div className="max-h-80 overflow-y-auto p-3">
+                <AlertsPanel alerts={alerts} />
+              </div>
+              <button
+                onClick={() => { setAlertsOpen(false); navigate('/admin') }}
+                className="w-full px-4 py-2.5 text-label font-medium text-orange hover:bg-admin-fill border-t border-admin-line transition-colors"
+              >
+                Tout voir
+              </button>
+            </div>
+          )}
+        </div>
 
         {/* Avatar + menu déconnexion */}
         <div className="relative ml-1" ref={menuRef}>

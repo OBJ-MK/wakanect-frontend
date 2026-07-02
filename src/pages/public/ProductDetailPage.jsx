@@ -284,18 +284,6 @@ export function ProductDetailPage() {
             <ShoppingBag size={18} />
             {outOfStock ? 'Épuisé' : 'Ajouter au panier'}
           </button>
-
-          {shopPhone && (
-            <a
-              href={buildWhatsAppLink(shopPhone, buildWaMsg(selectedColor))}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center justify-center gap-2 py-3.5 rounded-3xl border border-wa-green/30 text-wa-green font-semibold text-body hover:bg-wa-green/8 active:scale-[0.98] transition-all"
-            >
-              <MessageCircle size={18} />
-              Demander cette couleur sur WhatsApp
-            </a>
-          )}
         </div>
       </div>
     </div>

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ChevronLeft, AlertCircle, Copy } from 'lucide-react'
+import { ChevronLeft, AlertCircle, Copy, ImagePlus } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { usePendingProducts } from '@/hooks/useStock'
 import { WhatsAppBubble } from '@/components/features/parsing/WhatsAppBubble'
@@ -44,6 +44,75 @@ function ImageStrip({ images }) {
           className="h-20 w-20 rounded-2xl object-cover shrink-0 border border-white/10"
         />
       ))}
+    </div>
+  )
+}
+
+/**
+ * Encart "Photos à rattacher" — images WhatsApp arrivées quand plusieurs
+ * produits étaient en attente : le système ne devine pas, le marchand tranche.
+ * Un tap sur un candidat = rattachement définitif. Invisible si aucune orpheline.
+ */
+function OrphanMediaPanel({ orphans, candidates, onAttach }) {
+  const [busyId, setBusyId] = useState(null)
+
+  if (!orphans.length) return null
+
+  async function handleAttach(mediaId, candidateId) {
+    setBusyId(mediaId)
+    try {
+      await onAttach(mediaId, candidateId)
+    } finally {
+      setBusyId(null)
+    }
+  }
+
+  return (
+    <div className="glass rounded-4xl overflow-hidden animate-fade-up border border-amber/20">
+      <div className="h-0.5 bg-amber/60" />
+      <div className="p-5 flex flex-col gap-4">
+        <div className="flex items-center gap-2">
+          <ImagePlus size={16} className="text-amber shrink-0" />
+          <p className="text-body font-semibold text-white">
+            Photos à rattacher — à quel produit appartiennent-elles ?
+          </p>
+        </div>
+        <p className="text-label text-white/45">
+          Ces photos sont arrivées pendant que plusieurs produits étaient en attente.
+          Choisissez le bon produit pour chacune.
+        </p>
+
+        <div className="flex flex-col gap-4">
+          {orphans.map(orphan => (
+            <div key={orphan.media_id} className="flex gap-3 items-start">
+              <img
+                src={orphan.url}
+                alt=""
+                className={cn(
+                  'h-20 w-20 rounded-2xl object-cover shrink-0 border border-amber/30',
+                  busyId === orphan.media_id && 'opacity-50'
+                )}
+              />
+              <div className="flex flex-wrap gap-2">
+                {candidates.length === 0 ? (
+                  <span className="text-label text-white/45">Aucun produit en attente</span>
+                ) : (
+                  candidates.map(c => (
+                    <button
+                      key={c.id}
+                      disabled={busyId === orphan.media_id}
+                      onClick={() => handleAttach(orphan.media_id, c.id)}
+                      className="px-3 py-1.5 rounded-xl bg-amber/15 border border-amber/25 text-amber text-label hover:bg-amber/25 transition-colors disabled:opacity-50"
+                    >
+                      {c.name || c.raw_text?.slice(0, 30) || 'Produit sans nom'}
+                    </button>
+                  ))
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   )
 }
@@ -222,7 +291,7 @@ function PendingProductCard({ product, onPublish, onIgnore }) {
 }
 
 export function ValidationPage() {
-  const { pending, loading, applyProduct, ignoreProduct } = usePendingProducts()
+  const { pending, orphans, loading, applyProduct, ignoreProduct, attachOrphan } = usePendingProducts()
 
   async function handlePublish(id, data) {
     await applyProduct(id, data)
@@ -253,7 +322,7 @@ export function ValidationPage() {
           <div className="flex justify-center py-12">
             <div className="w-8 h-8 rounded-full border-2 border-orange/30 border-t-orange animate-spin" />
           </div>
-        ) : visible.length === 0 ? (
+        ) : visible.length === 0 && orphans.length === 0 ? (
           <div className="flex flex-col items-center py-16 text-center">
             <div className="w-16 h-16 rounded-full bg-emerald/15 flex items-center justify-center mb-4">
               <span className="text-3xl">✓</span>
@@ -262,14 +331,21 @@ export function ValidationPage() {
             <p className="text-label text-white/45 mt-1">Aucun produit en attente de validation</p>
           </div>
         ) : (
-          visible.map(product => (
-            <PendingProductCard
-              key={product.id}
-              product={product}
-              onPublish={handlePublish}
-              onIgnore={handleIgnore}
+          <>
+            <OrphanMediaPanel
+              orphans={orphans}
+              candidates={visible}
+              onAttach={attachOrphan}
             />
-          ))
+            {visible.map(product => (
+              <PendingProductCard
+                key={product.id}
+                product={product}
+                onPublish={handlePublish}
+                onIgnore={handleIgnore}
+              />
+            ))}
+          </>
         )}
       </div>
     </div>

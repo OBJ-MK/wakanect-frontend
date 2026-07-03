@@ -73,12 +73,20 @@ export function useStock({
 
 export function usePendingProducts() {
   const [pending, setPending] = useState([])
+  const [orphans, setOrphans] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError]     = useState(null)
 
   useEffect(() => {
-    stockService.getPending()
-      .then(data => setPending(Array.isArray(data) ? data : (data?.pending ?? data?.rows ?? [])))
+    Promise.all([
+      stockService.getPending(),
+      // Images ambiguës "à rattacher" — absence d'orphelins ne doit jamais bloquer la file
+      stockService.getOrphanMedia().catch(() => []),
+    ])
+      .then(([data, orphanData]) => {
+        setPending(Array.isArray(data) ? data : (data?.pending ?? data?.rows ?? []))
+        setOrphans(Array.isArray(orphanData) ? orphanData : [])
+      })
       .catch(e => setError(e.message))
       .finally(() => setLoading(false))
   }, [])
@@ -93,5 +101,16 @@ export function usePendingProducts() {
     setPending(prev => prev.filter(p => p.id !== id))
   }
 
-  return { pending, loading, error, applyProduct, ignoreProduct }
+  // Résout une ambiguïté : l'image orpheline rejoint le candidat choisi
+  async function attachOrphan(mediaId, candidateId) {
+    const res = await stockService.attachOrphanMedia(mediaId, candidateId)
+    setOrphans(prev => prev.filter(o => o.media_id !== mediaId))
+    if (res?.image_url) {
+      setPending(prev => prev.map(p =>
+        p.id === candidateId ? { ...p, images: [...(p.images || []), res.image_url] } : p
+      ))
+    }
+  }
+
+  return { pending, orphans, loading, error, applyProduct, ignoreProduct, attachOrphan }
 }

@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import {
   TrendingUp, ShoppingBag, CheckSquare, LayoutGrid,
@@ -9,12 +10,20 @@ import { formatFCFA } from '@/lib/formatters'
 import { WakanectLogo } from '@/components/brand/WakanectLogo'
 
 const EMPTY_STATS = {
+  revenue: 0,
   revenue_today: 0,
-  revenue_change: 0,
+  revenue_change: null,
   pending_validation: 0,
   orders_count: 0,
   low_stock_count: 0,
 }
+
+const PERIODS = [
+  { id: 'day',   label: 'Jour',    title: "Revenu aujourd'hui",      compare: 'vs hier' },
+  { id: 'week',  label: 'Semaine', title: 'Revenu — 7 derniers jours',  compare: 'vs semaine précédente' },
+  { id: 'month', label: 'Mois',    title: 'Revenu — 30 derniers jours', compare: 'vs mois précédent' },
+  { id: 'all',   label: 'Tous',    title: 'Revenu total',            compare: null },
+]
 
 function SparkLine() {
   const points = [40, 65, 45, 80, 60, 90, 75, 95, 70, 100, 85, 110]
@@ -75,8 +84,10 @@ function ActionTile({ to, icon: Icon, label, description, badge, color = 'orange
 
 export function DashboardPage() {
   const { merchant } = useAuthStore()
-  const { stats, loading } = useDashboard()
+  const [period, setPeriod] = useState('day')
+  const { stats, loading } = useDashboard(period)
   const navigate = useNavigate()
+  const activePeriod = PERIODS.find(p => p.id === period) ?? PERIODS[0]
 
   const data = stats || EMPTY_STATS
   const firstName = (merchant?.actor_name ?? merchant?.owner_name)?.split(' ')[0] ?? 'commerçant'
@@ -115,21 +126,40 @@ export function DashboardPage() {
           <div className="absolute top-0 left-0 right-0 h-0.5 gradient-thread opacity-80" />
           <div className="absolute -right-8 -top-8 w-40 h-40 rounded-full bg-orange/8 blur-2xl pointer-events-none" />
 
-          <p className="text-micro text-white/50 uppercase tracking-wider mb-1">
-            Revenu aujourd'hui
-          </p>
+          <div className="flex items-center justify-between gap-2 mb-1">
+            <p className="text-micro text-white/50 uppercase tracking-wider">
+              {activePeriod.title}
+            </p>
+            <div className="flex items-center gap-1 shrink-0">
+              {PERIODS.map(p => (
+                <button
+                  key={p.id}
+                  onClick={() => setPeriod(p.id)}
+                  className={`px-2 py-1 rounded-lg text-micro font-semibold transition-colors ${
+                    period === p.id
+                      ? 'bg-orange/20 text-orange'
+                      : 'text-white/40 hover:text-white hover:bg-white/8'
+                  }`}
+                >
+                  {p.label}
+                </button>
+              ))}
+            </div>
+          </div>
           <div className="flex items-end justify-between gap-4">
             <div>
-              <p className="font-display font-extrabold text-display text-white leading-none">
-                {formatFCFA(data.revenue_today ?? data.revenue ?? 0)}
+              <p className={`font-display font-extrabold text-display text-white leading-none transition-opacity ${loading ? 'opacity-40' : ''}`}>
+                {formatFCFA(data.revenue ?? data.revenue_today ?? 0)}
               </p>
-              <div className="flex items-center gap-1.5 mt-2">
-                <TrendingUp size={14} className="text-emerald" />
-                <span className="text-label font-semibold text-emerald">
-                  {data.revenue_change >= 0 ? '+' : ''}{data.revenue_change}%
-                </span>
-                <span className="text-label text-white/40">vs hier</span>
-              </div>
+              {activePeriod.compare && data.revenue_change != null && (
+                <div className="flex items-center gap-1.5 mt-2">
+                  <TrendingUp size={14} className={data.revenue_change >= 0 ? 'text-emerald' : 'text-red-400 rotate-180'} />
+                  <span className={`text-label font-semibold ${data.revenue_change >= 0 ? 'text-emerald' : 'text-red-400'}`}>
+                    {data.revenue_change >= 0 ? '+' : ''}{data.revenue_change}%
+                  </span>
+                  <span className="text-label text-white/40">{activePeriod.compare}</span>
+                </div>
+              )}
             </div>
             <SparkLine />
           </div>

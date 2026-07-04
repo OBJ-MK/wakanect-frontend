@@ -19,7 +19,7 @@ export const stockService = {
   listLowStock: () => api.get('/api/stock/products?lowStock=true'),
   updateStock: (id, data) => api.patch(`/api/stock/products/${id}/stock`, data),
   update: (id, data) => api.patch(`/api/products/${id}`, data),
-  getDashboardStats: () => api.get('/api/dashboard/stats'),
+  getDashboardStats: (period = 'day') => api.get(`/api/dashboard/stats?period=${period}`),
   uploadImage: (productId, file) => {
     const formData = new FormData()
     formData.append('image', file)

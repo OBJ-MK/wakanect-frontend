@@ -1,17 +1,20 @@
 import { useState, useEffect } from 'react'
 import { stockService } from '@/services/stockService'
 
-export function useDashboard() {
+export function useDashboard(period = 'day') {
   const [stats, setStats] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
   useEffect(() => {
-    stockService.getDashboardStats()
-      .then(setStats)
-      .catch(e => setError(e.message))
-      .finally(() => setLoading(false))
-  }, [])
+    let cancelled = false
+    setLoading(true)
+    stockService.getDashboardStats(period)
+      .then(s => { if (!cancelled) setStats(s) })
+      .catch(e => { if (!cancelled) setError(e.message) })
+      .finally(() => { if (!cancelled) setLoading(false) })
+    return () => { cancelled = true }
+  }, [period])
 
   return { stats, loading, error }
 }

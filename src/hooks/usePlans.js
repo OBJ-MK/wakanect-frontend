@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react'
 import { api } from '@/services/api'
 
-// Cache module-level : toutes les instances du hook partagent la même réponse
-// (évite N requêtes HTTP quand Hero + Pricing + Faq + FinalCta appellent usePlans).
-let _cache    = null
-let _cacheAt  = 0
+// Cache module-level par clé pays : toutes les instances du hook partagent la
+// même réponse (évite N requêtes HTTP quand Hero + Pricing + Faq + FinalCta
+// appellent usePlans).
+const _cache = new Map() // cacheKey → { data, at }
 const CACHE_TTL = 60_000
 
 /**
@@ -33,44 +33,47 @@ function planUrl(country) {
  * Charge GET /api/plans et retourne { data, loading, error, refetch }.
  * data = { country, currency, plans, trial: { days, scans }, discounts }
  *
- * Anonyme  → pays lu depuis /geo (CF-IPCountry), transmis via ?country=
- * Connecté → pays déduit du téléphone marchand par le backend (token JWT)
+ * options.country → force le pays (ex: 'SN' sur la landing page)
+ * Sinon :
+ *   Anonyme  → pays lu depuis /geo (CF-IPCountry), transmis via ?country=
+ *   Connecté → pays déduit du téléphone marchand par le backend (token JWT)
  */
-export function usePlans() {
-  const [state, setState] = useState(() => ({
-    data:    _cache,
-    loading: _cache === null,
-    error:   null,
-  }))
+export function usePlans({ country: forcedCountry } = {}) {
+  const cacheKey = forcedCountry ?? 'auto'
+  const [state, setState] = useState(() => {
+    const cached = _cache.get(cacheKey)
+    return {
+      data:    cached?.data ?? null,
+      loading: !cached,
+      error:   null,
+    }
+  })
+
+  function load() {
+    setState(s => ({ ...s, loading: true, error: null }))
+    const resolve = forcedCountry ? Promise.resolve(forcedCountry) : detectCountry()
+    resolve
+      .then(country => api.get(planUrl(country)))
+      .then(data => {
+        _cache.set(cacheKey, { data, at: Date.now() })
+        setState({ data, loading: false, error: null })
+      })
+      .catch(err => setState({ data: null, loading: false, error: err.message }))
+  }
 
   useEffect(() => {
-    if (_cache && Date.now() - _cacheAt < CACHE_TTL) {
-      setState({ data: _cache, loading: false, error: null })
+    const cached = _cache.get(cacheKey)
+    if (cached && Date.now() - cached.at < CACHE_TTL) {
+      setState({ data: cached.data, loading: false, error: null })
       return
     }
-    setState(s => ({ ...s, loading: true, error: null }))
-    detectCountry()
-      .then(country => api.get(planUrl(country)))
-      .then(data => {
-        _cache   = data
-        _cacheAt = Date.now()
-        setState({ data, loading: false, error: null })
-      })
-      .catch(err => setState({ data: null, loading: false, error: err.message }))
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+    load()
+  }, [cacheKey]) // eslint-disable-line react-hooks/exhaustive-deps
 
   function refetch() {
-    _cache   = null
-    _cacheAt = 0
+    _cache.delete(cacheKey)
     setState({ data: null, loading: true, error: null })
-    detectCountry()
-      .then(country => api.get(planUrl(country)))
-      .then(data => {
-        _cache   = data
-        _cacheAt = Date.now()
-        setState({ data, loading: false, error: null })
-      })
-      .catch(err => setState({ data: null, loading: false, error: err.message }))
+    load()
   }
 
   return { ...state, refetch }

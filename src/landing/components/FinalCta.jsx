@@ -7,7 +7,7 @@ import { LogoMark } from './Logo';
 
 export default function FinalCta() {
   const scope = useReveal();
-  const { data } = usePlans();
+  const { data } = usePlans({ country: 'SN' });
   const trialDays = data?.trial?.days ?? 14;
 
   return (

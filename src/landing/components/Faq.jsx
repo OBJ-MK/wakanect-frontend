@@ -58,7 +58,7 @@ function buildItems(data) {
 export default function Faq() {
   const scope = useReveal();
   const [open, setOpen] = useState(0);
-  const { data } = usePlans();
+  const { data } = usePlans({ country: 'SN' });
 
   const items = buildItems(data);
 

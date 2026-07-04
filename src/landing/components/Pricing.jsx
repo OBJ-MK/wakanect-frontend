@@ -96,7 +96,7 @@ function Cell({ v }) {
 
 export default function Pricing() {
   const scope = useReveal();
-  const { data } = usePlans();
+  const { data } = usePlans({ country: 'SN' });
 
   const trialDays = data?.trial?.days ?? 14;
 

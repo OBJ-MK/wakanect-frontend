@@ -11,4 +11,9 @@ export const catalogueService = {
     return api.get(`/api/boutique/${slug}?${params}`)
   },
   createOrder: (data) => api.post('/api/orders/public', data),
+  uploadPaymentProof: (orderId, file) => {
+    const formData = new FormData()
+    formData.append('image', file)
+    return api.upload(`/api/orders/public/${orderId}/proof`, formData)
+  },
 }

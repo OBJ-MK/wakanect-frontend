@@ -30,12 +30,31 @@ export function OrderDetail({ order, onStatusUpdate, onMarkPaid, loading }) {
       </div>
 
       {/* Payment */}
-      <div className="glass rounded-3xl p-5 flex items-center justify-between">
-        <div>
-          <p className="text-micro text-white/45 uppercase tracking-wider mb-1">Paiement</p>
-          <PaymentBadge status={order.payment_status} />
+      <div className="glass rounded-3xl p-5 flex flex-col gap-3">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-micro text-white/45 uppercase tracking-wider mb-1">Paiement</p>
+            <PaymentBadge status={order.payment_status} />
+          </div>
+          <p className="text-h2 font-display font-bold text-amber">{formatFCFA(order.total)}</p>
         </div>
-        <p className="text-h2 font-display font-bold text-amber">{formatFCFA(order.total)}</p>
+        {order.payment_proof_url && (
+          <div className="border-t border-white/8 pt-3">
+            <p className="text-micro text-white/45 uppercase tracking-wider mb-2">
+              Preuve de paiement envoyée par le client
+            </p>
+            <a href={order.payment_proof_url} target="_blank" rel="noopener noreferrer">
+              <img
+                src={order.payment_proof_url}
+                alt="Preuve de paiement"
+                className="w-32 h-32 object-cover rounded-2xl border border-white/10 hover:opacity-80 transition-opacity"
+              />
+            </a>
+            <p className="text-micro text-white/40 mt-1.5">
+              Vérifiez le montant avant de marquer la commande comme payée.
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Customer info */}

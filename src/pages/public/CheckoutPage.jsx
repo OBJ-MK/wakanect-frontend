@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useNavigate, useParams, Link } from 'react-router-dom'
-import { ChevronLeft, MapPin, Package } from 'lucide-react'
+import { ChevronLeft, MapPin, Package, Camera, X } from 'lucide-react'
 import { useCatalogueStore } from '@/store/catalogueStore'
 import { catalogueService } from '@/services/catalogueService'
 import { formatFCFA } from '@/lib/formatters'
@@ -27,6 +27,8 @@ export function CheckoutPage() {
   })
   const [loading, setLoading] = useState(false)
   const [errors, setErrors] = useState({})
+  const [proofPreview, setProofPreview] = useState(null)
+  const proofInputRef = useRef(null)
 
   const set = (key) => (e) => setForm(f => ({ ...f, [key]: e.target.value }))
   const total = cart.reduce((sum, i) => sum + i.price * i.quantity, 0)
@@ -36,7 +38,28 @@ export function CheckoutPage() {
     if (!form.name.trim()) e.name = 'Entrez votre nom'
     if (!form.phone.trim()) e.phone = 'Entrez votre numéro WhatsApp'
     if (form.delivery_mode === 'Livraison' && !form.address.trim()) e.address = 'Entrez votre adresse'
+    if (form.payment_method === 'proof' && !form.payment_proof) e.proof = 'Ajoutez la capture de votre paiement'
     return e
+  }
+
+  function handleProofChange(e) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setForm(f => ({ ...f, payment_proof: file }))
+    setProofPreview(prev => {
+      if (prev) URL.revokeObjectURL(prev)
+      return URL.createObjectURL(file)
+    })
+    setErrors(prev => ({ ...prev, proof: undefined }))
+  }
+
+  function removeProof() {
+    setForm(f => ({ ...f, payment_proof: null }))
+    setProofPreview(prev => {
+      if (prev) URL.revokeObjectURL(prev)
+      return null
+    })
+    if (proofInputRef.current) proofInputRef.current.value = ''
   }
 
   async function handleSubmit(e) {
@@ -49,9 +72,10 @@ export function CheckoutPage() {
       // Contrat back POST /api/orders/public :
       // { slug, customer: { name, phone, address, notes }, items: [{ productId, quantity, color? }] }
       // (prix et total recalculés côté back)
+      const methodLabel = PAYMENT_METHODS.find(m => m.id === form.payment_method)?.label ?? form.payment_method
       const noteParts = [
         `Réception : ${form.delivery_mode}`,
-        `Paiement : ${form.payment_method}`,
+        `Paiement : ${methodLabel}`,
       ]
       if (form.note.trim()) noteParts.push(form.note.trim())
       const colorParts = cart
@@ -59,7 +83,7 @@ export function CheckoutPage() {
         .map(i => `${i.name} : ${i.selectedColor}`)
       if (colorParts.length) noteParts.push(`Couleurs — ${colorParts.join(', ')}`)
 
-      await catalogueService.createOrder({
+      const created = await catalogueService.createOrder({
         slug,
         customer: {
           name: form.name.trim(),
@@ -72,7 +96,19 @@ export function CheckoutPage() {
           quantity: i.quantity,
           color: i.selectedColor || undefined,
         })),
+        paymentMethod: form.payment_method,
       })
+
+      // Preuve de paiement ("J'ai déjà payé") : la commande existe déjà,
+      // un échec d'upload ne doit donc pas la faire perdre au client.
+      if (form.payment_method === 'proof' && form.payment_proof && created?.order?.id) {
+        try {
+          await catalogueService.uploadPaymentProof(created.order.id, form.payment_proof)
+        } catch (proofErr) {
+          console.warn('Preuve non envoyée :', proofErr.message)
+        }
+      }
+
       clearCart()
       navigate(`/boutique/${slug}/confirmation`)
     } catch (err) {
@@ -232,6 +268,57 @@ export function CheckoutPage() {
                 </label>
               ))}
             </div>
+
+            {/* Preuve de paiement — visible uniquement pour "J'ai déjà payé" */}
+            {form.payment_method === 'proof' && (
+              <div className="flex flex-col gap-2">
+                <p className="text-label text-navy/60 dark:text-white/60">
+                  Envoyez la capture d'écran de votre paiement (Wave, Orange Money…).
+                  La boutique la verra sur votre commande.
+                </p>
+                <input
+                  ref={proofInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  onChange={handleProofChange}
+                  className="hidden"
+                  id="payment-proof-input"
+                />
+                {proofPreview ? (
+                  <div className="relative self-start">
+                    <img
+                      src={proofPreview}
+                      alt="Preuve de paiement"
+                      className="w-28 h-28 object-cover rounded-2xl border border-navy/10 dark:border-white/10"
+                    />
+                    <button
+                      type="button"
+                      onClick={removeProof}
+                      className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-red-500 text-white flex items-center justify-center shadow"
+                      aria-label="Retirer la preuve"
+                    >
+                      <X size={13} />
+                    </button>
+                  </div>
+                ) : (
+                  <label
+                    htmlFor="payment-proof-input"
+                    className={cn(
+                      'flex items-center justify-center gap-2 py-3.5 rounded-2xl border-2 border-dashed cursor-pointer transition-colors',
+                      errors.proof
+                        ? 'border-red-400 text-red-500'
+                        : 'border-navy/20 dark:border-white/20 text-navy/60 dark:text-white/60 hover:border-orange hover:text-orange',
+                    )}
+                  >
+                    <Camera size={18} />
+                    <span className="text-label font-semibold">Ajouter la capture</span>
+                  </label>
+                )}
+                {errors.proof && (
+                  <p className="text-micro text-red-500">{errors.proof}</p>
+                )}
+              </div>
+            )}
           </div>
 
           {errors._ && (

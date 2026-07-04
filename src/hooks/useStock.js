@@ -112,5 +112,11 @@ export function usePendingProducts() {
     }
   }
 
-  return { pending, orphans, loading, error, applyProduct, ignoreProduct, attachOrphan }
+  // Détruit une orpheline (le produit parent a été ignoré/supprimé)
+  async function deleteOrphan(mediaId) {
+    await stockService.deleteOrphanMedia(mediaId)
+    setOrphans(prev => prev.filter(o => o.media_id !== mediaId))
+  }
+
+  return { pending, orphans, loading, error, applyProduct, ignoreProduct, attachOrphan, deleteOrphan }
 }

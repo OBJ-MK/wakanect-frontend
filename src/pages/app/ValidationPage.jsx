@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ChevronLeft, AlertCircle, Copy, ImagePlus } from 'lucide-react'
+import { ChevronLeft, AlertCircle, Copy, ImagePlus, X } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { usePendingProducts } from '@/hooks/useStock'
 import { WhatsAppBubble } from '@/components/features/parsing/WhatsAppBubble'
@@ -53,7 +53,7 @@ function ImageStrip({ images }) {
  * produits étaient en attente : le système ne devine pas, le marchand tranche.
  * Un tap sur un candidat = rattachement définitif. Invisible si aucune orpheline.
  */
-function OrphanMediaPanel({ orphans, candidates, onAttach }) {
+function OrphanMediaPanel({ orphans, candidates, onAttach, onDelete }) {
   const [busyId, setBusyId] = useState(null)
 
   if (!orphans.length) return null
@@ -62,6 +62,17 @@ function OrphanMediaPanel({ orphans, candidates, onAttach }) {
     setBusyId(mediaId)
     try {
       await onAttach(mediaId, candidateId)
+    } finally {
+      setBusyId(null)
+    }
+  }
+
+  // Suppression définitive (photo dont le produit parent a été ignoré/supprimé)
+  async function handleDelete(mediaId) {
+    if (!window.confirm('Supprimer définitivement cette photo ? Elle ne pourra plus être rattachée à un produit.')) return
+    setBusyId(mediaId)
+    try {
+      await onDelete(mediaId)
     } finally {
       setBusyId(null)
     }
@@ -85,14 +96,25 @@ function OrphanMediaPanel({ orphans, candidates, onAttach }) {
         <div className="flex flex-col gap-4">
           {orphans.map(orphan => (
             <div key={orphan.media_id} className="flex gap-3 items-start">
-              <img
-                src={orphan.url}
-                alt=""
-                className={cn(
-                  'h-20 w-20 rounded-2xl object-cover shrink-0 border border-amber/30',
-                  busyId === orphan.media_id && 'opacity-50'
-                )}
-              />
+              <div className="relative shrink-0">
+                <img
+                  src={orphan.url}
+                  alt=""
+                  className={cn(
+                    'h-20 w-20 rounded-2xl object-cover border border-amber/30',
+                    busyId === orphan.media_id && 'opacity-50'
+                  )}
+                />
+                <button
+                  type="button"
+                  aria-label="Supprimer cette photo"
+                  disabled={busyId === orphan.media_id}
+                  onClick={() => handleDelete(orphan.media_id)}
+                  className="absolute -top-1.5 -right-1.5 h-6 w-6 rounded-full bg-navy-deep border border-white/20 flex items-center justify-center text-white/60 hover:text-white hover:border-red-400/60 hover:bg-red-500/20 transition-colors disabled:opacity-50"
+                >
+                  <X size={13} />
+                </button>
+              </div>
               <div className="flex flex-wrap gap-2">
                 {candidates.length === 0 ? (
                   <span className="text-label text-white/45">Aucun produit en attente</span>
@@ -291,7 +313,7 @@ function PendingProductCard({ product, onPublish, onIgnore }) {
 }
 
 export function ValidationPage() {
-  const { pending, orphans, loading, applyProduct, ignoreProduct, attachOrphan } = usePendingProducts()
+  const { pending, orphans, loading, applyProduct, ignoreProduct, attachOrphan, deleteOrphan } = usePendingProducts()
 
   async function handlePublish(id, data) {
     await applyProduct(id, data)
@@ -336,6 +358,7 @@ export function ValidationPage() {
               orphans={orphans}
               candidates={visible}
               onAttach={attachOrphan}
+              onDelete={deleteOrphan}
             />
             {visible.map(product => (
               <PendingProductCard

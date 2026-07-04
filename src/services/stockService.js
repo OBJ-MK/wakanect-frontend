@@ -13,6 +13,7 @@ export const stockService = {
   getPending: () => api.get('/api/stock/pending'),
   getOrphanMedia: () => api.get('/api/stock/orphan-media'),
   attachOrphanMedia: (mediaId, candidateId) => api.post('/api/stock/orphan-media/attach', { mediaId, candidateId }),
+  deleteOrphanMedia: (mediaId) => api.delete(`/api/stock/orphan-media/${mediaId}`),
   applyPending: (id, data) => api.post(`/api/stock/apply/${id}`, data),
   ignorePending: (id) => api.post(`/api/stock/ignore/${id}`),
   listLowStock: () => api.get('/api/stock/products?lowStock=true'),

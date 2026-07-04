@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/Button'
 import { cn } from '@/lib/utils'
 import { usePermissions } from '@/hooks/usePermissions'
 import { PERM } from '@/lib/permissions'
+import { PerformedBy } from '@/components/ui/PerformedBy'
 
 const MOCK_PRODUCTS = []
 
@@ -96,6 +97,9 @@ function StockRow({ product, onSave }) {
             </div>
             <span className="text-label text-white/40">{formatFCFA(product.price)}</span>
           </div>
+        )}
+        {!editing && (
+          <PerformedBy actor={product.performed_by} prefix="Ajouté par" className="mt-1" />
         )}
       </div>
 

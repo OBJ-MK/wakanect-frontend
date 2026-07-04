@@ -8,6 +8,7 @@ import { formatFCFA, formatRelativeTime } from '@/lib/formatters'
 import { FilterBar } from '@/components/features/catalogue/FilterBar'
 import { Pagination } from '@/components/ui/Pagination'
 import { usePermissions } from '@/hooks/usePermissions'
+import { PerformedBy } from '@/components/ui/PerformedBy'
 import { PERM } from '@/lib/permissions'
 
 const STATUS_FILTERS = ['Toutes', 'Nouvelle', 'Confirmée', 'Livrée', 'Annulée']
@@ -173,6 +174,7 @@ export function OrdersPage() {
                       <span className="text-white/20 text-micro">·</span>
                       <PaymentBadge status={order.payment_status} />
                     </div>
+                    <PerformedBy actor={order.performed_by} className="mt-1.5" />
                   </div>
                   <p className="text-label font-bold text-amber shrink-0">{formatFCFA(order.total)}</p>
                 </button>

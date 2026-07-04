@@ -3,6 +3,7 @@ import { OrderStatusStepper } from './OrderStatusStepper'
 import { PaymentBadge } from './PaymentBadge'
 import { Button } from '@/components/ui/Button'
 import { MapPin, Phone, MessageCircle, Package } from 'lucide-react'
+import { PerformedBy } from '@/components/ui/PerformedBy'
 
 export function OrderDetail({ order, onStatusUpdate, onMarkPaid, loading }) {
   if (!order) return null
@@ -94,9 +95,12 @@ export function OrderDetail({ order, onStatusUpdate, onMarkPaid, loading }) {
         </div>
       </div>
 
-      <p className="text-micro text-white/30 text-center">
-        Commandé le {formatDate(order.created_at)}
-      </p>
+      <div className="flex flex-col items-center gap-1">
+        <p className="text-micro text-white/30 text-center">
+          Commandé le {formatDate(order.created_at)}
+        </p>
+        <PerformedBy actor={order.performed_by} prefix="Traité par" className="text-white/30" />
+      </div>
 
       {/* Actions dans le flux */}
       {hasActionBar && (

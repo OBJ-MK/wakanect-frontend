@@ -40,19 +40,17 @@ export const useCatalogueStore = create(
       },
 
       clearCart: () => set({ cart: [] }),
-
-      get cartCount() {
-        return get().cart.reduce((sum, i) => sum + i.quantity, 0)
-      },
-
-      get cartTotal() {
-        return get().cart.reduce((sum, i) => sum + i.price * i.quantity, 0)
-      },
     }),
     {
       name: 'waka_cart',
-      // Seul le panier est persisté — boutique/boutiqueCache restent transients
+      // Seul le panier est persisté — boutique/boutiqueCache restent transients.
+      // ⚠ Ne JAMAIS mettre de getters (get xxx()) dans l'objet d'état : ils
+      // cassent silencieusement l'hydratation de persist (panier perdu au refresh).
       partialize: (state) => ({ cart: state.cart }),
     }
   )
 )
+
+// Sélecteurs — à utiliser avec useCatalogueStore(selectCartCount) etc.
+export const selectCartCount = (s) => s.cart.reduce((sum, i) => sum + i.quantity, 0)
+export const selectCartTotal = (s) => s.cart.reduce((sum, i) => sum + i.price * i.quantity, 0)

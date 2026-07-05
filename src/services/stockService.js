@@ -18,6 +18,7 @@ export const stockService = {
   ignorePending: (id) => api.post(`/api/stock/ignore/${id}`),
   listLowStock: () => api.get('/api/stock/products?lowStock=true'),
   updateStock: (id, data) => api.patch(`/api/stock/products/${id}/stock`, data),
+  create: (data) => api.post('/api/products', data),
   update: (id, data) => api.patch(`/api/products/${id}`, data),
   getDashboardStats: (period = 'day') => api.get(`/api/dashboard/stats?period=${period}`),
   uploadImage: (productId, file) => {

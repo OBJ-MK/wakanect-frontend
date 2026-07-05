@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import {
-  ChevronLeft, X, Plus, Check, Clock, Loader2, Star
+  ChevronLeft, X, Plus, Check, Loader2, Star
 } from 'lucide-react'
 import { Input } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
@@ -199,6 +199,7 @@ export function ProductFormPage() {
 
   useEffect(() => {
     if (!isEdit) return
+    setSuccess(false) // arrivée depuis la création : repart propre
     stockService.list()
       .then(data => {
         const list = Array.isArray(data) ? data : (data?.products ?? data?.rows ?? [])
@@ -233,7 +234,7 @@ export function ProductFormPage() {
     setSaving(true)
     try {
       const cleanVariants = toCleanVariants(form.variants)
-      await stockService.update(id, {
+      const payload = {
         name:        form.name,
         price:       Number(form.price),
         description: form.description,
@@ -244,9 +245,20 @@ export function ProductFormPage() {
         colors:      form.variants.map(v => v.color.trim()).filter(Boolean),
         sizes:       form.sizes,
         variants:    cleanVariants,
-      })
-      setSuccess(true)
-      setTimeout(() => navigate('/app/catalogue'), 800)
+      }
+
+      if (isEdit) {
+        await stockService.update(id, payload)
+        setSuccess(true)
+        setTimeout(() => navigate('/app/catalogue'), 800)
+      } else {
+        // Création directe depuis l'app : publié immédiatement (démarche volontaire),
+        // puis redirection vers l'édition pour ajouter les photos (l'upload
+        // nécessite l'id du produit).
+        const { product } = await stockService.create({ ...payload, isPublished: true })
+        setSuccess(true)
+        setTimeout(() => navigate(`/app/catalogue/${product.id}/modifier`, { replace: true }), 800)
+      }
     } catch (e) {
       setError(e.message)
     } finally {
@@ -278,17 +290,21 @@ export function ProductFormPage() {
         </div>
       </div>
 
-      <form onSubmit={isEdit ? handleSubmit : e => e.preventDefault()}>
+      <form onSubmit={handleSubmit}>
         <div className="page-container py-5 flex flex-col gap-5">
 
-          {/* Gestion des images (édition uniquement) */}
-          {isEdit && (
+          {/* Gestion des images — nécessite l'id produit, donc après création */}
+          {isEdit ? (
             <ImageManager
               productId={id}
               images={form.images}
               onChange={images => setForm(f => ({ ...f, images }))}
               onError={setError}
             />
+          ) : (
+            <p className="text-micro text-white/40 glass rounded-2xl px-4 py-3">
+              📷 Vous pourrez ajouter les photos juste après la création du produit.
+            </p>
           )}
 
           {/* Core fields */}
@@ -380,27 +396,15 @@ export function ProductFormPage() {
           )}
           {success && (
             <p className="text-label text-emerald-400 bg-emerald-500/10 rounded-2xl px-4 py-3">
-              Modifications enregistrées !
+              {isEdit ? 'Modifications enregistrées !' : 'Produit publié ! Ajoutez maintenant les photos…'}
             </p>
           )}
 
           {/* Bouton d'action */}
-          {isEdit ? (
-            <Button type="submit" size="lg" fullWidth loading={saving} className="mt-1">
-              <Check size={16} />
-              Enregistrer les modifications
-            </Button>
-          ) : (
-            <div className="flex flex-col items-center gap-2 mt-1">
-              <Button type="button" size="lg" fullWidth disabled className="opacity-50 cursor-not-allowed">
-                <Clock size={16} />
-                Publier le produit
-              </Button>
-              <p className="text-micro text-white/35">
-                Ajout manuel de produits bientôt disponible — utilisez WhatsApp pour l'instant
-              </p>
-            </div>
-          )}
+          <Button type="submit" size="lg" fullWidth loading={saving} className="mt-1">
+            <Check size={16} />
+            {isEdit ? 'Enregistrer les modifications' : 'Publier le produit'}
+          </Button>
         </div>
       </form>
     </div>

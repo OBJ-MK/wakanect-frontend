@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import {
   Store, Moon, Sun, Bell,
   LogOut, ChevronRight, Share2, HelpCircle,
-  Package, CreditCard, Users, Smartphone
+  Package, CreditCard, Users, Smartphone, BarChart2
 } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { useAuthStore } from '@/store/authStore'
@@ -107,6 +107,13 @@ export function ProfilePage() {
               action={<ChevronRight size={16} className="text-white/30 shrink-0" />}
             />
           )}
+          <SettingRow
+            icon={BarChart2}
+            label="Statistiques"
+            description="Revenu, panier moyen, top produits"
+            to="/app/profil/stats"
+            action={<ChevronRight size={16} className="text-white/30 shrink-0" />}
+          />
           <SettingRow
             icon={Share2}
             label="Partager ma boutique"

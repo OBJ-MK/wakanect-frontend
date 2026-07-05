@@ -1,14 +1,14 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import {
   TrendingUp, ShoppingBag, CheckSquare, LayoutGrid,
-  Share2, Bell, Package, ChevronRight, AlertTriangle, BarChart2, Lock, ShieldAlert
+  Share2, Bell, Package, ChevronRight, AlertTriangle, BarChart2, ShieldAlert
 } from 'lucide-react'
 import { useDashboard } from '@/hooks/useDashboard'
 import { useAuthStore } from '@/store/authStore'
 import { formatFCFA } from '@/lib/formatters'
 import { WakanectLogo } from '@/components/brand/WakanectLogo'
-import { OrderRow } from '@/components/features/dashbord/OrderRow'
+import { RevenueChart } from '@/components/features/dashbord/RevenueChart'
 
 const EMPTY_STATS = {
   revenue: 0,
@@ -26,48 +26,6 @@ const PERIODS = [
   { id: 'all',   label: 'Tous',    title: 'Revenu total',            compare: null },
 ]
 
-/** Graphique en barres du revenu quotidien réel (series du backend) */
-function RevenueChart({ series }) {
-  if (!series || series.length === 0) return null
-  const max = Math.max(...series.map(p => p.total), 1)
-  const fmtDay = (iso) => {
-    const d = new Date(iso + 'T00:00:00')
-    return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })
-  }
-  const gap = series.length > 30 ? 'gap-px' : 'gap-1'
-
-  return (
-    <div className="mt-4">
-      <div className={`flex items-end ${gap} h-16`}>
-        {series.map(p => (
-          <div
-            key={p.date}
-            title={`${fmtDay(p.date)} — ${formatFCFA(p.total)}`}
-            className={`flex-1 rounded-t-sm min-h-[2px] ${
-              p.total > 0
-                ? 'bg-gradient-to-t from-orange to-amber'
-                : 'bg-white/8'
-            }`}
-            style={{ height: p.total > 0 ? `${Math.max((p.total / max) * 100, 8)}%` : '2px' }}
-          />
-        ))}
-      </div>
-      <div className="flex justify-between mt-1.5">
-        <span className="text-[10px] text-white/30">{fmtDay(series[0].date)}</span>
-        <span className="text-[10px] text-white/30">{fmtDay(series[series.length - 1].date)}</span>
-      </div>
-    </div>
-  )
-}
-
-function MiniStat({ label, value, accent = 'text-white' }) {
-  return (
-    <div className="glass rounded-2xl px-3 py-3 flex flex-col gap-0.5 min-w-0">
-      <p className={`font-display font-bold text-h3 leading-tight truncate ${accent}`}>{value}</p>
-      <p className="text-micro text-white/45 leading-tight">{label}</p>
-    </div>
-  )
-}
 
 function ActionTile({ to, icon: Icon, label, description, badge, color = 'orange', accent }) {
   const colorMap = {
@@ -107,15 +65,10 @@ export function DashboardPage() {
   const { merchant } = useAuthStore()
   const [period, setPeriod] = useState('day')
   const { stats, loading } = useDashboard(period)
-  const navigate = useNavigate()
   const activePeriod = PERIODS.find(p => p.id === period) ?? PERIODS[0]
 
   const data = stats || EMPTY_STATS
   const firstName = (merchant?.actor_name ?? merchant?.owner_name)?.split(' ')[0] ?? 'commerçant'
-
-  // advanced_stats gate — source : plan_limits injecté au login par le backend
-  const planLimits     = merchant?.plan_limits
-  const advancedStats  = planLimits?.features?.advanced_stats ?? null
 
   return (
     <div className="min-h-screen bg-navy-deep">
@@ -210,24 +163,6 @@ export function DashboardPage() {
           </div>
         </div>
 
-        {/* Mini stats — période sélectionnée */}
-        <div className="grid grid-cols-3 gap-2">
-          <MiniStat
-            label="Commandes payées"
-            value={(data.orders_breakdown?.confirmed ?? 0) + (data.orders_breakdown?.delivered ?? 0)}
-          />
-          <MiniStat
-            label="Panier moyen"
-            value={data.avg_basket > 0 ? formatFCFA(data.avg_basket) : '—'}
-            accent="text-amber"
-          />
-          <MiniStat
-            label="À encaisser"
-            value={data.unpaid_count ?? 0}
-            accent={data.unpaid_count > 0 ? 'text-orange' : 'text-white'}
-          />
-        </div>
-
         {/* 4 action tiles — 2×2 grid */}
         <div className="grid grid-cols-2 gap-3">
           <ActionTile
@@ -260,25 +195,6 @@ export function DashboardPage() {
             color="emerald"
           />
         </div>
-
-        {/* Dernières commandes */}
-        {(data.recent_orders?.length ?? 0) > 0 && (
-          <div className="glass rounded-3xl overflow-hidden">
-            <div className="flex items-center justify-between px-4 pt-4 pb-2">
-              <p className="text-micro text-white/45 uppercase tracking-wider">Dernières commandes</p>
-              <Link to="/app/commandes" className="text-micro text-orange hover:underline">
-                Voir tout
-              </Link>
-            </div>
-            {data.recent_orders.map(order => (
-              <OrderRow
-                key={order.id}
-                order={order}
-                onClick={() => navigate('/app/commandes')}
-              />
-            ))}
-          </div>
-        )}
 
         {/* Stock bas alert — compact */}
         {data.low_stock_count > 0 && (
@@ -314,44 +230,20 @@ export function DashboardPage() {
           <ChevronRight size={16} className="text-white/30 shrink-0" />
         </Link>
 
-        {/* Analytics avancées (top produits) — gated sur plan_limits.features.advanced_stats */}
-        {advancedStats === true && (data.top_products?.length ?? 0) > 0 && (
-          <div className="glass rounded-3xl overflow-hidden border border-amber/15">
-            <div className="flex items-center gap-2 px-4 pt-4 pb-2">
-              <BarChart2 size={15} className="text-amber" />
-              <p className="text-micro text-white/45 uppercase tracking-wider">
-                Top produits — {activePeriod.label.toLowerCase()}
-              </p>
-            </div>
-            {data.top_products.map((p, i) => (
-              <div key={p.name} className="flex items-center gap-3 px-4 py-2.5 border-t border-white/5">
-                <span className={`w-6 h-6 rounded-lg flex items-center justify-center text-micro font-bold shrink-0 ${
-                  i === 0 ? 'bg-amber/20 text-amber' : 'bg-white/8 text-white/50'
-                }`}>
-                  {i + 1}
-                </span>
-                <p className="flex-1 min-w-0 text-body text-white truncate">{p.name}</p>
-                <div className="text-right shrink-0">
-                  <p className="text-label font-semibold text-white">×{p.quantity}</p>
-                  <p className="text-micro text-white/40">{formatFCFA(p.revenue)}</p>
-                </div>
-              </div>
-            ))}
+        {/* Statistiques détaillées — page dédiée (Profil → Statistiques) */}
+        <Link
+          to="/app/profil/stats"
+          className="flex items-center gap-3 glass rounded-3xl px-4 py-3 border border-white/8 hover:bg-white/6 active:scale-[0.98] transition-all"
+        >
+          <div className="w-8 h-8 rounded-xl bg-amber/15 flex items-center justify-center shrink-0">
+            <BarChart2 size={16} className="text-amber" />
           </div>
-        )}
-        {advancedStats === false && (
-          <div className="glass rounded-3xl px-4 py-4 border border-white/8 flex items-center gap-3 opacity-70">
-            <div className="w-9 h-9 rounded-xl bg-white/6 flex items-center justify-center shrink-0">
-              <Lock size={16} className="text-white/30" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-body font-semibold text-white/50">Analytics avancées</p>
-              <Link to="/abonnement" className="text-micro text-orange underline">
-                Disponible en plan Pro / Premium →
-              </Link>
-            </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-body font-semibold text-white">Statistiques détaillées</p>
+            <p className="text-micro text-white/45">Panier moyen, top produits, commandes…</p>
           </div>
-        )}
+          <ChevronRight size={16} className="text-white/30 shrink-0" />
+        </Link>
       </div>
     </div>
   )

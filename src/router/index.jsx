@@ -50,6 +50,7 @@ import { FicheEmployePage } from '@/pages/app/FicheEmployePage'
 import { ActiverNotificationsPage } from '@/pages/app/ActiverNotificationsPage'
 import { InstallerAppPage } from '@/pages/app/InstallerAppPage'
 import { VerifierNumeroPage } from '@/pages/app/VerifierNumeroPage'
+import { StatsPage } from '@/pages/app/StatsPage'
 
 // Public boutique
 import { CataloguePage } from '@/pages/public/CataloguePage'
@@ -120,6 +121,7 @@ export const router = createBrowserRouter([
           { path: 'profil/comment-ajouter', element: <CommentAjouterPage /> },
           { path: 'profil/abonnement', element: <RequirePermission perm={PERM.BILLING_MANAGE}><MonAbonnementPage /></RequirePermission> },
           { path: 'profil/installer', element: <InstallerAppPage /> },
+          { path: 'profil/stats', element: <StatsPage /> },
           { path: 'notifications/activer', element: <ActiverNotificationsPage /> },
           { path: 'verifier-numero', element: <VerifierNumeroPage /> },
           { path: 'equipe', element: <RequirePermission perm={PERM.TEAM_MANAGE}><MonEquipePage /></RequirePermission> },

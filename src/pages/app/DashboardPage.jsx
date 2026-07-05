@@ -8,6 +8,7 @@ import { useDashboard } from '@/hooks/useDashboard'
 import { useAuthStore } from '@/store/authStore'
 import { formatFCFA } from '@/lib/formatters'
 import { WakanectLogo } from '@/components/brand/WakanectLogo'
+import { OrderRow } from '@/components/features/dashbord/OrderRow'
 
 const EMPTY_STATS = {
   revenue: 0,
@@ -25,26 +26,46 @@ const PERIODS = [
   { id: 'all',   label: 'Tous',    title: 'Revenu total',            compare: null },
 ]
 
-function SparkLine() {
-  const points = [40, 65, 45, 80, 60, 90, 75, 95, 70, 100, 85, 110]
-  const max = Math.max(...points)
-  const w = 100, h = 36
-  const path = points.map((p, i) => {
-    const x = (i / (points.length - 1)) * w
-    const y = h - (p / max) * h
-    return `${i === 0 ? 'M' : 'L'} ${x} ${y}`
-  }).join(' ')
+/** Graphique en barres du revenu quotidien réel (series du backend) */
+function RevenueChart({ series }) {
+  if (!series || series.length === 0) return null
+  const max = Math.max(...series.map(p => p.total), 1)
+  const fmtDay = (iso) => {
+    const d = new Date(iso + 'T00:00:00')
+    return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })
+  }
+  const gap = series.length > 30 ? 'gap-px' : 'gap-1'
 
   return (
-    <svg width={w} height={h} className="opacity-60">
-      <defs>
-        <linearGradient id="spark" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stopColor="#EC5E2A" />
-          <stop offset="100%" stopColor="#FFB347" />
-        </linearGradient>
-      </defs>
-      <path d={path} fill="none" stroke="url(#spark)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
+    <div className="mt-4">
+      <div className={`flex items-end ${gap} h-16`}>
+        {series.map(p => (
+          <div
+            key={p.date}
+            title={`${fmtDay(p.date)} — ${formatFCFA(p.total)}`}
+            className={`flex-1 rounded-t-sm min-h-[2px] ${
+              p.total > 0
+                ? 'bg-gradient-to-t from-orange to-amber'
+                : 'bg-white/8'
+            }`}
+            style={{ height: p.total > 0 ? `${Math.max((p.total / max) * 100, 8)}%` : '2px' }}
+          />
+        ))}
+      </div>
+      <div className="flex justify-between mt-1.5">
+        <span className="text-[10px] text-white/30">{fmtDay(series[0].date)}</span>
+        <span className="text-[10px] text-white/30">{fmtDay(series[series.length - 1].date)}</span>
+      </div>
+    </div>
+  )
+}
+
+function MiniStat({ label, value, accent = 'text-white' }) {
+  return (
+    <div className="glass rounded-2xl px-3 py-3 flex flex-col gap-0.5 min-w-0">
+      <p className={`font-display font-bold text-h3 leading-tight truncate ${accent}`}>{value}</p>
+      <p className="text-micro text-white/45 leading-tight">{label}</p>
+    </div>
   )
 }
 
@@ -164,29 +185,47 @@ export function DashboardPage() {
               ))}
             </div>
           </div>
-          <div className="flex items-end justify-between gap-4">
-            <div>
-              <p className={`font-display font-extrabold text-display text-white leading-none transition-opacity ${loading ? 'opacity-40' : ''}`}>
-                {formatFCFA(data.revenue ?? data.revenue_today ?? 0)}
-              </p>
-              {activePeriod.compare && data.revenue_change != null && (
-                <div className="flex items-center gap-1.5 mt-2">
-                  <TrendingUp size={14} className={data.revenue_change >= 0 ? 'text-emerald' : 'text-red-400 rotate-180'} />
-                  <span className={`text-label font-semibold ${data.revenue_change >= 0 ? 'text-emerald' : 'text-red-400'}`}>
-                    {data.revenue_change >= 0 ? '+' : ''}{data.revenue_change}%
-                  </span>
-                  <span className="text-label text-white/40">{activePeriod.compare}</span>
-                </div>
-              )}
-            </div>
-            <SparkLine />
+          <div>
+            <p className={`font-display font-extrabold text-display text-white leading-none transition-opacity ${loading ? 'opacity-40' : ''}`}>
+              {formatFCFA(data.revenue ?? data.revenue_today ?? 0)}
+            </p>
+            {activePeriod.compare && data.revenue_change != null && (
+              <div className="flex items-center gap-1.5 mt-2">
+                <TrendingUp size={14} className={data.revenue_change >= 0 ? 'text-emerald' : 'text-red-400 rotate-180'} />
+                <span className={`text-label font-semibold ${data.revenue_change >= 0 ? 'text-emerald' : 'text-red-400'}`}>
+                  {data.revenue_change >= 0 ? '+' : ''}{data.revenue_change}%
+                </span>
+                <span className="text-label text-white/40">{activePeriod.compare}</span>
+              </div>
+            )}
           </div>
+
+          {/* Revenu quotidien réel */}
+          <RevenueChart series={data.series} />
 
           <div className="mt-4 pt-4 border-t border-white/8">
             <p className="text-label text-white/60">
               Bonjour, <span className="text-white font-semibold">{firstName}</span> 👋
             </p>
           </div>
+        </div>
+
+        {/* Mini stats — période sélectionnée */}
+        <div className="grid grid-cols-3 gap-2">
+          <MiniStat
+            label="Commandes payées"
+            value={(data.orders_breakdown?.confirmed ?? 0) + (data.orders_breakdown?.delivered ?? 0)}
+          />
+          <MiniStat
+            label="Panier moyen"
+            value={data.avg_basket > 0 ? formatFCFA(data.avg_basket) : '—'}
+            accent="text-amber"
+          />
+          <MiniStat
+            label="À encaisser"
+            value={data.unpaid_count ?? 0}
+            accent={data.unpaid_count > 0 ? 'text-orange' : 'text-white'}
+          />
         </div>
 
         {/* 4 action tiles — 2×2 grid */}
@@ -222,6 +261,25 @@ export function DashboardPage() {
           />
         </div>
 
+        {/* Dernières commandes */}
+        {(data.recent_orders?.length ?? 0) > 0 && (
+          <div className="glass rounded-3xl overflow-hidden">
+            <div className="flex items-center justify-between px-4 pt-4 pb-2">
+              <p className="text-micro text-white/45 uppercase tracking-wider">Dernières commandes</p>
+              <Link to="/app/commandes" className="text-micro text-orange hover:underline">
+                Voir tout
+              </Link>
+            </div>
+            {data.recent_orders.map(order => (
+              <OrderRow
+                key={order.id}
+                order={order}
+                onClick={() => navigate('/app/commandes')}
+              />
+            ))}
+          </div>
+        )}
+
         {/* Stock bas alert — compact */}
         {data.low_stock_count > 0 && (
           <Link
@@ -256,16 +314,29 @@ export function DashboardPage() {
           <ChevronRight size={16} className="text-white/30 shrink-0" />
         </Link>
 
-        {/* Analytics avancées — gated sur plan_limits.features.advanced_stats */}
-        {advancedStats === true && (
-          <div className="glass rounded-3xl px-4 py-4 border border-amber/20 flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-amber/15 flex items-center justify-center shrink-0">
-              <BarChart2 size={18} className="text-amber" />
+        {/* Analytics avancées (top produits) — gated sur plan_limits.features.advanced_stats */}
+        {advancedStats === true && (data.top_products?.length ?? 0) > 0 && (
+          <div className="glass rounded-3xl overflow-hidden border border-amber/15">
+            <div className="flex items-center gap-2 px-4 pt-4 pb-2">
+              <BarChart2 size={15} className="text-amber" />
+              <p className="text-micro text-white/45 uppercase tracking-wider">
+                Top produits — {activePeriod.label.toLowerCase()}
+              </p>
             </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-body font-semibold text-white">Analytics avancées</p>
-              <p className="text-micro text-white/45">Graphiques détaillés bientôt disponibles</p>
-            </div>
+            {data.top_products.map((p, i) => (
+              <div key={p.name} className="flex items-center gap-3 px-4 py-2.5 border-t border-white/5">
+                <span className={`w-6 h-6 rounded-lg flex items-center justify-center text-micro font-bold shrink-0 ${
+                  i === 0 ? 'bg-amber/20 text-amber' : 'bg-white/8 text-white/50'
+                }`}>
+                  {i + 1}
+                </span>
+                <p className="flex-1 min-w-0 text-body text-white truncate">{p.name}</p>
+                <div className="text-right shrink-0">
+                  <p className="text-label font-semibold text-white">×{p.quantity}</p>
+                  <p className="text-micro text-white/40">{formatFCFA(p.revenue)}</p>
+                </div>
+              </div>
+            ))}
           </div>
         )}
         {advancedStats === false && (

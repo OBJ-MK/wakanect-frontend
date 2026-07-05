@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import {
   TrendingUp, ShoppingBag, CheckSquare, LayoutGrid,
-  Share2, Bell, Package, ChevronRight, AlertTriangle, BarChart2, Lock
+  Share2, Bell, Package, ChevronRight, AlertTriangle, BarChart2, Lock, ShieldAlert
 } from 'lucide-react'
 import { useDashboard } from '@/hooks/useDashboard'
 import { useAuthStore } from '@/store/authStore'
@@ -121,6 +121,24 @@ export function DashboardPage() {
       </div>
 
       <div className="page-container py-5 flex flex-col gap-5">
+        {/* Vérification du numéro WhatsApp — n'apparaît que si le numéro
+            Wakanect est configuré côté back ET que le numéro n'est pas vérifié */}
+        {merchant?.wakanect_whatsapp_number && merchant?.phone_verified === false && merchant?.role === 'owner' && (
+          <Link
+            to="/app/verifier-numero"
+            className="flex items-center gap-3 glass rounded-3xl px-4 py-3 border border-orange/25 hover:bg-orange/8 active:scale-[0.98] transition-all"
+          >
+            <div className="w-8 h-8 rounded-xl bg-orange/15 flex items-center justify-center shrink-0">
+              <ShieldAlert size={16} className="text-orange" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-body font-semibold text-white">Vérifie ton numéro WhatsApp</p>
+              <p className="text-micro text-white/45">10 secondes, gratuit — envoie un code sur WhatsApp</p>
+            </div>
+            <ChevronRight size={16} className="text-white/30 shrink-0" />
+          </Link>
+        )}
+
         {/* Revenue hero — glass card */}
         <div className="relative overflow-hidden rounded-4xl glass p-6">
           <div className="absolute top-0 left-0 right-0 h-0.5 gradient-thread opacity-80" />

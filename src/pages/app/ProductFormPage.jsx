@@ -57,23 +57,33 @@ function TagInput({ label, tags, onAdd, onRemove, placeholder, colorClass = 'bg-
 
 function ImageManager({ productId, images, onChange, onError }) {
   const [uploading, setUploading] = useState(false)
+  const [uploadProgress, setUploadProgress] = useState(null) // "2/5" pendant un lot
   const [deletingId, setDeletingId] = useState(null)
   const [settingPrimaryId, setSettingPrimaryId] = useState(null)
 
   const busy = uploading || deletingId !== null || settingPrimaryId !== null
 
   async function handleAdd(e) {
-    const f = e.target.files?.[0]
-    if (!f) return
+    const files = Array.from(e.target.files || [])
+    if (files.length === 0) return
     setUploading(true)
     onError(null)
+    // Upload séquentiel : l'API accepte une image à la fois, on enchaîne
+    let lastError = null
     try {
-      const { product } = await stockService.uploadImage(productId, f)
-      onChange(product.images)
-    } catch (err) {
-      onError(err.message)
+      for (let i = 0; i < files.length; i++) {
+        if (files.length > 1) setUploadProgress(`${i + 1}/${files.length}`)
+        try {
+          const { product } = await stockService.uploadImage(productId, files[i])
+          onChange(product.images)
+        } catch (err) {
+          lastError = err
+        }
+      }
+      if (lastError) onError(lastError.message)
     } finally {
       setUploading(false)
+      setUploadProgress(null)
       e.target.value = ''
     }
   }
@@ -157,13 +167,17 @@ function ImageManager({ productId, images, onChange, onError }) {
         ))}
 
         {/* Bouton ajouter */}
-        <label className={`shrink-0 h-20 w-20 rounded-2xl border-2 border-dashed border-white/20 flex items-center justify-center transition-all ${
+        <label className={`shrink-0 h-20 w-20 rounded-2xl border-2 border-dashed border-white/20 flex flex-col items-center justify-center gap-0.5 transition-all ${
           busy ? 'opacity-40 cursor-wait' : 'cursor-pointer hover:border-white/40 hover:text-white/60'
         } text-white/40`}>
           {uploading ? <Loader2 size={20} className="animate-spin" /> : <Plus size={20} />}
+          {uploadProgress && (
+            <span className="text-[10px] leading-none">{uploadProgress}</span>
+          )}
           <input
             type="file"
             accept="image/jpeg,image/png,image/webp"
+            multiple
             className="sr-only"
             disabled={busy}
             onChange={handleAdd}
@@ -171,7 +185,7 @@ function ImageManager({ productId, images, onChange, onError }) {
         </label>
       </div>
       {images.length === 0 && (
-        <p className="text-micro text-white/35">Appuyez sur + pour ajouter une photo</p>
+        <p className="text-micro text-white/35">Appuyez sur + — vous pouvez sélectionner plusieurs photos d'un coup</p>
       )}
     </div>
   )
@@ -185,6 +199,7 @@ export function ProductFormPage() {
   const [form, setForm] = useState({
     name: '',
     price: '',
+    wholesalePrice: '',
     stock: '',
     category: '',
     description: '',
@@ -208,6 +223,7 @@ export function ProductFormPage() {
         setForm({
           name:        product.name        ?? '',
           price:       product.price       ?? '',
+          wholesalePrice: product.wholesale_price ?? '',
           stock:       product.stock       ?? '',
           category:    product.category    ?? '',
           description: product.description ?? '',
@@ -237,6 +253,7 @@ export function ProductFormPage() {
       const payload = {
         name:        form.name,
         price:       Number(form.price),
+        wholesalePrice: form.wholesalePrice === '' ? null : Number(form.wholesalePrice),
         description: form.description,
         category:    form.category,
         stock:       cleanVariants.length > 0
@@ -328,6 +345,19 @@ export function ProductFormPage() {
                 suffix="FCFA"
                 required
               />
+              <Input
+                label="Prix en gros"
+                type="number"
+                min="0"
+                placeholder="20000"
+                value={form.wholesalePrice}
+                onChange={set('wholesalePrice')}
+                suffix="FCFA"
+                hint="Facultatif"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
               <Input
                 label="Quantité"
                 type="number"

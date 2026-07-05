@@ -169,6 +169,11 @@ export function ProductDetailPage() {
           </p>
           <h1 className="font-display font-bold text-h2 text-navy dark:text-white">{product.name}</h1>
           <p className="font-display font-bold text-h1 text-orange mt-1">{formatFCFA(product.price)}</p>
+          {product.wholesale_price > 0 && (
+            <p className="text-label text-navy/60 dark:text-white/60 mt-0.5">
+              Prix en gros : <span className="font-semibold text-navy dark:text-white">{formatFCFA(product.wholesale_price)}</span>
+            </p>
+          )}
 
           {outOfStock ? (
             <span className="inline-flex mt-2 px-3 py-1 rounded-full bg-red-100 dark:bg-red-500/15 text-red-500 dark:text-red-400 text-label font-semibold">

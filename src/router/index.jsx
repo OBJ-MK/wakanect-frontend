@@ -49,6 +49,7 @@ import { AjouterEmployePage } from '@/pages/app/AjouterEmployePage'
 import { FicheEmployePage } from '@/pages/app/FicheEmployePage'
 import { ActiverNotificationsPage } from '@/pages/app/ActiverNotificationsPage'
 import { InstallerAppPage } from '@/pages/app/InstallerAppPage'
+import { VerifierNumeroPage } from '@/pages/app/VerifierNumeroPage'
 
 // Public boutique
 import { CataloguePage } from '@/pages/public/CataloguePage'
@@ -120,6 +121,7 @@ export const router = createBrowserRouter([
           { path: 'profil/abonnement', element: <RequirePermission perm={PERM.BILLING_MANAGE}><MonAbonnementPage /></RequirePermission> },
           { path: 'profil/installer', element: <InstallerAppPage /> },
           { path: 'notifications/activer', element: <ActiverNotificationsPage /> },
+          { path: 'verifier-numero', element: <VerifierNumeroPage /> },
           { path: 'equipe', element: <RequirePermission perm={PERM.TEAM_MANAGE}><MonEquipePage /></RequirePermission> },
           { path: 'equipe/ajouter', element: <RequirePermission perm={PERM.TEAM_MANAGE}><AjouterEmployePage /></RequirePermission> },
           { path: 'equipe/:id', element: <RequirePermission perm={PERM.TEAM_MANAGE}><FicheEmployePage /></RequirePermission> },

@@ -1,4 +1,4 @@
-const BACKEND = 'https://wakanectbackend.up.railway.app';
+const BACKEND = 'https://wakanect-backend.onrender.com';
 const API_PREFIX = '/api';
 
 const CRAWLER_RE = /facebookexternalhit|facebot|whatsapp|twitterbot|linkedinbot|slackbot|telegrambot|discordbot|pinterest|redditbot|googlebot|bingbot|applebot|embedly|vkshare|skypeuripreview/i;

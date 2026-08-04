@@ -111,7 +111,6 @@ export function CheckoutPage() {
 
       clearCart()
       navigate(`/boutique/${slug}/confirmation`)
-
     } catch (err) {
       setErrors({ _: err.message })
     } finally {

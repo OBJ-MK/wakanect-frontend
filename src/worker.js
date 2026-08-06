@@ -13,9 +13,9 @@ function truncate(s = '', n = 200) {
   return s.length > n ? s.slice(0, n - 1).trimEnd() + '…' : s;
 }
 
-class HeadInjector { constructor(h){this.h=h;} element(el){el.append(this.h,{html:true});} }
-class TitleRewriter { constructor(t){this.t=t;} element(el){el.setInnerContent(this.t);} }
-class MetaContentRewriter { constructor(c){this.c=c;} element(el){el.setAttribute('content',this.c);} }
+class HeadInjector { constructor(h) { this.h = h; } element(el) { el.append(this.h, { html: true }); } }
+class TitleRewriter { constructor(t) { this.t = t; } element(el) { el.setInnerContent(this.t); } }
+class MetaContentRewriter { constructor(c) { this.c = c; } element(el) { el.setAttribute('content', this.c); } }
 
 async function fetchBoutiqueMeta(slug) {
   const ctrl = new AbortController();
@@ -51,8 +51,7 @@ export default {
     const url = new URL(request.url);
 
     if (url.pathname === '/geo') {
-      const raw = request.cf?.country ?? 'SN';
-      const country = raw === 'ML' ? 'ML' : 'SN';
+      const country = (request.cf?.country ?? 'SN').toUpperCase();
       return new Response(JSON.stringify({ country }), {
         headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' },
       });

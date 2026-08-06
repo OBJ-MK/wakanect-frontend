@@ -19,7 +19,7 @@ async function detectCountry() {
     const r = await fetch('/geo')
     if (!r.ok) return 'SN'
     const { country } = await r.json()
-    return country === 'ML' ? 'ML' : 'SN'
+    return country || 'SN'
   } catch {
     return 'SN'
   }
@@ -43,9 +43,9 @@ export function usePlans({ country: forcedCountry } = {}) {
   const [state, setState] = useState(() => {
     const cached = _cache.get(cacheKey)
     return {
-      data:    cached?.data ?? null,
+      data: cached?.data ?? null,
       loading: !cached,
-      error:   null,
+      error: null,
     }
   })
 

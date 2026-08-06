@@ -19,12 +19,12 @@ const DEFAULT_FEATURES = Object.fromEntries(FEATURES.map(f => [f.key, false]))
 function planDraft(entry) {
   const prices = entry?.prices ?? {}
   return {
-    label: entry?.label ?? '',
+    label:         entry?.label         ?? '',
     scansPerMonth: entry?.scansPerMonth ?? 0,
-    maxEmployees: entry?.maxEmployees ?? 0,
-    priceTier1: prices['1'] ?? prices.get?.('1') ?? 0,
-    priceTier2: prices['2'] ?? prices.get?.('2') ?? 0,
-    priceTier3: prices['3'] ?? prices.get?.('3') ?? 0,
+    maxEmployees:  entry?.maxEmployees  ?? 0,
+    priceTier1:    prices['1'] ?? 0,
+    priceTier2:    prices['2'] ?? 0,
+    priceTier3:    prices['3'] ?? 0,
     features: { ...DEFAULT_FEATURES, ...(entry?.features ?? {}) },
   }
 }
@@ -137,8 +137,11 @@ function PlanCard({ planKey, entry, onSaved }) {
         label: draft.label,
         scansPerMonth: draft.scansPerMonth,
         maxEmployees: draft.maxEmployees,
-        priceSN: draft.priceSN,
-        priceML: draft.priceML,
+        prices: {
+          '1': draft.priceTier1,
+          '2': draft.priceTier2,
+          '3': draft.priceTier3,
+        },
         features: draft.features,
       })
       setOk(true)
@@ -224,26 +227,29 @@ function TrialCard({ data, onSaved }) {
   const set = key => value => setDraft(d => ({ ...d, [key]: value }))
 
   async function handleSave(e) {
-    e.preventDefault()
-    setSaving(true); setError(null); setOk(false)
-    try {
-      await adminApi.updatePlan(planKey, {
-        label: draft.label,
-        scansPerMonth: draft.scansPerMonth,
-        maxEmployees: draft.maxEmployees,
-        prices: {
-          '1': draft.priceTier1,
-          '2': draft.priceTier2,
-          '3': draft.priceTier3,
-        },
-        features: draft.features,
-      })
-    } catch (err) {
-      setError(err.message ?? 'Erreur réseau')
-    } finally {
-      setSaving(false)
-    }
+  e.preventDefault()
+  setSaving(true); setError(null); setOk(false)
+  try {
+    await adminApi.updatePlan(planKey, {
+      label:         draft.label,
+      scansPerMonth: draft.scansPerMonth,
+      maxEmployees:  draft.maxEmployees,
+      prices: {
+        '1': draft.priceTier1,
+        '2': draft.priceTier2,
+        '3': draft.priceTier3,
+      },
+      features:      draft.features,
+    })
+    setOk(true)
+    setTimeout(() => setOk(false), 3000)
+    onSaved()
+  } catch (err) {
+    setError(err.message ?? 'Erreur réseau')
+  } finally {
+    setSaving(false)
   }
+}
 
   return (
     <form onSubmit={handleSave} className="bg-white rounded-xl shadow-admin-card overflow-hidden">

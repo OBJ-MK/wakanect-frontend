@@ -8,21 +8,23 @@ import { LoadingState } from '@/components/admin/LoadingState'
 // Features booléennes — employee_management retiré, remplacé par maxEmployees.
 const FEATURES = [
   { key: 'public_storefront', label: 'Boutique publique' },
-  { key: 'order_management',  label: 'Gestion des commandes' },
+  { key: 'order_management', label: 'Gestion des commandes' },
   { key: 'unlimited_catalog', label: 'Catalogue illimité' },
-  { key: 'advanced_stats',    label: 'Analytics avancées' },
-  { key: 'priority_support',  label: 'Support prioritaire 24h' },
+  { key: 'advanced_stats', label: 'Analytics avancées' },
+  { key: 'priority_support', label: 'Support prioritaire 24h' },
 ]
 
 const DEFAULT_FEATURES = Object.fromEntries(FEATURES.map(f => [f.key, false]))
 
 function planDraft(entry) {
+  const prices = entry?.prices ?? {}
   return {
-    label:         entry?.label         ?? '',
+    label: entry?.label ?? '',
     scansPerMonth: entry?.scansPerMonth ?? 0,
-    maxEmployees:  entry?.maxEmployees  ?? 0,
-    priceSN:       entry?.priceSN       ?? 0,
-    priceML:       entry?.priceML       ?? 0,
+    maxEmployees: entry?.maxEmployees ?? 0,
+    priceTier1: prices['1'] ?? prices.get?.('1') ?? 0,
+    priceTier2: prices['2'] ?? prices.get?.('2') ?? 0,
+    priceTier3: prices['3'] ?? prices.get?.('3') ?? 0,
     features: { ...DEFAULT_FEATURES, ...(entry?.features ?? {}) },
   }
 }
@@ -73,13 +75,11 @@ function Toggle({ checked, onChange, label }) {
         role="switch"
         aria-checked={checked}
         onClick={() => onChange(!checked)}
-        className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
-          checked ? 'bg-orange' : 'bg-admin-line'
-        }`}
+        className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${checked ? 'bg-orange' : 'bg-admin-line'
+          }`}
       >
-        <span className={`inline-block h-3.5 w-3.5 rounded-full bg-white shadow transition-transform ${
-          checked ? 'translate-x-[18px]' : 'translate-x-0.5'
-        }`} />
+        <span className={`inline-block h-3.5 w-3.5 rounded-full bg-white shadow transition-transform ${checked ? 'translate-x-[18px]' : 'translate-x-0.5'
+          }`} />
       </button>
       <span className={`text-body ${checked ? 'text-navy font-medium' : 'text-admin-muted'}`}>
         {label}
@@ -123,8 +123,8 @@ function SaveFeedback({ saving, ok, error, onSubmit, label = 'Enregistrer' }) {
 function PlanCard({ planKey, entry, onSaved }) {
   const [draft, setDraft] = useState(() => planDraft(entry))
   const [saving, setSaving] = useState(false)
-  const [error,  setError]  = useState(null)
-  const [ok,     setOk]     = useState(false)
+  const [error, setError] = useState(null)
+  const [ok, setOk] = useState(false)
 
   const set = key => value => setDraft(d => ({ ...d, [key]: value }))
   const setFeature = key => value => setDraft(d => ({ ...d, features: { ...d.features, [key]: value } }))
@@ -134,12 +134,12 @@ function PlanCard({ planKey, entry, onSaved }) {
     setSaving(true); setError(null); setOk(false)
     try {
       await adminApi.updatePlan(planKey, {
-        label:         draft.label,
+        label: draft.label,
         scansPerMonth: draft.scansPerMonth,
-        maxEmployees:  draft.maxEmployees,
-        priceSN:       draft.priceSN,
-        priceML:       draft.priceML,
-        features:      draft.features,
+        maxEmployees: draft.maxEmployees,
+        priceSN: draft.priceSN,
+        priceML: draft.priceML,
+        features: draft.features,
       })
       setOk(true)
       setTimeout(() => setOk(false), 3000)
@@ -171,11 +171,14 @@ function PlanCard({ planKey, entry, onSaved }) {
         <FieldRow label="Libellé affiché">
           <TextInput value={draft.label} onChange={set('label')} placeholder={planKey === 'pro' ? 'Pro' : 'Premium'} />
         </FieldRow>
-        <FieldRow label="Prix mensuel SN (FCFA)">
-          <NumInput value={draft.priceSN} onChange={set('priceSN')} />
+        <FieldRow label="Prix mensuel — Tier 1 (FCFA)" hint="Fort pouvoir d'achat (SN, CI, GH, NG...)">
+          <NumInput value={draft.priceTier1} onChange={set('priceTier1')} />
         </FieldRow>
-        <FieldRow label="Prix mensuel ML (FCFA)">
-          <NumInput value={draft.priceML} onChange={set('priceML')} />
+        <FieldRow label="Prix mensuel — Tier 2 (FCFA)" hint="Intermédiaire (ML, BJ, BF...)">
+          <NumInput value={draft.priceTier2} onChange={set('priceTier2')} />
+        </FieldRow>
+        <FieldRow label="Prix mensuel — Tier 3 (FCFA)" hint="Accessible (NE, SL, CD...)">
+          <NumInput value={draft.priceTier3} onChange={set('priceTier3')} />
         </FieldRow>
         <FieldRow label="Scans / mois">
           <NumInput value={draft.scansPerMonth} onChange={set('scansPerMonth')} min={1} />
@@ -211,12 +214,12 @@ function PlanCard({ planKey, entry, onSaved }) {
 
 function TrialCard({ data, onSaved }) {
   const [draft, setDraft] = useState({
-    days:  data?.trial?.days  ?? 14,
+    days: data?.trial?.days ?? 14,
     scans: data?.trial?.scans ?? 100,
   })
   const [saving, setSaving] = useState(false)
-  const [error,  setError]  = useState(null)
-  const [ok,     setOk]     = useState(false)
+  const [error, setError] = useState(null)
+  const [ok, setOk] = useState(false)
 
   const set = key => value => setDraft(d => ({ ...d, [key]: value }))
 
@@ -224,10 +227,17 @@ function TrialCard({ data, onSaved }) {
     e.preventDefault()
     setSaving(true); setError(null); setOk(false)
     try {
-      await adminApi.updatePlan('trial', draft)
-      setOk(true)
-      setTimeout(() => setOk(false), 3000)
-      onSaved()
+      await adminApi.updatePlan(planKey, {
+        label: draft.label,
+        scansPerMonth: draft.scansPerMonth,
+        maxEmployees: draft.maxEmployees,
+        prices: {
+          '1': draft.priceTier1,
+          '2': draft.priceTier2,
+          '3': draft.priceTier3,
+        },
+        features: draft.features,
+      })
     } catch (err) {
       setError(err.message ?? 'Erreur réseau')
     } finally {
@@ -265,13 +275,13 @@ function TrialCard({ data, onSaved }) {
 
 function DiscountsCard({ data, onSaved }) {
   const [draft, setDraft] = useState({
-    quarterlyMultiplier:  data?.discounts?.quarterlyMultiplier  ?? 2.7,
+    quarterlyMultiplier: data?.discounts?.quarterlyMultiplier ?? 2.7,
     semiannualMultiplier: data?.discounts?.semiannualMultiplier ?? 5,
-    annualMultiplier:     data?.discounts?.annualMultiplier     ?? 10,
+    annualMultiplier: data?.discounts?.annualMultiplier ?? 10,
   })
   const [saving, setSaving] = useState(false)
-  const [error,  setError]  = useState(null)
-  const [ok,     setOk]     = useState(false)
+  const [error, setError] = useState(null)
+  const [ok, setOk] = useState(false)
 
   const set = key => value => setDraft(d => ({ ...d, [key]: value }))
 
@@ -370,13 +380,13 @@ export default function PlansAdminPage() {
         <div className="space-y-6">
           {/* Plans payants */}
           <div className="grid gap-6 xl:grid-cols-2">
-            <PlanCard planKey="pro"     entry={data?.pro}     onSaved={refetch} />
+            <PlanCard planKey="pro" entry={data?.pro} onSaved={refetch} />
             <PlanCard planKey="premium" entry={data?.premium} onSaved={refetch} />
           </div>
 
           {/* Gratuit + Remises côte à côte sur grand écran */}
           <div className="grid gap-6 xl:grid-cols-2">
-            <TrialCard   data={data}  onSaved={refetch} />
+            <TrialCard data={data} onSaved={refetch} />
             <DiscountsCard data={data} onSaved={refetch} />
           </div>
         </div>

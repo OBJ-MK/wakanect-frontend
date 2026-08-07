@@ -50,7 +50,7 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
 
-    if (url.pathname === '/geo') {
+     if (url.pathname === '/edge-country') {
       const country = (request.cf?.country ?? 'SN').toUpperCase();
       return new Response(JSON.stringify({ country }), {
         headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' },

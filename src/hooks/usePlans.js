@@ -16,7 +16,7 @@ const CACHE_TTL = 60_000
 async function detectCountry() {
   if (localStorage.getItem('waka_token')) return null  // backend résout depuis le token
   try {
-    const r = await fetch('/geo')
+    const r = await fetch('/edge-country', { cache: 'no-store' })
     if (!r.ok) return 'SN'
     const { country } = await r.json()
     return country || 'SN'

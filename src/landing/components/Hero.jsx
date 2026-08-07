@@ -15,7 +15,7 @@ const LINES = [
 
 export default function Hero() {
   const root = useRef(null);
-  const { data } = usePlans({ country: 'SN' });
+  const { data } = usePlans();
 
   // Valeurs issues de /api/plans, avec fallback raisonnable
   const trialDays  = data?.trial?.days  ?? 14;

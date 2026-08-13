@@ -15,7 +15,8 @@ export function CheckoutPage() {
   const cart = useCatalogueStore(s => s.cart)
   const clearCart = useCatalogueStore(s => s.clearCart)
   const boutique = useCatalogueStore(s => s.boutique)
-
+  const removeFromCart = useCatalogueStore(s => s.removeFromCart)
+  const updateQty = useCatalogueStore(s => s.updateQty)
   const [form, setForm] = useState({
     name: '',
     phone: '',
@@ -167,9 +168,32 @@ export function CheckoutPage() {
                   {item.selectedColor && (
                     <p className="text-micro text-navy/45 dark:text-white/45">{item.selectedColor}</p>
                   )}
+                  <div className="flex items-center gap-2 mt-1">
+                    <button
+                      type="button"
+                      onClick={() => updateQty(item.key, item.quantity - 1)}
+                      className="w-6 h-6 rounded-full border border-navy/15 dark:border-white/15 flex items-center justify-center text-navy dark:text-white hover:border-orange"
+                    >
+                      −
+                    </button>
+                    <span className="text-label text-navy dark:text-white w-4 text-center">{item.quantity}</span>
+                    <button
+                      type="button"
+                      onClick={() => updateQty(item.key, item.quantity + 1)}
+                      className="w-6 h-6 rounded-full border border-navy/15 dark:border-white/15 flex items-center justify-center text-navy dark:text-white hover:border-orange"
+                    >
+                      +
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => removeFromCart(item.key)}
+                      className="ml-1 text-micro text-red-500/80 hover:text-red-500 underline"
+                    >
+                      Retirer
+                    </button>
+                  </div>
                 </div>
                 <div className="text-right shrink-0">
-                  <p className="text-micro text-navy/50 dark:text-white/50">×{item.quantity}</p>
                   <p className="text-label font-semibold text-orange">{formatFCFA(item.price * item.quantity)}</p>
                 </div>
               </div>

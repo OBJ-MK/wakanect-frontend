@@ -10,6 +10,9 @@ export const catalogueService = {
     if (sort) params.set('sort', sort)
     return api.get(`/api/boutique/${slug}?${params}`)
   },
+
+  getProduct: (slug, id) => api.get(`/api/boutique/${slug}/produit/${id}`),
+
   createOrder: (data) => api.post('/api/orders/public', data),
   uploadPaymentProof: (orderId, file) => {
     const formData = new FormData()

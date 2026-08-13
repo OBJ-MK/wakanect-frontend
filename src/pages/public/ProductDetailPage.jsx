@@ -136,9 +136,12 @@ export function ProductDetailPage() {
 
   const colorAvailable = (color) => product.colors?.includes(color)
 
+  const [added, setAdded] = useState(false)
+
   function addToCart() {
     addToCartStore(product, activeColor, qty)
-    navigate(`/boutique/${slug}/commande`)
+    setAdded(true)
+    setTimeout(() => setAdded(false), 1400)
   }
 
   return (
@@ -279,7 +282,7 @@ export function ProductDetailPage() {
             className="flex items-center justify-center gap-2 py-4 rounded-3xl bg-orange text-white font-semibold text-body hover:bg-orange-hi active:scale-[0.98] transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-orange-glow"
           >
             <ShoppingBag size={18} />
-            {outOfStock ? 'Épuisé' : 'Ajouter au panier'}
+            {outOfStock ? 'Épuisé' : added ? '✓ Ajouté' : 'Ajouter au panier'}
           </button>
         </div>
       </div>

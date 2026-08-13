@@ -10,5 +10,5 @@ export const orderService = {
   },
   get: (id) => api.get(`/api/orders/${id}`),
   updateStatus: (id, status) => api.patch(`/api/orders/${id}/status`, { status }),
-  markPaid: (id) => api.patch(`/api/orders/${id}/payment`, {}),
+  markPaid: (id) => api.patch(`/api/orders/${id}/payment`, { payment_status: 'Payée' }),
 }

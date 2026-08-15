@@ -70,8 +70,8 @@ export const adminApi = {
     api.get('/api/admin/sante'),
 
   // ── Écran 9 · Audit ──────────────────────────────────────────────────────
-  audit: (scope = 'all') =>
-    api.get(`/api/admin/audit?scope=${scope}`),
+  audit: (scope = 'all', success = 'all') =>
+    api.get(`/api/admin/audit?scope=${scope}${success !== 'all' ? `&success=${success}` : ''}`),
 
   // ── Plans tarifaires ─────────────────────────────────────────────────────
   plans: () =>

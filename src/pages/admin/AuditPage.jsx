@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Shield } from 'lucide-react'
+import { Shield, CheckCircle2, XCircle } from 'lucide-react'
 import { adminApi } from '@/services/adminApi'
 import { useAdminQuery } from '@/hooks/useAdminQuery'
 import { DataTable } from '@/components/admin/DataTable'
@@ -10,7 +10,14 @@ import { EmptyState } from '@/components/admin/EmptyState'
 const SCOPE_OPTIONS = [
   { value: 'all',      label: 'Tout' },
   { value: 'admin',    label: 'Actions admin' },
+  { value: 'owner',    label: 'Actions propriétaires' },
   { value: 'employee', label: 'Actions employés' },
+]
+
+const RESULT_OPTIONS = [
+  { value: 'all',   label: 'Tout' },
+  { value: 'true',  label: 'Réussites' },
+  { value: 'false', label: 'Échecs' },
 ]
 
 const COLS = [
@@ -18,6 +25,7 @@ const COLS = [
   { key: 'author',     label: 'Auteur' },
   { key: 'authorType', label: 'Type' },
   { key: 'action',     label: 'Action' },
+  { key: 'success',    label: 'Résultat' },
   { key: 'target',     label: 'Cible' },
   { key: 'slug',       label: 'Boutique' },
 ]
@@ -29,10 +37,11 @@ function fmtDate(s) {
 
 export default function AuditPage() {
   const [scope, setScope] = useState('all')
+  const [resultFilter, setResultFilter] = useState('all')
 
   const { data, loading, error, refetch } = useAdminQuery(
-    () => adminApi.audit(scope),
-    [scope],
+    () => adminApi.audit(scope, resultFilter),
+    [scope, resultFilter],
   )
 
   if (error) return <ErrorState message={error} onRetry={refetch} />
@@ -68,6 +77,25 @@ export default function AuditPage() {
         </div>
       </div>
 
+      {/* Filtre résultat */}
+      <div className="flex gap-1.5">
+        {RESULT_OPTIONS.map(opt => (
+          <button
+            key={opt.value}
+            onClick={() => setResultFilter(opt.value)}
+            className={`px-3 py-1.5 text-label rounded-lg border transition-colors ${
+              resultFilter === opt.value
+                ? opt.value === 'false'
+                  ? 'bg-red-50 text-red-700 border-red-200'
+                  : 'bg-navy/10 text-navy border-navy/20'
+                : 'bg-white text-admin-ink-2 border-admin-line hover:border-navy/30'
+            }`}
+          >
+            {opt.label}
+          </button>
+        ))}
+      </div>
+
       {/* Note performedBy */}
       <div className="bg-navy/5 border border-admin-line rounded-xl px-4 py-3 flex items-start gap-2">
         <Shield className="w-4 h-4 text-navy shrink-0 mt-0.5" />
@@ -97,6 +125,16 @@ export default function AuditPage() {
                   )
                 : col.key === 'action'
                 ? (val) => <span className="font-mono text-micro text-admin-ink bg-admin-fill px-1.5 py-0.5 rounded">{val}</span>
+                : col.key === 'success'
+                ? (val) => val ? (
+                    <span className="inline-flex items-center gap-1 text-micro font-medium text-green-700">
+                      <CheckCircle2 className="w-3.5 h-3.5" /> Réussi
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 text-micro font-medium text-red-700">
+                      <XCircle className="w-3.5 h-3.5" /> Échec
+                    </span>
+                  )
                 : undefined,
             }))}
             rows={rows}

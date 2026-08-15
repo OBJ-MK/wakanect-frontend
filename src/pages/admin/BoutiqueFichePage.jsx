@@ -6,6 +6,7 @@ import {
 } from 'lucide-react'
 import { adminApi } from '@/services/adminApi'
 import { useAdminQuery } from '@/hooks/useAdminQuery'
+import { useAuthStore } from '@/store/authStore'
 import { useAdmin } from './AdminApp'
 import { KpiCard } from '@/components/admin/KpiCard'
 import { KpiSkeleton } from '@/components/admin/LoadingState'
@@ -32,6 +33,7 @@ export default function BoutiqueFichePage() {
   const { slug } = useParams()
   const navigate = useNavigate()
   const { setImpersonating } = useAdmin()
+  const { token: adminToken, merchant: adminMerchant, login } = useAuthStore()
 
   const { data, loading, error, refetch } = useAdminQuery(
     () => adminApi.boutique(slug),
@@ -56,9 +58,18 @@ export default function BoutiqueFichePage() {
   async function handleImpersonate() {
     setBusy('impersonate')
     try {
-      await adminApi.impersonate(boutique.id)
+      const { token, merchant: target } = await adminApi.impersonate(boutique.id)
+
+      // Sauvegarde la session admin pour pouvoir y revenir depuis /app
+      sessionStorage.setItem('waka_admin_backup', JSON.stringify({
+        token: adminToken,
+        merchant: adminMerchant,
+      }))
+
+      localStorage.setItem('waka_token', token)
+      login(token, target)
       setImpersonating({ id: boutique.id, slug: boutique.slug, name: boutique.name })
-      setActionSheet(false)
+      navigate('/app')
     } finally {
       setBusy(null)
     }

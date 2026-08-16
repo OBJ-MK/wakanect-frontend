@@ -98,6 +98,27 @@ export default function SantePage() {
         </div>
       )}
 
+      {/* Intégrations (variables d'environnement configurées côté serveur) */}
+      {!loading && data?.integrations && (
+        <div className="bg-white rounded-xl shadow-admin-card p-5">
+          <h3 className="text-h3 font-semibold text-navy mb-4">Intégrations</h3>
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
+            {data.integrations.map((it) => (
+              <div
+                key={it.name}
+                className={`flex items-center gap-2 px-3 py-2.5 rounded-lg ring-1 ${
+                  it.ok ? 'ring-wa-green/30 bg-wa-green/5' : 'ring-danger/20 bg-danger/5'
+                }`}
+              >
+                <div className={`w-2 h-2 rounded-full shrink-0 ${it.ok ? 'bg-wa-green' : 'bg-danger'}`} />
+                <span className="text-label text-admin-ink flex-1">{it.name}</span>
+                {!it.ok && <span className="text-micro font-medium text-danger">non configurée</span>}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Taux d'erreur par dépendance */}
       {!loading && (
         <div className="bg-white rounded-xl shadow-admin-card p-5">

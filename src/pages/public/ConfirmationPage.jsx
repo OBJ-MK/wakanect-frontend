@@ -20,17 +20,17 @@ export function ConfirmationPage() {
           Commande confirmée !
         </h1>
         <p className="text-body text-navy/60 dark:text-white/60 mb-2">
-          Votre reçu a été envoyé sur WhatsApp.
+          Votre commande a bien été transmise au commerçant.
         </p>
         <p className="text-label text-navy/40 dark:text-white/40 mb-8">
-          Le commerçant vous contactera sous peu pour confirmer les détails.
+          Il vous contactera sous peu sur WhatsApp pour confirmer les détails et convenir du paiement.
         </p>
 
-        {/* WhatsApp confirmation note */}
+        {/* Notification note — le commerçant est notifié, pas le client (pas de reçu WhatsApp envoyé) */}
         <div className="w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl bg-wa-green/10 border border-wa-green/20 mb-6">
           <MessageCircle size={18} className="text-wa-green shrink-0" />
           <p className="text-label text-navy dark:text-white/80 text-left">
-            Reçu envoyé par WhatsApp — vérifiez vos messages
+            Le commerçant a été notifié de votre commande
           </p>
         </div>
 

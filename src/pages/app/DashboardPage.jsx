@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import {
   TrendingUp, ShoppingBag, CheckSquare, LayoutGrid,
@@ -9,6 +9,7 @@ import { useAuthStore } from '@/store/authStore'
 import { formatFCFA } from '@/lib/formatters'
 import { WakanectLogo } from '@/components/brand/WakanectLogo'
 import { RevenueChart } from '@/components/features/dashbord/RevenueChart'
+import { notificationService } from '@/services/notificationService'
 
 const EMPTY_STATS = {
   revenue: 0,
@@ -67,6 +68,18 @@ export function DashboardPage() {
   const { stats, loading } = useDashboard(period)
   const activePeriod = PERIODS.find(p => p.id === period) ?? PERIODS[0]
 
+  const [unreadNotifs, setUnreadNotifs] = useState(0)
+  useEffect(() => {
+    let cancelled = false
+    notificationService.list()
+      .then(data => {
+        if (cancelled) return
+        setUnreadNotifs((data.notifications || []).filter(n => !n.read).length)
+      })
+      .catch(() => {})
+    return () => { cancelled = true }
+  }, [])
+
   const data = stats || EMPTY_STATS
   const firstName = (merchant?.actor_name ?? merchant?.owner_name)?.split(' ')[0] ?? 'commerçant'
 
@@ -87,7 +100,7 @@ export function DashboardPage() {
             aria-label="Notifications"
           >
             <Bell size={20} />
-            {data.pending_validation > 0 && (
+            {unreadNotifs > 0 && (
               <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-orange" />
             )}
           </Link>

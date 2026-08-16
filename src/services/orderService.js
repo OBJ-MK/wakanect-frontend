@@ -9,6 +9,7 @@ export const orderService = {
     return api.get(`/api/orders?${params}`)
   },
   get: (id) => api.get(`/api/orders/${id}`),
-  updateStatus: (id, status) => api.patch(`/api/orders/${id}/status`, { status }),
+  updateStatus: (id, status, cancelReason, cancelReasonDetail) =>
+    api.patch(`/api/orders/${id}/status`, { status, cancelReason, cancelReasonDetail }),
   markPaid: (id) => api.patch(`/api/orders/${id}/payment`, { payment_status: 'Payée' }),
 }

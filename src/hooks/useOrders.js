@@ -53,12 +53,13 @@ export function useOrders({ search = '', status = 'Toutes', sort = '', page = 1 
     fetchList()
   }, [fetchList])
 
-  async function changeStatus(id, newStatus) {
-    await orderService.updateStatus(id, newStatus)
+  async function changeStatus(id, newStatus, cancelReason, cancelReasonDetail) {
+    const res = await orderService.updateStatus(id, newStatus, cancelReason, cancelReasonDetail)
     updateOrderStatus(id, newStatus)
     // Le statut a changé : invalide toutes les pages commandes en cache
     useListCacheStore.getState().clearPrefix('orders|')
     fetchList({ silent: true })
+    return res
   }
 
   async function markPaid(id) {

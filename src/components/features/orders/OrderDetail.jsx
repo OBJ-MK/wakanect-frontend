@@ -1,11 +1,22 @@
+import { useState } from 'react'
 import { formatFCFA, formatDate } from '@/lib/formatters'
 import { OrderStatusStepper } from './OrderStatusStepper'
 import { PaymentBadge } from './PaymentBadge'
+import { CancelReasonModal } from './CancelReasonModal'
 import { Button } from '@/components/ui/Button'
 import { MapPin, Phone, MessageCircle, Package } from 'lucide-react'
 import { PerformedBy } from '@/components/ui/PerformedBy'
 
-export function OrderDetail({ order, onStatusUpdate, onMarkPaid, loading }) {
+const CANCEL_REASON_LABELS = {
+  stock_epuise:          'Stock épuisé',
+  variante_indisponible: 'Couleur / taille non disponible',
+  client_injoignable:    'Client injoignable',
+  autre:                 null, // affiche cancel_reason_detail directement
+}
+
+export function OrderDetail({ order, onStatusUpdate, onCancel, onMarkPaid, loading }) {
+  const [showCancelModal, setShowCancelModal] = useState(false)
+
   if (!order) return null
 
   const status = order.status
@@ -149,7 +160,7 @@ export function OrderDetail({ order, onStatusUpdate, onMarkPaid, loading }) {
           )}
           {canCancel && (
             <button
-              onClick={() => onStatusUpdate('Annulée')}
+              onClick={() => setShowCancelModal(true)}
               disabled={loading}
               className="text-center text-label text-red-400/80 hover:text-red-400 transition-colors py-1.5 disabled:opacity-40"
             >
@@ -158,6 +169,25 @@ export function OrderDetail({ order, onStatusUpdate, onMarkPaid, loading }) {
           )}
         </div>
       )}
+
+      {status === 'Annulée' && order.cancel_reason && (
+        <div className="glass rounded-3xl p-4 border border-red-500/15">
+          <p className="text-micro text-white/45 uppercase tracking-wider mb-1">Raison de l'annulation</p>
+          <p className="text-body text-white/80">
+            {CANCEL_REASON_LABELS[order.cancel_reason] || order.cancel_reason_detail}
+          </p>
+        </div>
+      )}
+
+      <CancelReasonModal
+        isOpen={showCancelModal}
+        onClose={() => setShowCancelModal(false)}
+        loading={loading}
+        onConfirm={(reason, detail) => {
+          setShowCancelModal(false)
+          onCancel(reason, detail)
+        }}
+      />
     </div>
   )
 }

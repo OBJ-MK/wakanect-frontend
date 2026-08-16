@@ -178,6 +178,7 @@ export function DashboardPage() {
             icon={ShoppingBag}
             label="Commandes"
             description={`${data.orders_count ?? 0} au total`}
+            badge={data.orders_breakdown?.new}
             color="orange"
           />
           <ActionTile

@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { ChevronLeft, MessageCircle } from 'lucide-react'
+import { ChevronLeft } from 'lucide-react'
 import { useOrders } from '@/hooks/useOrders'
 import { OrderDetail } from '@/components/features/orders/OrderDetail'
 import { StatusBadge } from '@/components/ui/StatusBadge'
@@ -43,7 +43,7 @@ export function OrdersPage() {
   const listRef = useRef(null)
 
   // Filtrage server-side : statut + recherche (débouncée dans le hook) + tri
-  const { orders: fetchedOrders, loading, total, pages, changeStatus, markPaid } = useOrders({
+  const { orders: fetchedOrders, loading, total, pages, changeStatus, markPaid, notifyLinkOpened, notifyConfirm } = useOrders({
     search: filters.search,
     status: filters.category,
     sort:   filters.sort,
@@ -94,16 +94,27 @@ export function OrdersPage() {
     }
   }
 
-  const [cancelWaLink, setCancelWaLink] = useState(null)
-  useEffect(() => { setCancelWaLink(null) }, [selected])
-
   async function handleCancel(reason, reasonDetail) {
     if (!selected) return
     if (!ensure(PERM.ORDERS_CANCEL)) return
     setStatusUpdating(true)
     try {
-      const res = await changeStatus(selected, 'Annulée', reason, reasonDetail)
-      if (res?.whatsappDeepLink) setCancelWaLink(res.whatsappDeepLink)
+      await changeStatus(selected, 'Annulée', reason, reasonDetail)
+    } finally {
+      setStatusUpdating(false)
+    }
+  }
+
+  async function handleNotifyLinkOpened() {
+    if (!selected) return
+    notifyLinkOpened(selected).catch(() => {})
+  }
+
+  async function handleNotifyConfirm() {
+    if (!selected) return
+    setStatusUpdating(true)
+    try {
+      await notifyConfirm(selected)
     } finally {
       setStatusUpdating(false)
     }
@@ -133,28 +144,13 @@ export function OrdersPage() {
           </div>
         </div>
         <div className="page-container py-5 pb-56">
-          {cancelWaLink && (
-            <a
-              href={cancelWaLink}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={() => setCancelWaLink(null)}
-              className="flex items-center gap-3 glass rounded-3xl px-4 py-3.5 border border-wa-green/25 hover:bg-wa-green/8 active:scale-[0.98] transition-all mb-4"
-            >
-              <div className="w-9 h-9 rounded-2xl bg-wa-green/15 flex items-center justify-center shrink-0">
-                <MessageCircle size={17} className="text-wa-green" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-body font-semibold text-white">Prévenir le client sur WhatsApp</p>
-                <p className="text-micro text-white/45">Message pré-rempli, à envoyer depuis ton WhatsApp</p>
-              </div>
-            </a>
-          )}
           <OrderDetail
             order={selectedOrder}
             onStatusUpdate={handleStatusUpdate}
             onCancel={handleCancel}
             onMarkPaid={handleMarkPaid}
+            onNotifyLinkOpened={handleNotifyLinkOpened}
+            onNotifyConfirm={handleNotifyConfirm}
             loading={statusUpdating}
           />
         </div>

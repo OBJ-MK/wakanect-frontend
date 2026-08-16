@@ -14,7 +14,7 @@ const CANCEL_REASON_LABELS = {
   autre:                 null, // affiche cancel_reason_detail directement
 }
 
-export function OrderDetail({ order, onStatusUpdate, onCancel, onMarkPaid, loading }) {
+export function OrderDetail({ order, onStatusUpdate, onCancel, onMarkPaid, onNotifyLinkOpened, onNotifyConfirm, loading }) {
   const [showCancelModal, setShowCancelModal] = useState(false)
 
   if (!order) return null
@@ -77,6 +77,7 @@ export function OrderDetail({ order, onStatusUpdate, onCancel, onMarkPaid, loadi
         </div>
         {order.customer_phone && (
           <a
+          
             href={`https://wa.me/${order.customer_phone.replace(/\D/g, '')}`}
             target="_blank"
             rel="noopener noreferrer"
@@ -171,11 +172,58 @@ export function OrderDetail({ order, onStatusUpdate, onCancel, onMarkPaid, loadi
       )}
 
       {status === 'Annulée' && order.cancel_reason && (
-        <div className="glass rounded-3xl p-4 border border-red-500/15">
-          <p className="text-micro text-white/45 uppercase tracking-wider mb-1">Raison de l'annulation</p>
-          <p className="text-body text-white/80">
-            {CANCEL_REASON_LABELS[order.cancel_reason] || order.cancel_reason_detail}
-          </p>
+        <div className="glass rounded-3xl p-4 border border-red-500/15 flex flex-col gap-3">
+          <div>
+            <p className="text-micro text-white/45 uppercase tracking-wider mb-1">Raison de l'annulation</p>
+            <p className="text-body text-white/80">
+              {CANCEL_REASON_LABELS[order.cancel_reason] || order.cancel_reason_detail}
+            </p>
+          </div>
+
+          {order.whatsapp_cancel_link && (
+            <div className="border-t border-white/8 pt-3 flex flex-col gap-2.5">
+              <p className="text-micro text-white/45 uppercase tracking-wider">Prévenir le client</p>
+              <a
+              
+                href={order.whatsapp_cancel_link}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={onNotifyLinkOpened}
+                className="flex items-center gap-2.5 rounded-2xl bg-wa-green/10 border border-wa-green/25 px-3.5 py-3 hover:bg-wa-green/15 active:scale-[0.98] transition-all"
+              >
+                <MessageCircle size={16} className="text-wa-green shrink-0" />
+                <span className="text-label font-semibold text-white flex-1">
+                  {order.wa_link_opened_at ? 'Rouvrir le message WhatsApp' : 'Ouvrir WhatsApp avec le message pré-rempli'}
+                </span>
+              </a>
+
+              {order.wa_link_opened_at && (
+                <p className="text-micro text-white/40">
+                  Lien ouvert le {formatDate(order.wa_link_opened_at)}
+                  {!order.customer_notified_at && ' — a-t-il bien été envoyé ?'}
+                </p>
+              )}
+
+              {order.customer_notified_at ? (
+                <p className="flex items-center gap-1.5 text-label font-medium text-emerald-400">
+                  ✓ Client notifié le {formatDate(order.customer_notified_at)}
+                </p>
+              ) : (
+                <button
+                  onClick={onNotifyConfirm}
+                  disabled={loading}
+                  className="text-label font-semibold text-white/60 hover:text-white text-left disabled:opacity-40"
+                >
+                  Marquer comme envoyé au client
+                </button>
+              )}
+
+              <p className="text-micro text-white/30 leading-snug">
+                On ne peut pas confirmer automatiquement l'envoi ou la lecture — WhatsApp ne le permet
+                pas pour ce type de lien. C'est à toi de confirmer une fois le message envoyé.
+              </p>
+            </div>
+          )}
         </div>
       )}
 

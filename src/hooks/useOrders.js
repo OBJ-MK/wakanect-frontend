@@ -6,7 +6,7 @@ import { useListCacheStore, buildListKey } from '@/store/listCacheStore'
 const PAGE_SIZE = 20
 
 export function useOrders({ search = '', status = 'Toutes', sort = '', page = 1 } = {}) {
-  const { orders, setOrders, updateOrderStatus, updateOrderPayment } = useOrderStore()
+  const { orders, setOrders, updateOrderStatus, updateOrderPayment, patchOrder } = useOrderStore()
   const [loading, setLoading] = useState(true)
   const [total, setTotal]     = useState(0)
   const [pages, setPages]     = useState(1)
@@ -69,5 +69,19 @@ export function useOrders({ search = '', status = 'Toutes', sort = '', page = 1 
     fetchList({ silent: true })
   }
 
-  return { orders, loading, total, pages, error, changeStatus, markPaid }
+  async function notifyLinkOpened(id) {
+    const res = await orderService.notifyLinkOpened(id)
+    if (res?.order) {
+      patchOrder(id, { wa_link_opened_at: res.order.wa_link_opened_at })
+    }
+  }
+
+  async function notifyConfirm(id) {
+    const res = await orderService.notifyConfirm(id)
+    if (res?.order) {
+      patchOrder(id, { customer_notified_at: res.order.customer_notified_at })
+    }
+  }
+
+  return { orders, loading, total, pages, error, changeStatus, markPaid, notifyLinkOpened, notifyConfirm }
 }

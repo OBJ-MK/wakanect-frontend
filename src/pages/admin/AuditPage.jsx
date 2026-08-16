@@ -25,10 +25,74 @@ const COLS = [
   { key: 'author',     label: 'Auteur' },
   { key: 'authorType', label: 'Type' },
   { key: 'action',     label: 'Action' },
+  { key: 'details',    label: 'Détails' },
   { key: 'success',    label: 'Résultat' },
   { key: 'target',     label: 'Cible' },
   { key: 'slug',       label: 'Boutique' },
 ]
+
+const STATUS_LABELS_FR = {
+  pending: 'Nouvelle', confirmed: 'Confirmée', delivered: 'Livrée', cancelled: 'Annulée',
+  preparing: 'En préparation', ready: 'Prête',
+  unpaid: 'Non payée', partial: 'Partiel', paid: 'Payée',
+}
+
+const CANCEL_REASON_LABELS_FR = {
+  stock_epuise: 'Stock épuisé',
+  variante_indisponible: 'Couleur/taille indisponible',
+  client_injoignable: 'Client injoignable',
+  autre: 'Autre',
+}
+
+const FAILURE_REASON_LABELS_FR = {
+  transition_invalide: 'Transition de statut invalide',
+  raison_annulation_manquante: "Raison d'annulation manquante",
+  stock_insuffisant: 'Stock insuffisant',
+  valeur_invalide: 'Valeur invalide',
+  mot_de_passe_invalide: 'Mot de passe invalide',
+  compte_introuvable_ou_inactif: 'Compte introuvable ou inactif',
+  boutique_introuvable: 'Boutique introuvable',
+  employe_introuvable_ou_inactif: 'Employé introuvable ou inactif',
+}
+
+// Traduit les métadonnées brutes (JSON) en résumé lisible, spécifique à chaque
+// type d'action — évite d'avoir à décoder du JSON pour comprendre une ligne.
+function summarizeDetails(row) {
+  const m = row.metadata || {}
+  const parts = []
+
+  if (m.previousStatus || m.newStatus || m.attemptedStatus) {
+    const from = STATUS_LABELS_FR[m.previousStatus] || m.previousStatus
+    const to = STATUS_LABELS_FR[m.newStatus || m.attemptedStatus] || m.newStatus || m.attemptedStatus
+    if (from && to) parts.push(`${from} → ${to}`)
+  }
+  if (m.previousPaymentStatus || m.newPaymentStatus) {
+    const from = STATUS_LABELS_FR[m.previousPaymentStatus] || m.previousPaymentStatus
+    const to = STATUS_LABELS_FR[m.newPaymentStatus] || m.newPaymentStatus
+    parts.push(`Paiement : ${from} → ${to}`)
+  }
+  if (m.cancelReason) {
+    parts.push(`Raison : ${CANCEL_REASON_LABELS_FR[m.cancelReason] || m.cancelReason}${m.cancelReasonDetail ? ` (${m.cancelReasonDetail})` : ''}`)
+  }
+  if (m.reason) {
+    parts.push(FAILURE_REASON_LABELS_FR[m.reason] || m.reason)
+  }
+  if (m.detail) parts.push(m.detail)
+  if (m.orderNumber) parts.push(`Commande ${m.orderNumber}`)
+  if (m.openCount) parts.push(`Ouvert ${m.openCount}×`)
+  if (m.created !== undefined || m.updated !== undefined) {
+    parts.push(`${m.created || 0} créé(s), ${m.updated || 0} mis à jour`)
+  }
+  if (Array.isArray(m.errors) && m.errors.length) parts.push(`${m.errors.length} erreur(s)`)
+  if (m.name) parts.push(m.name)
+  if (m.price !== undefined) parts.push(`${m.price} FCFA`)
+  if (m.changes) parts.push(`Modifié : ${Object.keys(m.changes).join(', ')}`)
+  if (m.boutiqueSlug) parts.push(m.boutiqueSlug)
+  if (m.previousPlan || m.newPlan) parts.push(`Plan : ${m.previousPlan} → ${m.newPlan}`)
+  if (m.days) parts.push(`+${m.days}j`)
+
+  return parts.length ? parts.join(' · ') : null
+}
 
 function fmtDate(s) {
   if (!s) return '—'
@@ -125,6 +189,10 @@ export default function AuditPage() {
                   )
                 : col.key === 'action'
                 ? (val) => <span className="font-mono text-micro text-admin-ink bg-admin-fill px-1.5 py-0.5 rounded">{val}</span>
+                : col.key === 'details'
+                ? (_val, row) => (
+                    <span className="text-label text-admin-ink-2">{summarizeDetails(row) ?? '—'}</span>
+                  )
                 : col.key === 'success'
                 ? (val) => val ? (
                     <span className="inline-flex items-center gap-1 text-micro font-medium text-green-700">

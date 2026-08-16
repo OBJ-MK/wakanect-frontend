@@ -11,5 +11,7 @@ export const orderService = {
   get: (id) => api.get(`/api/orders/${id}`),
   updateStatus: (id, status, cancelReason, cancelReasonDetail) =>
     api.patch(`/api/orders/${id}/status`, { status, cancelReason, cancelReasonDetail }),
+  notifyLinkOpened: (id) => api.post(`/api/orders/${id}/notify-link-opened`, {}),
+  notifyConfirm: (id) => api.post(`/api/orders/${id}/notify-confirm`, {}),
   markPaid: (id) => api.patch(`/api/orders/${id}/payment`, { payment_status: 'Payée' }),
 }

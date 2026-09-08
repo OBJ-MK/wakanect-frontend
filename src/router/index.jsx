@@ -33,7 +33,8 @@ import { OnboardingPage } from '@/pages/onboarding/OnboardingPage'
 import { DashboardPage } from '@/pages/app/DashboardPage'
 import { OrdersPage } from '@/pages/app/OrdersPage'
 import { StockPage } from '@/pages/app/StockPage'
-import { ValidationPage } from '@/pages/app/ValidationPage'
+import { ValidationListPage } from '@/pages/app/ValidationListPage'
+import { ValidationDetailPage } from '@/pages/app/ValidationDetailPage'
 import { ProfilePage } from '@/pages/app/ProfilePage'
 import { NotificationsPage } from '@/pages/app/NotificationsPage'
 import { CatalogueMarchandPage } from '@/pages/app/CatalogueMarchandPage'
@@ -109,7 +110,8 @@ export const router = createBrowserRouter([
           { path: 'commandes/:id', element: <OrdersPage /> },
           { path: 'stock', element: <StockPage /> },
           { path: 'stock-bas', element: <StockBasPage /> },
-          { path: 'validation', element: <RequirePermission perm={PERM.PRODUCTS_PUBLISH}><ValidationPage /></RequirePermission> },
+          { path: 'validation', element: <RequirePermission perm={PERM.PRODUCTS_PUBLISH}><ValidationListPage /></RequirePermission> },
+          { path: 'validation/:id', element: <RequirePermission perm={PERM.PRODUCTS_PUBLISH}><ValidationDetailPage /></RequirePermission> },
           { path: 'notifications', element: <NotificationsPage /> },
           { path: 'catalogue', element: <CatalogueMarchandPage /> },
           { path: 'catalogue/ajouter', element: <RequirePermission perm={PERM.PRODUCTS_EDIT}><ProductFormPage /></RequirePermission> },

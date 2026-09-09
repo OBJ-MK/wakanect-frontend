@@ -1,6 +1,3 @@
-import { useEffect, useState } from 'react'
-import { useParams, Link } from 'react-router-dom'
-import { Package, CheckCircle, Truck, Clock, MessageCircle, Loader2 } from 'lucide-react'
 import { formatFCFA } from '@/lib/formatters'
 import { buildWhatsAppLink } from '@/lib/utils'
 import { catalogueService } from '@/services/catalogueService'

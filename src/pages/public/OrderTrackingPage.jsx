@@ -5,11 +5,28 @@ import { formatFCFA } from '@/lib/formatters'
 import { buildWhatsAppLink } from '@/lib/utils'
 import { catalogueService } from '@/services/catalogueService'
 
+// Ajouter Copy, Check aux imports lucide-react et useState à react
+import { useEffect, useState } from 'react'
+import { useParams, Link } from 'react-router-dom'
+import { Package, CheckCircle, Truck, Clock, MessageCircle, Loader2, Copy, Check } from 'lucide-react'
+
 const STATUS_STEPS = [
   { key: 'Nouvelle', label: 'Commande reçue', icon: Clock },
   { key: 'Confirmée', label: 'Confirmée par le vendeur', icon: CheckCircle },
   { key: 'Livrée', label: 'Livrée', icon: Truck },
 ]
+
+const [copied, setCopied] = useState(false)
+
+const handleCopy = async () => {
+  try {
+    await navigator.clipboard.writeText(window.location.href)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  } catch {
+    // ignore — pas de clipboard dispo
+  }
+}
 
 const STATUS_ORDER = ['Nouvelle', 'Confirmée', 'Livrée']
 
@@ -72,10 +89,21 @@ export function OrderTrackingPage() {
     <div className="min-h-screen bg-cream dark:bg-navy-deep">
       {/* Header */}
       <div className="bg-white/80 dark:bg-navy/80 backdrop-blur-glass border-b border-navy/8 dark:border-white/8 px-4 py-4">
-        <div className="max-w-lg mx-auto">
-          <p className="text-micro text-navy/40 dark:text-white/40 uppercase tracking-wider">Suivi de commande</p>
-          <h1 className="font-display font-bold text-h2 text-navy dark:text-white mt-0.5">{order.id}</h1>
-          <p className="text-label text-navy/50 dark:text-white/40">{order.shop_name}</p>
+        <div className="max-w-lg mx-auto flex items-center justify-between gap-3">
+          <div className="min-w-0">
+            <p className="text-micro text-navy/40 dark:text-white/40 uppercase tracking-wider">Suivi de commande</p>
+            <h1 className="font-display font-bold text-h2 text-navy dark:text-white mt-0.5">{order.id}</h1>
+            <p className="text-label text-navy/50 dark:text-white/40">{order.shop_name}</p>
+          </div>
+          <button
+            onClick={handleCopy}
+            className="shrink-0 w-10 h-10 rounded-xl bg-navy/5 dark:bg-white/8 flex items-center justify-center hover:bg-navy/10 dark:hover:bg-white/12 active:scale-95 transition-all"
+            aria-label="Copier le lien de suivi"
+          >
+            {copied
+              ? <Check size={16} className="text-emerald" />
+              : <Copy size={16} className="text-navy/50 dark:text-white/50" />}
+          </button>
         </div>
       </div>
 
@@ -89,9 +117,8 @@ export function OrderTrackingPage() {
               return (
                 <div key={step.key} className="flex items-start gap-4">
                   <div className="flex flex-col items-center">
-                    <div className={`w-9 h-9 rounded-full flex items-center justify-center transition-all ${
-                      done ? 'bg-emerald/15 text-emerald' : 'bg-navy/8 dark:bg-white/8 text-navy/30 dark:text-white/25'
-                    }`}>
+                    <div className={`w-9 h-9 rounded-full flex items-center justify-center transition-all ${done ? 'bg-emerald/15 text-emerald' : 'bg-navy/8 dark:bg-white/8 text-navy/30 dark:text-white/25'
+                      }`}>
                       <step.icon size={17} strokeWidth={active ? 2.5 : 1.8} />
                     </div>
                     {i < STATUS_STEPS.length - 1 && (
@@ -119,11 +146,10 @@ export function OrderTrackingPage() {
         )}
 
         {/* Payment status */}
-        <div className={`rounded-3xl p-4 flex items-center gap-3 ${
-          isPaid
+        <div className={`rounded-3xl p-4 flex items-center gap-3 ${isPaid
             ? 'bg-emerald/10 border border-emerald/20'
             : 'bg-amber/10 border border-amber/20'
-        }`}>
+          }`}>
           <div className={`w-9 h-9 rounded-2xl flex items-center justify-center ${isPaid ? 'bg-emerald/15' : 'bg-amber/15'}`}>
             <Package size={17} className={isPaid ? 'text-emerald' : 'text-amber'} />
           </div>

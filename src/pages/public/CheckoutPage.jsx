@@ -1,4 +1,5 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
+import { track } from '@/lib/track'
 import { useNavigate, useParams, Link } from 'react-router-dom'
 import { ChevronLeft, MapPin, Package, Camera, X } from 'lucide-react'
 import { useCatalogueStore } from '@/store/catalogueStore'
@@ -33,6 +34,12 @@ export function CheckoutPage() {
 
   const set = (key) => (e) => setForm(f => ({ ...f, [key]: e.target.value }))
   const total = cart.reduce((sum, i) => sum + i.price * i.quantity, 0)
+
+
+  useEffect(() => {
+    track(slug, 'checkout_started')
+  }, [slug])
+
 
   function validate() {
     const e = {}
@@ -110,6 +117,7 @@ export function CheckoutPage() {
         }
       }
 
+      track(slug, 'order_placed', { orderId: created.order.id })
       clearCart()
       navigate(`/boutique/${slug}/confirmation`, {
         state: { trackingCode: created.order.trackingCode },

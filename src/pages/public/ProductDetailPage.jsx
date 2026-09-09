@@ -5,6 +5,7 @@ import { useCatalogueStore } from '@/store/catalogueStore'
 import { formatFCFA } from '@/lib/formatters'
 import { cn } from '@/lib/utils'
 import { catalogueService } from '@/services/catalogueService'
+import { track } from '@/lib/track'
 
 
 const COLOR_MAP = {
@@ -93,6 +94,7 @@ export function ProductDetailPage() {
         setProduct(data.product)
         if (data.product?.colors?.length === 1) setSelectedColor(data.product.colors[0])
         if (data.product?.sizes?.length === 1) setSelectedSize(data.product.sizes[0])
+        track(slug, 'product_view', { productId: id })
       })
       .catch(() => { if (!cancelled) setNotFound(true) })
       .finally(() => { if (!cancelled) setLoading(false) })
@@ -129,11 +131,12 @@ export function ProductDetailPage() {
 
   const outOfStock = product.stock <= 0
   const needsColor = product.colors?.length > 0 && !selectedColor
-  const needsSize  = product.sizes?.length > 0 && !selectedSize
+  const needsSize = product.sizes?.length > 0 && !selectedSize
 
   function handleAdd() {
     if (outOfStock || needsColor || needsSize) return
     addToCartStore({ ...product, selectedSize }, selectedColor, quantity)
+    track(slug, 'add_to_cart', { productId: id })
     setAdded(true)
     setTimeout(() => setAdded(false), 1400)
   }

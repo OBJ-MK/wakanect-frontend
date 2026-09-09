@@ -8,10 +8,10 @@ import { RevenueChart } from '@/components/features/dashbord/RevenueChart'
 import { OrderRow } from '@/components/features/dashbord/OrderRow'
 
 const PERIODS = [
-  { id: 'day',   label: 'Jour',    title: "Revenu aujourd'hui",         compare: 'vs hier' },
-  { id: 'week',  label: 'Semaine', title: 'Revenu — 7 derniers jours',  compare: 'vs semaine précédente' },
-  { id: 'month', label: 'Mois',    title: 'Revenu — 30 derniers jours', compare: 'vs mois précédent' },
-  { id: 'all',   label: 'Tous',    title: 'Revenu total',               compare: null },
+  { id: 'day', label: 'Jour', title: "Revenu aujourd'hui", compare: 'vs hier' },
+  { id: 'week', label: 'Semaine', title: 'Revenu — 7 derniers jours', compare: 'vs semaine précédente' },
+  { id: 'month', label: 'Mois', title: 'Revenu — 30 derniers jours', compare: 'vs mois précédent' },
+  { id: 'all', label: 'Tous', title: 'Revenu total', compare: null },
 ]
 
 const EMPTY = {
@@ -30,10 +30,10 @@ function MiniStat({ label, value, accent = 'text-white' }) {
 }
 
 const BREAKDOWN_ITEMS = [
-  { key: 'new',       label: 'Nouvelles',  dot: 'bg-blue-400' },
+  { key: 'new', label: 'Nouvelles', dot: 'bg-blue-400' },
   { key: 'confirmed', label: 'Confirmées', dot: 'bg-amber' },
-  { key: 'delivered', label: 'Livrées',    dot: 'bg-emerald' },
-  { key: 'cancelled', label: 'Annulées',   dot: 'bg-red-400' },
+  { key: 'delivered', label: 'Livrées', dot: 'bg-emerald' },
+  { key: 'cancelled', label: 'Annulées', dot: 'bg-red-400' },
 ]
 
 export function StatsPage() {
@@ -59,11 +59,10 @@ export function StatsPage() {
               <button
                 key={p.id}
                 onClick={() => setPeriod(p.id)}
-                className={`px-2 py-1 rounded-lg text-micro font-semibold transition-colors ${
-                  period === p.id
+                className={`px-2 py-1 rounded-lg text-micro font-semibold transition-colors ${period === p.id
                     ? 'bg-orange/20 text-orange'
                     : 'text-white/40 hover:text-white hover:bg-white/8'
-                }`}
+                  }`}
               >
                 {p.label}
               </button>
@@ -138,9 +137,8 @@ export function StatsPage() {
             </div>
             {data.top_products.map((p, i) => (
               <div key={p.name} className="flex items-center gap-3 px-4 py-2.5 border-t border-white/5">
-                <span className={`w-6 h-6 rounded-lg flex items-center justify-center text-micro font-bold shrink-0 ${
-                  i === 0 ? 'bg-amber/20 text-amber' : 'bg-white/8 text-white/50'
-                }`}>
+                <span className={`w-6 h-6 rounded-lg flex items-center justify-center text-micro font-bold shrink-0 ${i === 0 ? 'bg-amber/20 text-amber' : 'bg-white/8 text-white/50'
+                  }`}>
                   {i + 1}
                 </span>
                 <p className="flex-1 min-w-0 text-body text-white truncate">{p.name}</p>
@@ -162,6 +160,33 @@ export function StatsPage() {
               <Link to="/abonnement" className="text-micro text-orange underline">
                 Disponible en plan Pro / Premium →
               </Link>
+            </div>
+          </div>
+        )}
+
+        {/* Funnel de conversion (pixel) — gated Pro/Premium comme Top produits */}
+        {advancedStats === true && data.funnel && data.funnel.page_views > 0 && (
+          <div className="glass rounded-3xl p-4">
+            <p className="text-micro text-white/45 uppercase tracking-wider mb-3">
+              Parcours client — {activePeriod.label.toLowerCase()}
+            </p>
+            <div className="flex flex-col gap-2">
+              {[
+                { label: 'Visites boutique', value: data.funnel.page_views },
+                { label: 'Fiches produit vues', value: data.funnel.product_views },
+                { label: 'Ajouts au panier', value: data.funnel.add_to_carts },
+                { label: 'Commandes démarrées', value: data.funnel.checkouts_started },
+                { label: 'Commandes passées', value: data.funnel.orders_placed },
+              ].map(row => (
+                <div key={row.label} className="flex items-center justify-between">
+                  <span className="text-label text-white/60">{row.label}</span>
+                  <span className="text-label font-bold text-white">{row.value}</span>
+                </div>
+              ))}
+            </div>
+            <div className="flex items-center justify-between mt-3 pt-3 border-t border-white/8">
+              <span className="text-label text-white/60">Taux de conversion</span>
+              <span className="text-label font-bold text-emerald">{data.funnel.conversion_rate}%</span>
             </div>
           </div>
         )}

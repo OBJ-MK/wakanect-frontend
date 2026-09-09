@@ -1,11 +1,29 @@
+import { useState } from 'react'
 import { Link, useParams, useLocation } from 'react-router-dom'
-import { CheckCircle, MessageCircle, ArrowLeft, MapPin } from 'lucide-react'
+import { CheckCircle, MessageCircle, ArrowLeft, MapPin, Copy, Check } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 
 export function ConfirmationPage() {
   const { slug } = useParams()
   const { state } = useLocation()
   const trackingCode = state?.trackingCode
+  const [copied, setCopied] = useState(false)
+
+  const trackingUrl = trackingCode
+    ? `${window.location.origin}/boutique/${slug}/suivi/${trackingCode}`
+    : null
+
+  const handleCopy = async () => {
+    if (!trackingUrl) return
+    try {
+      await navigator.clipboard.writeText(trackingUrl)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch {
+      // Clipboard API indisponible (vieux navigateur / contexte non-https) —
+      // le lien reste sélectionnable manuellement dans le champ affiché.
+    }
+  }
 
   return (
     <div className="min-h-screen bg-cream dark:bg-navy-deep flex flex-col items-center justify-center px-4 py-12">
@@ -37,11 +55,35 @@ export function ConfirmationPage() {
         </div>
 
         {trackingCode && (
-          <Link to={`/boutique/${slug}/suivi/${trackingCode}`} className="w-full mb-3">
-            <Button variant="primary" size="lg" fullWidth>
-              <MapPin size={16} /> Suivre ma commande
-            </Button>
-          </Link>
+          <>
+            <Link to={`/boutique/${slug}/suivi/${trackingCode}`} className="w-full mb-3">
+              <Button variant="primary" size="lg" fullWidth>
+                <MapPin size={16} /> Suivre ma commande
+              </Button>
+            </Link>
+
+            {/* Lien copiable — pour que le client puisse le coller dans ses
+                notes/WhatsApp et revenir suivre sa commande plus tard */}
+            <div className="w-full flex items-center gap-2 mb-1">
+              <div className="flex-1 min-w-0 px-3.5 py-2.5 rounded-xl bg-navy/5 dark:bg-white/5 border border-navy/10 dark:border-white/10">
+                <p className="text-micro text-navy/50 dark:text-white/40 truncate text-left">
+                  {trackingUrl}
+                </p>
+              </div>
+              <button
+                onClick={handleCopy}
+                className="shrink-0 w-10 h-10 rounded-xl bg-navy/5 dark:bg-white/5 border border-navy/10 dark:border-white/10 flex items-center justify-center hover:bg-navy/10 dark:hover:bg-white/10 active:scale-95 transition-all"
+                aria-label="Copier le lien de suivi"
+              >
+                {copied
+                  ? <Check size={16} className="text-emerald" />
+                  : <Copy size={16} className="text-navy/50 dark:text-white/50" />}
+              </button>
+            </div>
+            <p className="text-micro text-navy/40 dark:text-white/35 mb-6">
+              {copied ? 'Copié !' : 'Gardez ce lien pour suivre votre commande plus tard'}
+            </p>
+          </>
         )}
 
         <Link to={`/boutique/${slug}`} className="w-full">

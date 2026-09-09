@@ -1,4 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
+import { useParams } from 'react-router-dom'
+import { track } from '@/lib/track'
 import { MessageCircle } from 'lucide-react'
 import { useTenant } from '@/hooks/useTenant'
 import { ProductGrid } from '@/components/features/catalogue/ProductGrid'
@@ -30,6 +32,12 @@ export function CataloguePage() {
   const [categoryOptions, setCategoryOptions] = useState(['Tout'])
   const [cartOpen, setCartOpen] = useState(false)
   const gridRef = useRef(null)
+
+  const { slug } = useParams()
+
+  useEffect(() => {
+    track(slug, 'page_view')
+  }, [slug])
 
   const isFiltered =
     filters.search.trim() !== '' || filters.category !== 'Tout' ||

@@ -161,7 +161,7 @@ export const router = createBrowserRouter([
       { path: 'produit/:id', element: <ProductDetailPage /> },
       { path: 'commande', element: <CheckoutPage /> },
       { path: 'confirmation', element: <ConfirmationPage /> },
-      { path: 'suivi/:orderId', element: <OrderTrackingPage /> },
+      { path: 'suivi/:trackingCode', element: <OrderTrackingPage /> },
     ],
   },
 

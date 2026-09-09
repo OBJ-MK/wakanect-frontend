@@ -19,4 +19,6 @@ export const catalogueService = {
     formData.append('image', file)
     return api.upload(`/api/orders/public/${orderId}/proof`, formData)
   },
+
+  getOrderTracking: (trackingCode) => api.get(`/api/orders/public/track/${trackingCode}`), // ← ajouté
 }

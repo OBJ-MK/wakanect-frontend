@@ -1,8 +1,9 @@
+import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { Package, CheckCircle, Truck, Clock, MessageCircle } from 'lucide-react'
+import { Package, CheckCircle, Truck, Clock, MessageCircle, Loader2 } from 'lucide-react'
 import { formatFCFA } from '@/lib/formatters'
 import { buildWhatsAppLink } from '@/lib/utils'
-
+import { catalogueService } from '@/services/catalogueService'
 
 const STATUS_STEPS = [
   { key: 'Nouvelle', label: 'Commande reçue', icon: Clock },
@@ -13,10 +14,33 @@ const STATUS_STEPS = [
 const STATUS_ORDER = ['Nouvelle', 'Confirmée', 'Livrée']
 
 export function OrderTrackingPage() {
-  const { slug, orderId } = useParams()
-  const order = null
+  const { slug, trackingCode } = useParams()
+  const [order, setOrder] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [notFound, setNotFound] = useState(false)
 
-  if (!order) {
+  useEffect(() => {
+    let cancelled = false
+    setLoading(true)
+    setNotFound(false)
+
+    catalogueService.getOrderTracking(trackingCode)
+      .then((data) => { if (!cancelled) setOrder(data) })
+      .catch(() => { if (!cancelled) setNotFound(true) })
+      .finally(() => { if (!cancelled) setLoading(false) })
+
+    return () => { cancelled = true }
+  }, [trackingCode])
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-cream dark:bg-navy-deep flex items-center justify-center">
+        <Loader2 size={28} className="text-navy/30 dark:text-white/25 animate-spin" />
+      </div>
+    )
+  }
+
+  if (notFound || !order) {
     return (
       <div className="min-h-screen bg-cream dark:bg-navy-deep flex flex-col items-center justify-center px-5 text-center gap-4">
         <div className="w-16 h-16 rounded-full bg-navy/8 dark:bg-white/8 flex items-center justify-center">
@@ -88,6 +112,12 @@ export function OrderTrackingPage() {
           </div>
         </div>
 
+        {order.status === 'Annulée' && (
+          <div className="rounded-3xl p-4 bg-red-500/10 border border-red-500/20">
+            <p className="text-body font-semibold text-red-600">Commande annulée</p>
+          </div>
+        )}
+
         {/* Payment status */}
         <div className={`rounded-3xl p-4 flex items-center gap-3 ${
           isPaid
@@ -117,7 +147,7 @@ export function OrderTrackingPage() {
               <div className="flex-1 min-w-0">
                 <p className="text-body font-medium text-navy dark:text-white">{item.name}</p>
                 <p className="text-micro text-navy/40 dark:text-white/40">
-                  {[item.color, item.size && `Taille ${item.size}`, `×${item.quantity}`].filter(Boolean).join(' · ')}
+                  {[item.color, `×${item.quantity}`].filter(Boolean).join(' · ')}
                 </p>
               </div>
               <p className="text-label font-bold text-navy dark:text-white">{formatFCFA(item.price * item.quantity)}</p>

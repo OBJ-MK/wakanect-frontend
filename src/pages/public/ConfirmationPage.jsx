@@ -1,9 +1,11 @@
-import { Link, useParams } from 'react-router-dom'
-import { CheckCircle, MessageCircle, ArrowLeft } from 'lucide-react'
+import { Link, useParams, useLocation } from 'react-router-dom'
+import { CheckCircle, MessageCircle, ArrowLeft, MapPin } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 
 export function ConfirmationPage() {
   const { slug } = useParams()
+  const { state } = useLocation()
+  const trackingCode = state?.trackingCode
 
   return (
     <div className="min-h-screen bg-cream dark:bg-navy-deep flex flex-col items-center justify-center px-4 py-12">
@@ -26,13 +28,21 @@ export function ConfirmationPage() {
           Il vous contactera sous peu sur WhatsApp pour confirmer les détails et convenir du paiement.
         </p>
 
-        {/* Notification note — le commerçant est notifié, pas le client (pas de reçu WhatsApp envoyé) */}
+        {/* Notification note */}
         <div className="w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl bg-wa-green/10 border border-wa-green/20 mb-6">
           <MessageCircle size={18} className="text-wa-green shrink-0" />
           <p className="text-label text-navy dark:text-white/80 text-left">
             Le commerçant a été notifié de votre commande
           </p>
         </div>
+
+        {trackingCode && (
+          <Link to={`/boutique/${slug}/suivi/${trackingCode}`} className="w-full mb-3">
+            <Button variant="primary" size="lg" fullWidth>
+              <MapPin size={16} /> Suivre ma commande
+            </Button>
+          </Link>
+        )}
 
         <Link to={`/boutique/${slug}`} className="w-full">
           <Button variant="outline" size="lg" fullWidth>

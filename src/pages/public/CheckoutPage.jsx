@@ -111,7 +111,9 @@ export function CheckoutPage() {
       }
 
       clearCart()
-      navigate(`/boutique/${slug}/confirmation`)
+      navigate(`/boutique/${slug}/confirmation`, {
+        state: { trackingCode: created.order.trackingCode },
+      })
     } catch (err) {
       setErrors({ _: err.message })
     } finally {

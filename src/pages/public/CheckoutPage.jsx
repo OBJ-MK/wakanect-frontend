@@ -9,6 +9,7 @@ import { PAYMENT_METHODS, DELIVERY_MODES } from '@/lib/constants'
 import { Input } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
 import { cn } from '@/lib/utils'
+import { useOrdersCacheStore } from '@/store/ordersCacheStore'
 
 export function CheckoutPage() {
   const { slug } = useParams()
@@ -18,6 +19,7 @@ export function CheckoutPage() {
   const boutique = useCatalogueStore(s => s.boutique)
   const removeFromCart = useCatalogueStore(s => s.removeFromCart)
   const updateQty = useCatalogueStore(s => s.updateQty)
+  const addOrderToCache = useOrdersCacheStore(s => s.addOrder)
   const [form, setForm] = useState({
     name: '',
     phone: '',
@@ -118,6 +120,14 @@ export function CheckoutPage() {
       }
 
       track(slug, 'order_placed', { orderId: created.order.id })
+      addOrderToCache({
+        trackingCode: created.order.trackingCode,
+        orderNumber:  created.order.orderNumber,
+        slug,
+        shopName:     boutique?.shop_name || '',
+        total:        created.order.totalAmount,
+        createdAt:    new Date().toISOString(),
+      })
       clearCart()
       navigate(`/boutique/${slug}/confirmation`, {
         state: { trackingCode: created.order.trackingCode },

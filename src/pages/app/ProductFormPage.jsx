@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { useState, useEffect, useRef } from 'react'
+import { Link, useNavigate, useParams, useLocation } from 'react-router-dom'
 import {
   ChevronLeft, X, Plus, Check, Loader2, Star
 } from 'lucide-react'
@@ -191,9 +191,82 @@ function ImageManager({ productId, images, onChange, onError }) {
   )
 }
 
+// Gestion des photos AVANT la création du produit (pas d'id disponible pour l'upload
+// réel) : les fichiers restent en mémoire (File + preview locale via ObjectURL) et sont
+// envoyés juste après la création, dans le même clic "Publier" — voir handleSubmit.
+function StagedImageManager({ images, onChange, disabled }) {
+  function handleAdd(e) {
+    const files = Array.from(e.target.files || [])
+    if (files.length === 0) return
+    const staged = files.map(file => ({
+      tempId: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+      file,
+      previewUrl: URL.createObjectURL(file),
+    }))
+    onChange([...images, ...staged])
+    e.target.value = ''
+  }
+
+  function handleRemove(tempId) {
+    const target = images.find(img => img.tempId === tempId)
+    if (target) URL.revokeObjectURL(target.previewUrl)
+    onChange(images.filter(img => img.tempId !== tempId))
+  }
+
+  return (
+    <div className="flex flex-col gap-2">
+      <label className="text-label font-semibold text-white/60">Photos</label>
+      <div className="flex gap-2 overflow-x-auto pb-1">
+        {images.map((img, idx) => (
+          <div key={img.tempId} className="relative shrink-0">
+            <img
+              src={img.previewUrl}
+              alt=""
+              className={`h-20 w-20 rounded-2xl object-cover border-2 transition-all ${
+                idx === 0 ? 'border-orange' : 'border-white/10'
+              }`}
+            />
+            {idx === 0 && (
+              <div className="absolute bottom-1 left-1/2 -translate-x-1/2 px-1.5 py-0.5 rounded-full bg-orange text-white text-[9px] leading-none whitespace-nowrap">
+                principale
+              </div>
+            )}
+            <button
+              type="button"
+              onClick={() => !disabled && handleRemove(img.tempId)}
+              disabled={disabled}
+              className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-red-500 flex items-center justify-center text-white hover:bg-red-600 disabled:opacity-40 transition-colors"
+            >
+              <X size={10} />
+            </button>
+          </div>
+        ))}
+
+        <label className={`shrink-0 h-20 w-20 rounded-2xl border-2 border-dashed border-white/20 flex flex-col items-center justify-center transition-all ${
+          disabled ? 'opacity-40 cursor-wait' : 'cursor-pointer hover:border-white/40 hover:text-white/60'
+        } text-white/40`}>
+          <Plus size={20} />
+          <input
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            multiple
+            className="sr-only"
+            disabled={disabled}
+            onChange={handleAdd}
+          />
+        </label>
+      </div>
+      {images.length === 0 && (
+        <p className="text-micro text-white/35">Appuyez sur + — la première photo ajoutée devient la principale. Facultatif, vous pourrez en ajouter plus tard.</p>
+      )}
+    </div>
+  )
+}
+
 export function ProductFormPage() {
   const { id } = useParams()
   const navigate = useNavigate()
+  const location = useLocation()
   const isEdit = Boolean(id)
 
   const [form, setForm] = useState({
@@ -211,6 +284,22 @@ export function ProductFormPage() {
   const [loadingProduct, setLoadingProduct] = useState(isEdit)
   const [error, setError] = useState(null)
   const [success, setSuccess] = useState(false)
+
+  // Photos en attente de création du produit (mode création uniquement)
+  const [stagedImages, setStagedImages] = useState([])
+  const [uploadStep, setUploadStep] = useState(null)
+  const stagedImagesRef = useRef(stagedImages)
+  useEffect(() => { stagedImagesRef.current = stagedImages }, [stagedImages])
+  // Libère les ObjectURL des previews au démontage pour éviter les fuites mémoire
+  useEffect(() => () => {
+    stagedImagesRef.current.forEach(img => URL.revokeObjectURL(img.previewUrl))
+  }, [])
+
+  // Bannière d'erreur reportée depuis la création si l'upload d'une photo a échoué
+  // (voir handleSubmit) — le produit existe déjà, on atterrit ici pour compléter.
+  useEffect(() => {
+    if (location.state?.imgError) setError(location.state.imgError)
+  }, [location.state])
 
   useEffect(() => {
     if (!isEdit) return
@@ -269,17 +358,42 @@ export function ProductFormPage() {
         setSuccess(true)
         setTimeout(() => navigate('/app/catalogue'), 800)
       } else {
-        // Création directe depuis l'app : publié immédiatement (démarche volontaire),
-        // puis redirection vers l'édition pour ajouter les photos (l'upload
-        // nécessite l'id du produit).
+        // Création directe depuis l'app : publié immédiatement (démarche volontaire).
+        // Les photos ont été sélectionnées en amont (StagedImageManager) et sont
+        // envoyées juste après, dans le même clic "Publier" — une seule soumission
+        // utilisateur, même si ça reste 2 appels API (create, puis upload x N)
+        // côté réseau, car l'upload nécessite l'id du produit.
         const { product } = await stockService.create({ ...payload, isPublished: true })
+
+        let imgError = null
+        for (let i = 0; i < stagedImages.length; i++) {
+          setUploadStep(`Envoi des photos ${i + 1}/${stagedImages.length}…`)
+          try {
+            await stockService.uploadImage(product.id, stagedImages[i].file)
+          } catch (err) {
+            imgError = err.message
+            break
+          }
+        }
+
+        if (imgError) {
+          // Le produit existe déjà : direction l'édition pour compléter/retenter
+          // la photo en échec, plutôt que de bloquer l'utilisateur sur la création.
+          navigate(`/app/catalogue/${product.id}/modifier`, {
+            replace: true,
+            state: { imgError: `Produit publié, mais une photo n'est pas passée : ${imgError}` },
+          })
+          return
+        }
+
         setSuccess(true)
-        setTimeout(() => navigate(`/app/catalogue/${product.id}/modifier`, { replace: true }), 800)
+        setTimeout(() => navigate('/app/catalogue'), 800)
       }
     } catch (e) {
       setError(e.message)
     } finally {
       setSaving(false)
+      setUploadStep(null)
     }
   }
 
@@ -310,7 +424,8 @@ export function ProductFormPage() {
       <form onSubmit={handleSubmit}>
         <div className="page-container py-5 flex flex-col gap-5">
 
-          {/* Gestion des images — nécessite l'id produit, donc après création */}
+          {/* En édition : upload réel (le produit existe déjà).
+              En création : photos gardées en mémoire, envoyées avec le formulaire. */}
           {isEdit ? (
             <ImageManager
               productId={id}
@@ -319,9 +434,11 @@ export function ProductFormPage() {
               onError={setError}
             />
           ) : (
-            <p className="text-micro text-white/40 glass rounded-2xl px-4 py-3">
-              📷 Vous pourrez ajouter les photos juste après la création du produit.
-            </p>
+            <StagedImageManager
+              images={stagedImages}
+              onChange={setStagedImages}
+              disabled={saving}
+            />
           )}
 
           {/* Core fields */}
@@ -426,8 +543,11 @@ export function ProductFormPage() {
           )}
           {success && (
             <p className="text-label text-emerald-400 bg-emerald-500/10 rounded-2xl px-4 py-3">
-              {isEdit ? 'Modifications enregistrées !' : 'Produit publié ! Ajoutez maintenant les photos…'}
+              {isEdit ? 'Modifications enregistrées !' : 'Produit publié !'}
             </p>
+          )}
+          {uploadStep && (
+            <p className="text-micro text-white/40 text-center -mt-2">{uploadStep}</p>
           )}
 
           {/* Bouton d'action */}

@@ -11,5 +11,5 @@ const STATUS_STYLES = {
 
 export function StatusBadge({ status }) {
   const variant = STATUS_STYLES[status] || 'default'
-  return <Badge variant={variant}><Sparkles className="w-3.5 h-3.5" /></Badge>
+  return <Badge variant={variant}>{status.Nouvelle ?? <Sparkles className="w-3.5 h-3.5" />}</Badge>
 }

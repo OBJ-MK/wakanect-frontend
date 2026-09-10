@@ -1,12 +1,12 @@
 import { cn } from '@/lib/utils'
 
 const variants = {
-  default: 'bg-navy/10 text-navy dark:bg-white/10 dark:text-white/80',
-  orange: 'bg-orange/15 text-orange',
-  amber: 'bg-amber/15 text-amber-700 dark:text-amber',
-  emerald: 'bg-emerald/15 text-emerald-700 dark:text-emerald',
-  red: 'bg-red-500/15 text-red-600 dark:text-red-400',
-  'wa-green': 'bg-wa-green/15 text-green-700 dark:text-wa-green',
+  default: '', // par defaut, pas de style particulier
+  orange: 'text-orange',
+  amber: 'text-amber-700 dark:text-amber',
+  emerald: ' text-emerald-700 dark:text-emerald',
+  red: 'text-red-600 dark:text-red-400',
+  'wa-green': 'text-green-700 dark:text-wa-green',
 }
 
 export function Badge({ variant = 'default', className, children }) {

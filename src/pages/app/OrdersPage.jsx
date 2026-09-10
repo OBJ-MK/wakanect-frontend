@@ -136,7 +136,7 @@ export function OrdersPage() {
                 {selectedOrder.customer_name}
               </h1>
               <div className="flex items-center gap-2 mt-0.5">
-                <StatusBadge status={selectedOrder.status} />
+                <StatusBadge/>
                 <span className="text-white/20">·</span>
                 <PaymentBadge status={selectedOrder.payment_status} />
               </div>

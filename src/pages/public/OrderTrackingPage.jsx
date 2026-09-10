@@ -13,17 +13,6 @@ const STATUS_STEPS = [
   { key: 'Livrée', label: 'Livrée', icon: Truck },
 ]
 
-const [copied, setCopied] = useState(false)
-
-const handleCopy = async () => {
-  try {
-    await navigator.clipboard.writeText(window.location.href)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
-  } catch {
-    // ignore — pas de clipboard dispo
-  }
-}
 
 const STATUS_ORDER = ['Nouvelle', 'Confirmée', 'Livrée']
 
@@ -32,6 +21,18 @@ export function OrderTrackingPage() {
   const [order, setOrder] = useState(null)
   const [loading, setLoading] = useState(true)
   const [notFound, setNotFound] = useState(false)
+
+  const [copied, setCopied] = useState(false)
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch {
+      // ignore — pas de clipboard dispo
+    }
+  }
 
   useEffect(() => {
     let cancelled = false
@@ -144,8 +145,8 @@ export function OrderTrackingPage() {
 
         {/* Payment status */}
         <div className={`rounded-3xl p-4 flex items-center gap-3 ${isPaid
-            ? 'bg-emerald/10 border border-emerald/20'
-            : 'bg-amber/10 border border-amber/20'
+          ? 'bg-emerald/10 border border-emerald/20'
+          : 'bg-amber/10 border border-amber/20'
           }`}>
           <div className={`w-9 h-9 rounded-2xl flex items-center justify-center ${isPaid ? 'bg-emerald/15' : 'bg-amber/15'}`}>
             <Package size={17} className={isPaid ? 'text-emerald' : 'text-amber'} />

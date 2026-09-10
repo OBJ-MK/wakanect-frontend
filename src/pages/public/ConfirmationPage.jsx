@@ -2,12 +2,14 @@ import { useState } from 'react'
 import { Link, useParams, useLocation } from 'react-router-dom'
 import { CheckCircle, MessageCircle, ArrowLeft, MapPin, Copy, Check } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
+import { usePageDuration } from '@/hooks/usePageDuration'
 
 export function ConfirmationPage() {
   const { slug } = useParams()
   const { state } = useLocation()
   const trackingCode = state?.trackingCode
   const [copied, setCopied] = useState(false)
+  usePageDuration(slug, 'confirmation')
 
   const trackingUrl = trackingCode
     ? `${window.location.origin}/boutique/${slug}/suivi/${trackingCode}`

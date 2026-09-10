@@ -10,6 +10,7 @@ import { CartFab } from '@/components/features/catalogue/CartFab'
 import { CartSheet } from './CartSheet'
 import { buildWhatsAppLink } from '@/lib/utils'
 import { WakanectLogo } from '@/components/brand/WakanectLogo'
+import { usePageDuration } from '@/hooks/usePageDuration'
 
 const DEFAULT_FILTERS = { search: '', category: 'Tout', priceMin: '', priceMax: '', sort: 'recent' }
 
@@ -26,14 +27,17 @@ function ProductCardSkeleton() {
   )
 }
 
+
 export function CataloguePage() {
   const [filters, setFilters] = useState(DEFAULT_FILTERS)
   const [page, setPage] = useState(1)
   const [categoryOptions, setCategoryOptions] = useState(['Tout'])
   const [cartOpen, setCartOpen] = useState(false)
   const gridRef = useRef(null)
+  
 
   const { slug } = useParams()
+  usePageDuration(slug, 'catalogue')
 
   useEffect(() => {
     track(slug, 'page_view')

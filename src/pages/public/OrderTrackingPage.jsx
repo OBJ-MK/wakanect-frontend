@@ -6,6 +6,7 @@ import { catalogueService } from '@/services/catalogueService'
 import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { Package, CheckCircle, Truck, Clock, MessageCircle, Loader2, Copy, Check } from 'lucide-react'
+import { usePageDuration } from '@/hooks/usePageDuration'
 
 const STATUS_STEPS = [
   { key: 'Nouvelle', label: 'Commande reçue', icon: Clock },
@@ -34,6 +35,8 @@ export function OrderTrackingPage() {
     }
   }
 
+  usePageDuration(slug, 'tracking')
+  
   useEffect(() => {
     let cancelled = false
     setLoading(true)

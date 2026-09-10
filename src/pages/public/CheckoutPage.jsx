@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
 import { cn } from '@/lib/utils'
 import { useOrdersCacheStore } from '@/store/ordersCacheStore'
+import { usePageDuration } from '@/hooks/usePageDuration'
 
 export function CheckoutPage() {
   const { slug } = useParams()
@@ -37,6 +38,7 @@ export function CheckoutPage() {
   const set = (key) => (e) => setForm(f => ({ ...f, [key]: e.target.value }))
   const total = cart.reduce((sum, i) => sum + i.price * i.quantity, 0)
 
+  usePageDuration(slug, 'checkout')
 
   useEffect(() => {
     track(slug, 'checkout_started')

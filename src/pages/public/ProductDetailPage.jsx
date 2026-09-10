@@ -6,7 +6,7 @@ import { formatFCFA } from '@/lib/formatters'
 import { cn } from '@/lib/utils'
 import { catalogueService } from '@/services/catalogueService'
 import { track } from '@/lib/track'
-
+import { usePageDuration } from '@/hooks/usePageDuration'
 
 const COLOR_MAP = {
   'Rouge': '#E53E3E',
@@ -20,6 +20,8 @@ const COLOR_MAP = {
   'Kaki': '#718096',
   'Multicolore': 'linear-gradient(135deg, #E53E3E, #D69E2E, #38A169)',
 }
+
+
 
 function PhotoCarousel({ images, name }) {
   const [idx, setIdx] = useState(0)
@@ -75,6 +77,7 @@ export function ProductDetailPage() {
   const { slug, id } = useParams()
   const navigate = useNavigate()
   const addToCartStore = useCatalogueStore(s => s.addToCart)
+  usePageDuration(slug, 'product', { productId: id }, id)
 
   const [product, setProduct] = useState(null)
   const [loading, setLoading] = useState(true)

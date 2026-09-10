@@ -60,8 +60,8 @@ export function StatsPage() {
                 key={p.id}
                 onClick={() => setPeriod(p.id)}
                 className={`px-2 py-1 rounded-lg text-micro font-semibold transition-colors ${period === p.id
-                    ? 'bg-orange/20 text-orange'
-                    : 'text-white/40 hover:text-white hover:bg-white/8'
+                  ? 'bg-orange/20 text-orange'
+                  : 'text-white/40 hover:text-white hover:bg-white/8'
                   }`}
               >
                 {p.label}
@@ -187,6 +187,33 @@ export function StatsPage() {
             <div className="flex items-center justify-between mt-3 pt-3 border-t border-white/8">
               <span className="text-label text-white/60">Taux de conversion</span>
               <span className="text-label font-bold text-emerald">{data.funnel.conversion_rate}%</span>
+            </div>
+          </div>
+        )}
+
+        {advancedStats === true && data.avg_duration_seconds && (
+          <div className="glass rounded-3xl p-4">
+            <p className="text-micro text-white/45 uppercase tracking-wider mb-3">
+              Temps moyen passé par étape — {activePeriod.label.toLowerCase()}
+            </p>
+            <div className="flex flex-col gap-2">
+              {[
+                { key: 'catalogue', label: 'Catalogue' },
+                { key: 'product', label: 'Fiche produit' },
+                { key: 'checkout', label: 'Commande' },
+                { key: 'confirmation', label: 'Confirmation' },
+                { key: 'tracking', label: 'Suivi commande' },
+              ].filter(row => data.avg_duration_seconds[row.key] > 0).map(row => {
+                const s = data.avg_duration_seconds[row.key]
+                return (
+                  <div key={row.key} className="flex items-center justify-between">
+                    <span className="text-label text-white/60">{row.label}</span>
+                    <span className="text-label font-bold text-white">
+                      {s >= 60 ? `${Math.floor(s / 60)}min ${s % 60}s` : `${s}s`}
+                    </span>
+                  </div>
+                )
+              })}
             </div>
           </div>
         )}

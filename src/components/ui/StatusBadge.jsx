@@ -1,4 +1,5 @@
 import { Badge } from './Badge'
+import { Sparkles } from 'lucide-react'
 
 const STATUS_STYLES = {
   Nouvelle: 'amber',
@@ -10,5 +11,5 @@ const STATUS_STYLES = {
 
 export function StatusBadge({ status }) {
   const variant = STATUS_STYLES[status] || 'default'
-  return <Badge variant={variant}>{status}</Badge>
+  return <Badge variant={variant}><Sparkles className="w-3.5 h-3.5" /></Badge>
 }

@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { ChevronLeft, Sparkles } from 'lucide-react'
+import { ChevronLeft } from 'lucide-react'
 import { useOrders } from '@/hooks/useOrders'
 import { OrderDetail } from '@/components/features/orders/OrderDetail'
 import { StatusBadge } from '@/components/ui/StatusBadge'
@@ -136,11 +136,7 @@ export function OrdersPage() {
                 {selectedOrder.customer_name}
               </h1>
               <div className="flex items-center gap-2 mt-0.5">
-                <div className="flex items-center gap-1">
-                  <Sparkles className="w-3.5 h-3.5 text-orange-400" />
-                  <StatusBadge />
-                </div>
-                <span className="text-white/20">·</span>
+               <StatusBadge />
                 <PaymentBadge status={selectedOrder.payment_status} />
               </div>
             </div>

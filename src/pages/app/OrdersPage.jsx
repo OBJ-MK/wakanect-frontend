@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { ChevronLeft } from 'lucide-react'
+import { ChevronLeft, Sparkles } from 'lucide-react'
 import { useOrders } from '@/hooks/useOrders'
 import { OrderDetail } from '@/components/features/orders/OrderDetail'
 import { StatusBadge } from '@/components/ui/StatusBadge'
@@ -14,8 +14,8 @@ import { PERM } from '@/lib/permissions'
 const STATUS_FILTERS = ['Toutes', 'Nouvelle', 'Confirmée', 'Livrée', 'Annulée']
 
 const ORDER_SORT_OPTIONS = [
-  { value: 'recent',     label: 'Plus récentes' },
-  { value: 'price_asc',  label: 'Total croissant' },
+  { value: 'recent', label: 'Plus récentes' },
+  { value: 'price_asc', label: 'Total croissant' },
   { value: 'price_desc', label: 'Total décroissant' },
 ]
 
@@ -39,18 +39,18 @@ function OrderRowSkeleton() {
 
 export function OrdersPage() {
   const [filters, setFilters] = useState(DEFAULT_FILTERS)
-  const [page, setPage]       = useState(1)
+  const [page, setPage] = useState(1)
   const listRef = useRef(null)
 
   // Filtrage server-side : statut + recherche (débouncée dans le hook) + tri
   const { orders: fetchedOrders, loading, total, pages, changeStatus, markPaid, notifyLinkOpened, notifyConfirm } = useOrders({
     search: filters.search,
     status: filters.category,
-    sort:   filters.sort,
+    sort: filters.sort,
     page,
   })
 
-  const [selected, setSelected]       = useState(null)
+  const [selected, setSelected] = useState(null)
   const [statusUpdating, setStatusUpdating] = useState(false)
   const { ensure } = usePermissions()
 
@@ -107,7 +107,7 @@ export function OrdersPage() {
 
   async function handleNotifyLinkOpened() {
     if (!selected) return
-    notifyLinkOpened(selected).catch(() => {})
+    notifyLinkOpened(selected).catch(() => { })
   }
 
   async function handleNotifyConfirm() {
@@ -136,7 +136,10 @@ export function OrdersPage() {
                 {selectedOrder.customer_name}
               </h1>
               <div className="flex items-center gap-2 mt-0.5">
-                <StatusBadge/>
+                <div className="flex items-center gap-1">
+                  <Sparkles className="w-3.5 h-3.5 text-orange-400" />
+                  <StatusBadge />
+                </div>
                 <span className="text-white/20">·</span>
                 <PaymentBadge status={selectedOrder.payment_status} />
               </div>

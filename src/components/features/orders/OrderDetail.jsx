@@ -6,6 +6,7 @@ import { CancelReasonModal } from './CancelReasonModal'
 import { Button } from '@/components/ui/Button'
 import { MapPin, Phone, MessageCircle, Package } from 'lucide-react'
 import { PerformedBy } from '@/components/ui/PerformedBy'
+import { PAYMENT_METHODS } from '@/lib/constants'
 
 const CANCEL_REASON_LABELS = {
   stock_epuise:          'Stock épuisé',
@@ -22,7 +23,13 @@ export function OrderDetail({ order, onStatusUpdate, onCancel, onMarkPaid, onNot
   const status = order.status
   const isPaid = order.payment_status === 'Payée'
 
-  const canConfirm = status === 'Nouvelle'
+  // Wave / Orange Money / "déjà payé" : le paiement se fait hors-app, donc pas
+  // moyen de le vérifier autrement que la capture jointe par le client — on
+  // bloque la confirmation tant qu'elle n'est pas là (miroir de la règle serveur).
+  const proofRequired = PAYMENT_METHODS.find(m => m.id === order.payment_method)?.requiresProof
+  const proofMissing  = proofRequired && !order.payment_proof_url
+
+  const canConfirm = status === 'Nouvelle' && !proofMissing
   const canDeliver = status === 'Confirmée'
   const canCancel  = status !== 'Livrée' && status !== 'Annulée'
   const canMarkPaid = !isPaid && status !== 'Annulée'
@@ -136,6 +143,12 @@ export function OrderDetail({ order, onStatusUpdate, onCancel, onMarkPaid, onNot
       {/* Actions dans le flux */}
       {hasActionBar && (
         <div className="flex flex-col gap-3 pt-2 pb-6">
+          {status === 'Nouvelle' && proofMissing && (
+            <p className="text-label text-amber bg-amber/10 rounded-2xl px-4 py-3 text-center leading-snug">
+              En attente de la preuve de paiement du client — impossible de confirmer
+              cette commande tant qu'elle n'est pas envoyée.
+            </p>
+          )}
           {(canConfirm || canDeliver) && (
             <Button
               variant="primary"

@@ -31,6 +31,7 @@ import { OnboardingPage } from '@/pages/onboarding/OnboardingPage'
 
 // Legal
 import { PrivacyPolicyPage } from '@/pages/legal/PrivacyPolicyPage'
+import { DataDeletionPage } from '@/pages/legal/DataDeletionPage'
 
 // App — merchant
 import { DashboardPage } from '@/pages/app/DashboardPage'
@@ -78,10 +79,14 @@ export const router = createBrowserRouter([
     element: <OnboardingPage />,
   },
 
-  // Légal — page publique, requise par Meta pour la publication de l'app WhatsApp
+  // Légal — pages publiques, requises par Meta pour la publication de l'app WhatsApp
   {
     path: '/politique-confidentialite',
     element: <PrivacyPolicyPage />,
+  },
+  {
+    path: '/suppression-donnees',
+    element: <DataDeletionPage />,
   },
 
   // Landing publique — page d'accueil, lazy (chunk isolé, jamais téléchargé par l'app/admin)

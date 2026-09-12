@@ -51,6 +51,38 @@ function fmtDate(s) {
   return new Date(s).toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' })
 }
 
+function fmtUsd(n) {
+  return n == null ? '—' : `$${n.toFixed(n < 1 ? 4 : 2)}`
+}
+
+function UsageCard({ name, primary, primaryLabel, rows, note, unavailable }) {
+  return (
+    <div className="bg-white rounded-xl shadow-admin-card p-4 ring-1 ring-admin-line">
+      <div className="flex items-center justify-between mb-1">
+        <p className="text-label font-semibold text-navy">{name}</p>
+        {unavailable === false && (
+          <span className="text-micro font-medium text-danger">solde épuisé</span>
+        )}
+      </div>
+      {primary != null && (
+        <p className="text-h3 font-bold text-admin-ink tabular-nums">{primary}</p>
+      )}
+      {primaryLabel && <p className="text-micro text-admin-muted mb-2">{primaryLabel}</p>}
+      <div className="space-y-1 mt-2">
+        {rows.map((r) => (
+          <div key={r.label} className="flex items-center justify-between text-label">
+            <span className="text-admin-muted">{r.label}</span>
+            <span className="font-medium text-admin-ink tabular-nums">{r.value}</span>
+          </div>
+        ))}
+      </div>
+      {note && (
+        <p className="text-micro text-admin-muted mt-3 pt-3 border-t border-admin-line">{note}</p>
+      )}
+    </div>
+  )
+}
+
 export default function SantePage() {
   const { data, loading, error, refetch } = useAdminQuery(adminApi.sante)
 
@@ -61,6 +93,10 @@ export default function SantePage() {
   const r2  = data?.r2 ?? {}
   const err = data?.errorRates ?? {}
   const logs = data?.logs ?? []
+  const usage = data?.usage ?? {}
+  const ds = usage.deepseek ?? {}
+  const cf = usage.cloudflare ?? {}
+  const hk = usage.haiku ?? {}
 
   return (
     <div className="space-y-6">
@@ -118,12 +154,54 @@ export default function SantePage() {
           </div>
         </div>
       )}
+            {/* Consommation par dépendance IA — solde réel quand l'API le permet */}
+      {!loading && (
+        <div>
+          <h3 className="text-h3 font-semibold text-navy mb-3">Consommation</h3>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
+            <UsageCard
+              name="DeepSeek"
+              unavailable={ds.isAvailable}
+              primary={fmtUsd(ds.balanceUsd)}
+              primaryLabel="solde restant (en direct)"
+              rows={[
+                { label: 'Requêtes aujourd\'hui', value: ds.requestsToday ?? 0 },
+                { label: 'Coût aujourd\'hui',       value: fmtUsd(ds.costTodayUsd) },
+                { label: 'Requêtes ce mois',        value: ds.requestsMonth ?? 0 },
+                { label: 'Coût ce mois',             value: fmtUsd(ds.costMonthUsd) },
+              ]}
+            />
+            <UsageCard
+              name="Cloudflare Workers AI"
+              primary={cf.requestsToday ?? 0}
+              primaryLabel="requêtes aujourd'hui (suivi interne)"
+              rows={[
+                { label: 'Requêtes ce mois', value: cf.requestsMonth ?? 0 },
+              ]}
+              note={cf.note}
+            />
+            <UsageCard
+              name="Anthropic (Haiku)"
+              primary={hk.requestsToday ?? 0}
+              primaryLabel="requêtes aujourd'hui (suivi interne)"
+              rows={[
+                { label: 'Coût aujourd\'hui',  value: fmtUsd(hk.costTodayUsd) },
+                { label: 'Requêtes ce mois',   value: hk.requestsMonth ?? 0 },
+                { label: 'Coût ce mois',        value: fmtUsd(hk.costMonthUsd) },
+              ]}
+              note={hk.note}
+            />
+          </div>
+        </div>
+      )}
+
 
       {/* Taux d'erreur par dépendance */}
       {!loading && (
         <div className="bg-white rounded-xl shadow-admin-card p-5">
           <h3 className="text-h3 font-semibold text-navy mb-4">Taux d'erreur par dépendance</h3>
           <div className="space-y-3">
+            <ErrorRate label="DeepSeek"     pct={err.deepseek} />
             <ErrorRate label="Haiku AI"     pct={err.haiku} />
             <ErrorRate label="Cloudflare"   pct={err.cloudflare} />
             <ErrorRate label="R2 Storage"   pct={err.r2} />

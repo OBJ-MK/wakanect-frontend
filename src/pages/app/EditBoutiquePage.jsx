@@ -18,6 +18,10 @@ export function EditBoutiquePage() {
     slug:        merchant?.slug        ?? '',
     address:     merchant?.address     ?? '',
     description: merchant?.description ?? '',
+    wave_number:         merchant?.payment_settings?.wave?.number         ?? '',
+    wave_name:           merchant?.payment_settings?.wave?.name           ?? '',
+    orange_money_number: merchant?.payment_settings?.orange_money?.number ?? '',
+    orange_money_name:   merchant?.payment_settings?.orange_money?.name   ?? '',
     _slugEdited: false,
   })
   const [saving, setSaving]           = useState(false)
@@ -48,6 +52,10 @@ export function EditBoutiquePage() {
         slug:               form.slug,
         address:            form.address,
         catalogDescription: form.description,
+        paymentSettings: {
+          wave:        { number: form.wave_number.trim(),         name: form.wave_name.trim() },
+          orangeMoney: { number: form.orange_money_number.trim(), name: form.orange_money_name.trim() },
+        },
       })
       setMerchant(updated)
       navigate('/app/profil')
@@ -166,6 +174,43 @@ export function EditBoutiquePage() {
                 className="w-full rounded-2xl px-4 py-3 text-body bg-[var(--bg-surface)] border border-[var(--border-default)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-orange/40 focus:border-orange resize-none dark:bg-navy/60 dark:border-white/10"
               />
             </div>
+          </div>
+
+          <div className="glass rounded-3xl p-4 flex flex-col gap-4">
+            <div>
+              <p className="text-label font-semibold text-white/80">Wave &amp; Orange Money</p>
+              <p className="text-micro text-white/40 mt-0.5">
+                Affichés au client dans le tunnel de commande quand il choisit ce mode de paiement.
+              </p>
+            </div>
+            <Input
+              label="Numéro Wave"
+              type="tel"
+              placeholder="+221 77 000 00 00"
+              value={form.wave_number}
+              onChange={set('wave_number')}
+            />
+            <Input
+              label="Nom affiché sur le compte Wave"
+              placeholder="Ex : Boutique Aminata"
+              value={form.wave_name}
+              onChange={set('wave_name')}
+              hint="Facultatif — rassure le client qu'il envoie au bon compte"
+            />
+            <Input
+              label="Numéro Orange Money"
+              type="tel"
+              placeholder="+221 77 000 00 00"
+              value={form.orange_money_number}
+              onChange={set('orange_money_number')}
+            />
+            <Input
+              label="Nom affiché sur le compte Orange Money"
+              placeholder="Ex : Boutique Aminata"
+              value={form.orange_money_name}
+              onChange={set('orange_money_name')}
+              hint="Facultatif — rassure le client qu'il envoie au bon compte"
+            />
           </div>
 
           {error && (

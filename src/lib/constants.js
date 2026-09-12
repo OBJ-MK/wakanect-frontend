@@ -20,10 +20,14 @@ export const DELIVERY_MODES = {
   PICKUP: 'Retrait',
 }
 
+// requiresProof : le client paie hors-app (Wave/OM, avant ou après la commande)
+// donc on lui demande une capture d'écran, obligatoire, pour que le marchand
+// puisse vérifier le paiement avant de confirmer.
 export const PAYMENT_METHODS = [
-  { id: 'wave', label: 'Wave', icon: '🌊' },
-  { id: 'orange_money', label: 'Orange Money', icon: '🟠' },
-  { id: 'proof', label: "J'ai déjà payé — envoyer une preuve", icon: '📎' },
+  { id: 'cash', label: 'Paiement à la livraison', icon: '💵', requiresProof: false },
+  { id: 'wave', label: 'Wave', icon: '🌊', requiresProof: true },
+  { id: 'orange_money', label: 'Orange Money', icon: '🟠', requiresProof: true },
+  { id: 'proof', label: "J'ai déjà payé — envoyer une preuve", icon: '📎', requiresProof: true },
 ]
 
 export const CATEGORIES = [

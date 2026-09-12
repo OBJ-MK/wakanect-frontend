@@ -27,7 +27,7 @@ export function CheckoutPage() {
     delivery_mode: 'Livraison',
     address: '',
     note: '',
-    payment_method: 'wave',
+    payment_method: 'cash',
     payment_proof: null,
   })
   const [loading, setLoading] = useState(false)
@@ -50,7 +50,8 @@ export function CheckoutPage() {
     if (!form.name.trim()) e.name = 'Entrez votre nom'
     if (!form.phone.trim()) e.phone = 'Entrez votre numéro WhatsApp'
     if (form.delivery_mode === 'Livraison' && !form.address.trim()) e.address = 'Entrez votre adresse'
-    if (form.payment_method === 'proof' && !form.payment_proof) e.proof = 'Ajoutez la capture de votre paiement'
+    const selectedMethod = PAYMENT_METHODS.find(m => m.id === form.payment_method)
+    if (selectedMethod?.requiresProof && !form.payment_proof) e.proof = 'Ajoutez la capture de votre paiement'
     return e
   }
 
@@ -111,9 +112,10 @@ export function CheckoutPage() {
         paymentMethod: form.payment_method,
       })
 
-      // Preuve de paiement ("J'ai déjà payé") : la commande existe déjà,
+      // Preuve de paiement (Wave / Orange Money / "déjà payé") : la commande existe déjà,
       // un échec d'upload ne doit donc pas la faire perdre au client.
-      if (form.payment_method === 'proof' && form.payment_proof && created?.order?.id) {
+      const requiresProof = PAYMENT_METHODS.find(m => m.id === form.payment_method)?.requiresProof
+      if (requiresProof && form.payment_proof && created?.order?.id) {
         try {
           await catalogueService.uploadPaymentProof(created.order.id, form.payment_proof)
         } catch (proofErr) {
@@ -315,11 +317,35 @@ export function CheckoutPage() {
               ))}
             </div>
 
-            {/* Preuve de paiement — visible uniquement pour "J'ai déjà payé" */}
-            {form.payment_method === 'proof' && (
+            {/* Coordonnées du marchand — visibles pour Wave / Orange Money uniquement */}
+            {(form.payment_method === 'wave' || form.payment_method === 'orange_money') && (() => {
+              const info = form.payment_method === 'wave'
+                ? boutique?.payment_settings?.wave
+                : boutique?.payment_settings?.orange_money
+              if (!info?.number) {
+                return (
+                  <p className="text-label text-red-500 bg-red-500/10 rounded-xl px-4 py-2.5">
+                    La boutique n'a pas encore renseigné son numéro {form.payment_method === 'wave' ? 'Wave' : 'Orange Money'}.
+                    Choisissez un autre mode de paiement ou contactez-la directement.
+                  </p>
+                )
+              }
+              return (
+                <div className="rounded-2xl bg-orange/5 border border-orange/20 px-4 py-3 flex flex-col gap-1">
+                  <p className="text-micro text-navy/50 dark:text-white/45 uppercase tracking-wider">
+                    Envoyez {formatFCFA(total)} à
+                  </p>
+                  <p className="text-body font-semibold text-navy dark:text-white">{info.number}</p>
+                  {info.name && <p className="text-label text-navy/60 dark:text-white/60">{info.name}</p>}
+                </div>
+              )
+            })()}
+
+            {/* Preuve de paiement — Wave, Orange Money, ou "J'ai déjà payé" */}
+            {PAYMENT_METHODS.find(m => m.id === form.payment_method)?.requiresProof && (
               <div className="flex flex-col gap-2">
                 <p className="text-label text-navy/60 dark:text-white/60">
-                  Envoyez la capture d'écran de votre paiement (Wave, Orange Money…).
+                  Envoyez la capture d'écran de votre paiement.
                   La boutique la verra sur votre commande.
                 </p>
                 <input

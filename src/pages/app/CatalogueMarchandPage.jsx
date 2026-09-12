@@ -69,7 +69,7 @@ function ProductCard({ product }) {
       </div>
 
       <div className="p-3 flex flex-col gap-1">
-        <p className="text-label font-semibold text-white leading-snug line-clamp-2">{product.name}</p>
+        <p className="text-label font-semibold text-white leading-snug line-clamp-2 min-h-[2.25rem]">{product.name}</p>
         <div className="flex items-center justify-between">
           <p className="text-body font-bold text-amber">{formatFCFA(product.price)}</p>
           <p className={cn(

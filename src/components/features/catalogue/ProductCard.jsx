@@ -56,24 +56,12 @@ export function ProductCard({ product }) {
 
       {/* Info */}
       <div className="p-3 flex flex-col gap-2 flex-1">
-        <p className="text-body font-semibold text-[var(--text-primary)] line-clamp-2 leading-snug">
+        {/* min-h réserve toujours la place de 2 lignes, même si le titre tient sur une —
+            sinon les cartes avec titre court sont plus basses que les autres dans la grille. */}
+        <p className="text-body font-semibold text-[var(--text-primary)] line-clamp-2 leading-snug min-h-[2.5rem]">
           {product.name}
         </p>
         <p className="text-label font-bold text-orange">{formatFCFA(product.price)}</p>
-
-        {/* Color chips — lecture seule */}
-        {product.colors?.length > 0 && (
-          <div className="flex flex-wrap gap-1">
-            {product.colors.map(color => (
-              <span
-                key={color}
-                className="px-2 py-0.5 rounded-full text-micro border border-[var(--border-default)] text-[var(--text-secondary)]"
-              >
-                {color}
-              </span>
-            ))}
-          </div>
-        )}
 
         <Button
           size="sm"

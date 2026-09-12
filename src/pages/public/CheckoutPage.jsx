@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { track } from '@/lib/track'
 import { useNavigate, useParams, Link } from 'react-router-dom'
-import { ChevronLeft, MapPin, Package, Camera, X } from 'lucide-react'
+import { ChevronLeft, MapPin, Package, Camera, X, Truck, Store } from 'lucide-react'
 import { useCatalogueStore } from '@/store/catalogueStore'
 import { catalogueService } from '@/services/catalogueService'
 import { formatFCFA } from '@/lib/formatters'
@@ -38,12 +38,18 @@ export function CheckoutPage() {
   const set = (key) => (e) => setForm(f => ({ ...f, [key]: e.target.value }))
   const total = cart.reduce((sum, i) => sum + i.price * i.quantity, 0)
 
+  const merchantPaymentInfo =
+    form.payment_method === 'wave' ? boutique?.payment_settings?.wave :
+      form.payment_method === 'orange_money' ? boutique?.payment_settings?.orange_money :
+        null
+  const merchantPaymentMissing =
+    (form.payment_method === 'wave' || form.payment_method === 'orange_money') && !merchantPaymentInfo?.number
+
   usePageDuration(slug, 'checkout')
 
   useEffect(() => {
     track(slug, 'checkout_started')
   }, [slug])
-
 
   function validate() {
     const e = {}
@@ -51,7 +57,9 @@ export function CheckoutPage() {
     if (!form.phone.trim()) e.phone = 'Entrez votre numéro WhatsApp'
     if (form.delivery_mode === 'Livraison' && !form.address.trim()) e.address = 'Entrez votre adresse'
     const selectedMethod = PAYMENT_METHODS.find(m => m.id === form.payment_method)
-    if (selectedMethod?.requiresProof && !form.payment_proof) e.proof = 'Ajoutez la capture de votre paiement'
+    if (selectedMethod?.requiresProof && !merchantPaymentMissing && !form.payment_proof) {
+      e.proof = 'Ajoutez la capture de votre paiement'
+    }
     return e
   }
 
@@ -82,9 +90,6 @@ export function CheckoutPage() {
     setErrors({})
     setLoading(true)
     try {
-      // Contrat back POST /api/orders/public :
-      // { slug, customer: { name, phone, address, notes }, items: [{ productId, quantity, color? }] }
-      // (prix et total recalculés côté back)
       const methodLabel = PAYMENT_METHODS.find(m => m.id === form.payment_method)?.label ?? form.payment_method
       const noteParts = [
         `Réception : ${form.delivery_mode}`,
@@ -112,8 +117,6 @@ export function CheckoutPage() {
         paymentMethod: form.payment_method,
       })
 
-      // Preuve de paiement (Wave / Orange Money / "déjà payé") : la commande existe déjà,
-      // un échec d'upload ne doit donc pas la faire perdre au client.
       const requiresProof = PAYMENT_METHODS.find(m => m.id === form.payment_method)?.requiresProof
       if (requiresProof && form.payment_proof && created?.order?.id) {
         try {
@@ -126,11 +129,11 @@ export function CheckoutPage() {
       track(slug, 'order_placed', { orderId: created.order.id })
       addOrderToCache({
         trackingCode: created.order.trackingCode,
-        orderNumber:  created.order.orderNumber,
+        orderNumber: created.order.orderNumber,
         slug,
-        shopName:     boutique?.shop_name || '',
-        total:        created.order.totalAmount,
-        createdAt:    new Date().toISOString(),
+        shopName: boutique?.shop_name || '',
+        total: created.order.totalAmount,
+        createdAt: new Date().toISOString(),
       })
       clearCart()
       navigate(`/boutique/${slug}/confirmation`, {
@@ -156,7 +159,7 @@ export function CheckoutPage() {
 
   return (
     <div className="min-h-screen bg-cream dark:bg-navy-deep">
-      {/* Header orange vif */}
+      {/* Header */}
       <div className="bg-gradient-to-r from-orange to-orange-hi px-4 pt-safe pt-4 pb-5">
         <div className="max-w-lg mx-auto flex items-center gap-3">
           <Link
@@ -171,7 +174,7 @@ export function CheckoutPage() {
 
       <div className="max-w-lg mx-auto px-4 py-5">
         <form onSubmit={handleSubmit} className="flex flex-col gap-5" noValidate>
-          {/* Order recap */}
+          {/* Récapitulatif */}
           <div className="bg-white dark:bg-navy rounded-3xl overflow-hidden shadow-card border border-navy/8 dark:border-white/8">
             <p className="text-micro text-navy/50 dark:text-white/45 uppercase tracking-wider px-4 pt-4 pb-2">
               Récapitulatif
@@ -228,7 +231,7 @@ export function CheckoutPage() {
             </div>
           </div>
 
-          {/* Customer info */}
+          {/* Informations client */}
           <div className="bg-white dark:bg-navy rounded-3xl p-5 shadow-card border border-navy/8 dark:border-white/8 flex flex-col gap-4">
             <p className="text-micro text-navy/50 dark:text-white/45 uppercase tracking-wider">Vos informations</p>
             <Input
@@ -251,7 +254,7 @@ export function CheckoutPage() {
             />
           </div>
 
-          {/* Delivery mode */}
+          {/* Mode de réception */}
           <div className="bg-white dark:bg-navy rounded-3xl p-5 shadow-card border border-navy/8 dark:border-white/8 flex flex-col gap-4">
             <p className="text-micro text-navy/50 dark:text-white/45 uppercase tracking-wider">Mode de réception</p>
             <div className="flex gap-3">
@@ -261,13 +264,18 @@ export function CheckoutPage() {
                   type="button"
                   onClick={() => setForm(f => ({ ...f, delivery_mode: mode }))}
                   className={cn(
-                    'flex-1 py-3 rounded-2xl text-label font-semibold border transition-colors',
+                    'flex-1 py-3 px-4 rounded-2xl text-label font-semibold border transition-colors flex items-center justify-center gap-2',
                     form.delivery_mode === mode
                       ? 'bg-orange text-white border-orange'
                       : 'border-navy/15 dark:border-white/15 text-navy dark:text-white hover:border-orange/50',
                   )}
                 >
-                  {mode === 'Livraison' ? '🚚' : '🏪'} {mode}
+                  {mode === 'Livraison' ? (
+                    <Truck className="w-5 h-5 shrink-0" />
+                  ) : (
+                    <Store className="w-5 h-5 shrink-0" />
+                  )}
+                  <span>{mode}</span>
                 </button>
               ))}
             </div>
@@ -289,60 +297,67 @@ export function CheckoutPage() {
             />
           </div>
 
-          {/* Payment */}
+          {/* Paiement */}
           <div className="bg-white dark:bg-navy rounded-3xl p-5 shadow-card border border-navy/8 dark:border-white/8 flex flex-col gap-4">
             <p className="text-micro text-navy/50 dark:text-white/45 uppercase tracking-wider">Paiement</p>
             <div className="flex flex-col gap-2">
-              {PAYMENT_METHODS.map(method => (
-                <label
-                  key={method.id}
-                  className={cn(
-                    'flex items-center gap-3 p-3.5 rounded-2xl border cursor-pointer transition-colors',
-                    form.payment_method === method.id
-                      ? 'border-orange bg-orange/5'
-                      : 'border-navy/10 dark:border-white/10 hover:border-orange/40',
-                  )}
-                >
-                  <input
-                    type="radio"
-                    name="payment"
-                    value={method.id}
-                    checked={form.payment_method === method.id}
-                    onChange={() => setForm(f => ({ ...f, payment_method: method.id }))}
-                    className="accent-orange"
-                  />
-                  <span className="text-base">{method.icon}</span>
-                  <span className="text-body text-navy dark:text-white">{method.label}</span>
-                </label>
-              ))}
+              {PAYMENT_METHODS.map(method => {
+                const Icon = method.icon
+                return (
+                  <label
+                    key={method.id}
+                    className={cn(
+                      'flex items-center gap-3 p-3.5 rounded-2xl border cursor-pointer transition-colors',
+                      form.payment_method === method.id
+                        ? 'border-orange bg-orange/5'
+                        : 'border-navy/10 dark:border-white/10 hover:border-orange/40',
+                    )}
+                  >
+                    <input
+                      type="radio"
+                      name="payment"
+                      value={method.id}
+                      checked={form.payment_method === method.id}
+                      onChange={() => setForm(f => ({ ...f, payment_method: method.id }))}
+                      className="accent-orange"
+                    />
+                    <div className="w-6 h-6 flex items-center justify-center shrink-0">
+                      {method.isImage ? (
+                        <img
+                          src={method.icon}
+                          alt={method.label}
+                          className="w-6 h-6 object-contain rounded-md"
+                        />
+                      ) : (
+                        <Icon className="w-5 h-5 text-navy dark:text-white" />
+                      )}
+                    </div>
+                    <span className="text-body text-navy dark:text-white">{method.label}</span>
+                  </label>
+                )
+              })}
             </div>
 
-            {/* Coordonnées du marchand — visibles pour Wave / Orange Money uniquement */}
-            {(form.payment_method === 'wave' || form.payment_method === 'orange_money') && (() => {
-              const info = form.payment_method === 'wave'
-                ? boutique?.payment_settings?.wave
-                : boutique?.payment_settings?.orange_money
-              if (!info?.number) {
-                return (
-                  <p className="text-label text-red-500 bg-red-500/10 rounded-xl px-4 py-2.5">
-                    La boutique n'a pas encore renseigné son numéro {form.payment_method === 'wave' ? 'Wave' : 'Orange Money'}.
-                    Choisissez un autre mode de paiement ou contactez-la directement.
-                  </p>
-                )
-              }
-              return (
+            {/* Coordonnées du marchand */}
+            {(form.payment_method === 'wave' || form.payment_method === 'orange_money') && (
+              merchantPaymentMissing ? (
+                <p className="text-label text-red-500 bg-red-500/10 rounded-xl px-4 py-2.5">
+                  La boutique n'a pas encore renseigné son numéro {form.payment_method === 'wave' ? 'Wave' : 'Orange Money'}.
+                  Choisissez un autre mode de paiement ou contactez-la directement.
+                </p>
+              ) : (
                 <div className="rounded-2xl bg-orange/5 border border-orange/20 px-4 py-3 flex flex-col gap-1">
                   <p className="text-micro text-navy/50 dark:text-white/45 uppercase tracking-wider">
                     Envoyez {formatFCFA(total)} à
                   </p>
-                  <p className="text-body font-semibold text-navy dark:text-white">{info.number}</p>
-                  {info.name && <p className="text-label text-navy/60 dark:text-white/60">{info.name}</p>}
+                  <p className="text-body font-semibold text-navy dark:text-white">{merchantPaymentInfo.number}</p>
+                  {merchantPaymentInfo.name && <p className="text-label text-navy/60 dark:text-white/60">{merchantPaymentInfo.name}</p>}
                 </div>
               )
-            })()}
+            )}
 
-            {/* Preuve de paiement — Wave, Orange Money, ou "J'ai déjà payé" */}
-            {PAYMENT_METHODS.find(m => m.id === form.payment_method)?.requiresProof && (
+            {/* Preuve de paiement */}
+            {PAYMENT_METHODS.find(m => m.id === form.payment_method)?.requiresProof && !merchantPaymentMissing && (
               <div className="flex flex-col gap-2">
                 <p className="text-label text-navy/60 dark:text-white/60">
                   Envoyez la capture d'écran de votre paiement.
@@ -397,7 +412,7 @@ export function CheckoutPage() {
             <p className="text-label text-red-500 bg-red-500/10 rounded-xl px-4 py-2.5">{errors._}</p>
           )}
 
-          <Button type="submit" size="xl" fullWidth loading={loading}>
+          <Button type="submit" size="xl" fullWidth loading={loading} disabled={merchantPaymentMissing}>
             Confirmer la commande · {formatFCFA(total)}
           </Button>
         </form>

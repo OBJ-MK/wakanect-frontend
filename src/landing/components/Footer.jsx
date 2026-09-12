@@ -25,8 +25,8 @@ const COLS = [
     links: [
       ['À propos', '/about'],
       ['Nous contacter', '/contact'],
-      ['Mentions légales', '/legal'],
-      ['Confidentialité', '/privacy'],
+      ['Confidentialité', '/politique-confidentialite'],
+      ['Suppression des données', '/suppression-donnees'],
     ],
   },
 ];

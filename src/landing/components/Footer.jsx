@@ -79,7 +79,7 @@ export default function Footer() {
         </div>
 
         <div className="mt-14 flex flex-col items-center justify-between gap-4 border-t border-cream/10 pt-8 text-center sm:flex-row sm:text-left">
-          <p className="text-xs text-cream/65">© 2026 Wakanect SAS. Tous droits réservés.</p>
+          <p className="text-xs text-cream/65">© 2026 Wakanect. Tous droits réservés.</p>
           <p className="text-xs text-cream/65">
             Créé en Afrique de l'Ouest, pour l'Afrique de l'Ouest.
           </p>

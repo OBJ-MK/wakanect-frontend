@@ -1,7 +1,9 @@
 import { cn } from '@/lib/utils'
+import { CheckCircle2, Clock } from 'lucide-react'
 
 export function PaymentBadge({ status }) {
   const paid = status === 'Payée'
+  const Icon = paid ? CheckCircle2 : Clock
   return (
     <span
       className={cn(
@@ -11,7 +13,7 @@ export function PaymentBadge({ status }) {
           : 'text-red-600 dark:text-red-400',
       )}
     >
-      <span className={cn('w-1.5 h-1.5 rounded-full', paid ? 'bg-emerald' : 'bg-red-400')} />
+      <Icon className="w-3.5 h-3.5" />
       {status}
     </span>
   )

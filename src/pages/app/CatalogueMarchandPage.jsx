@@ -1,9 +1,11 @@
 import { useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
-import { Plus, Edit3, LayoutGrid, AlertTriangle, Package } from 'lucide-react'
+import { Plus, Edit3, LayoutGrid, AlertTriangle, Package, Share2, Check } from 'lucide-react'
 import { formatFCFA } from '@/lib/formatters'
-import { cn } from '@/lib/utils'
+import { cn, shareOrCopy } from '@/lib/utils'
 import { useStock } from '@/hooks/useStock'
+import { useAuthStore } from '@/store/authStore'
+import { PUBLIC_BASE } from '@/lib/constants'
 import { FilterBar } from '@/components/features/catalogue/FilterBar'
 import { Pagination } from '@/components/ui/Pagination'
 
@@ -21,10 +23,23 @@ function ProductCardSkeleton() {
   )
 }
 
-function ProductCard({ product }) {
+function ProductCard({ product, slug }) {
   const lowStock  = product.stock > 0 && product.stock <= 5
   const outOfStock = product.stock === 0
   const thumb = product.images?.[0]?.url ?? product.image_url ?? null
+  const [shared, setShared] = useState(false)
+
+  async function handleShare(e) {
+    e.preventDefault()
+    e.stopPropagation()
+    if (!slug) return
+    const url = `${PUBLIC_BASE}/boutique/${slug}/produit/${product.id}`
+    const result = await shareOrCopy(product.name, url)
+    if (result === 'shared' || result === 'copied') {
+      setShared(true)
+      setTimeout(() => setShared(false), 1400)
+    }
+  }
 
   return (
     <div className={cn(
@@ -46,6 +61,15 @@ function ProductCard({ product }) {
             <span className="text-micro">Aucune photo</span>
           </div>
         )}
+
+        <button
+          type="button"
+          onClick={handleShare}
+          aria-label="Partager cet article"
+          className="absolute top-2 left-2 w-8 h-8 rounded-xl bg-navy/70 backdrop-blur-glass flex items-center justify-center text-white/70 hover:text-white hover:bg-navy/90 active:scale-95 transition-all"
+        >
+          {shared ? <Check size={14} /> : <Share2 size={14} />}
+        </button>
 
         <Link
           to={`/app/catalogue/${product.id}/modifier`}
@@ -85,6 +109,7 @@ function ProductCard({ product }) {
 }
 
 export function CatalogueMarchandPage() {
+  const merchant = useAuthStore(s => s.merchant)
   const [filters, setFilters] = useState(DEFAULT_FILTERS)
   const [page, setPage]       = useState(1)
   const [categoryOptions, setCategoryOptions] = useState(['Tout'])
@@ -201,7 +226,7 @@ export function CatalogueMarchandPage() {
         ) : (
           <>
             <div ref={gridRef} className="grid grid-cols-2 gap-3 scroll-mt-24">
-              {products.map(p => <ProductCard key={p.id} product={p} />)}
+              {products.map(p => <ProductCard key={p.id} product={p} slug={merchant?.slug} />)}
             </div>
 
             <Pagination page={page} pages={pages} onChange={changePage} />

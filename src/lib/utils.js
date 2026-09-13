@@ -28,6 +28,29 @@ export function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms))
 }
 
+/**
+ * Partage natif (Web Share API) avec repli sur le presse-papier.
+ * Retourne 'shared' | 'copied' | 'cancelled' | 'error' pour que l'appelant
+ * puisse donner un retour visuel adapté (icône ✓, toast…).
+ */
+export async function shareOrCopy(title, url) {
+  if (navigator.share) {
+    try {
+      await navigator.share({ title, url })
+      return 'shared'
+    } catch (err) {
+      if (err?.name === 'AbortError') return 'cancelled'
+      // Le partage natif a échoué (pas d'app cible, etc.) → on retombe sur le presse-papier
+    }
+  }
+  try {
+    await navigator.clipboard.writeText(url)
+    return 'copied'
+  } catch {
+    return 'error'
+  }
+}
+
 export function clamp(value, min, max) {
   return Math.min(Math.max(value, min), max)
 }

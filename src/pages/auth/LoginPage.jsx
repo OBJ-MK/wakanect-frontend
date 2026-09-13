@@ -3,22 +3,36 @@ import { Link } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
-import { Phone, Lock, Store } from 'lucide-react'
+import { PhoneInput } from '@/components/ui/PhoneInput'
+import { Lock, Store, AtSign } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 export function LoginPage() {
   const { handleLogin, loading, error } = useAuth()
   const [mode, setMode] = useState('owner')
-  const [form, setForm] = useState({ shop: '', identifier: '', password: '' })
+  // 'phone' | 'email' — bascule dispo en mode propriétaire seulement ;
+  // en mode employé, la connexion est toujours par téléphone.
+  const [identifierMode, setIdentifierMode] = useState('phone')
+  const [form, setForm] = useState({
+    shop: '',
+    phone_dial: '+221',
+    phone_number: '',
+    email: '',
+    password: '',
+  })
 
   const set = (key) => (e) => setForm(f => ({ ...f, [key]: e.target.value }))
 
   function onSubmit(e) {
     e.preventDefault()
+    const identifier = mode === 'owner' && identifierMode === 'email'
+      ? form.email
+      : `${form.phone_dial} ${form.phone_number}`.trim()
+
     handleLogin(
       mode === 'owner'
-        ? { identifier: form.identifier, password: form.password }
-        : { shop: form.shop, identifier: form.identifier, password: form.password, role: 'employee' }
+        ? { identifier, password: form.password }
+        : { shop: form.shop, identifier, password: form.password, role: 'employee' }
     )
   }
 
@@ -58,16 +72,39 @@ export function LoginPage() {
             required
           />
         )}
-        <Input
-          label={mode === 'owner' ? 'Numéro ou email' : 'Ton numéro de téléphone'}
-          type="text"
-          placeholder="+221 77 000 00 00"
-          value={form.identifier}
-          onChange={set('identifier')}
-          icon={<Phone size={16} />}
-          autoComplete="username"
-          required
-        />
+
+        {mode === 'owner' && identifierMode === 'email' ? (
+          <Input
+            label="Email"
+            type="email"
+            placeholder="vous@exemple.com"
+            value={form.email}
+            onChange={set('email')}
+            icon={<AtSign size={16} />}
+            autoComplete="username"
+            required
+          />
+        ) : (
+          <PhoneInput
+            label={mode === 'owner' ? 'Numéro de téléphone' : 'Ton numéro de téléphone'}
+            dialCode={form.phone_dial}
+            onDialCodeChange={(v) => setForm(f => ({ ...f, phone_dial: v }))}
+            number={form.phone_number}
+            onNumberChange={(v) => setForm(f => ({ ...f, phone_number: v }))}
+            required
+          />
+        )}
+
+        {mode === 'owner' && (
+          <button
+            type="button"
+            onClick={() => setIdentifierMode(m => m === 'phone' ? 'email' : 'phone')}
+            className="self-start -mt-2 text-micro text-white/40 hover:text-white/65 transition-colors"
+          >
+            {identifierMode === 'phone' ? 'Se connecter avec un email' : 'Se connecter avec un numéro'}
+          </button>
+        )}
+
         <Input
           label="Mot de passe"
           type="password"

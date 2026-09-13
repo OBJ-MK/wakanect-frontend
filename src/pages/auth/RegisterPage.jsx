@@ -42,6 +42,7 @@ export function RegisterPage() {
       ownerName: form.owner_name,
       whatsappPhone: `${form.phone_dial} ${form.phone_number}`.trim(),
       password: form.password,
+      acceptedTerms: form.accepted_terms,
     })
   }
 

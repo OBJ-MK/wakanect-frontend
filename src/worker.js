@@ -40,11 +40,11 @@ async function fetchProductMeta(slug, id) {
   return data?.product || null;
 }
 
-function buildOgBlock({ url, title, description, image }) {
+function buildOgBlock({ url, siteName, title, description, image }) {
   const hasImg = image && image.startsWith('https://');
   const lines = [
     `<meta property="og:type" content="website" />`,
-    `<meta property="og:site_name" content="${esc(title)}" />`,
+    `<meta property="og:site_name" content="${esc(siteName)}" />`,
     `<meta property="og:title" content="${esc(title)}" />`,
     `<meta property="og:description" content="${esc(description)}" />`,
     `<meta property="og:url" content="${esc(url)}" />`,
@@ -84,7 +84,11 @@ export default {
           const title = `${product.name} — ${formatFCFA(product.price)}`;
           const description = truncate(product.description || `Disponible maintenant, ${formatFCFA(product.price)}`);
           const image = product.image_url;
-          const ogBlock = buildOgBlock({ url: `${url.origin}${url.pathname}`, title, description, image });
+          const ogBlock = buildOgBlock({
+            url: `${url.origin}${url.pathname}`,
+            siteName: `${url.host}/boutique/${slug}`,
+            title, description, image,
+          });
 
           const assetResp = await env.ASSETS.fetch(request);
           const rewritten = new HTMLRewriter()
@@ -103,7 +107,11 @@ export default {
           const title = meta.shop_name;
           const description = truncate(meta.description || `Découvrez la boutique ${meta.shop_name}`);
           const image = meta.banner_url || meta.logo_url || null; // bannière prioritaire, logo en repli
-          const ogBlock = buildOgBlock({ url: `${url.origin}${url.pathname}`, title, description, image });
+          const ogBlock = buildOgBlock({
+            url: `${url.origin}${url.pathname}`,
+            siteName: `${url.host}/boutique/${boutiqueMatch[1]}`,
+            title, description, image,
+          });
 
           const assetResp = await env.ASSETS.fetch(request);
           const rewritten = new HTMLRewriter()

@@ -1,13 +1,11 @@
 import { useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
-import { Plus, Edit3, LayoutGrid, AlertTriangle, Package, Share2, Check } from 'lucide-react'
-import { formatFCFA } from '@/lib/formatters'
-import { cn, shareOrCopy } from '@/lib/utils'
+import { Plus, LayoutGrid, AlertTriangle, Package } from 'lucide-react'
 import { useStock } from '@/hooks/useStock'
 import { useAuthStore } from '@/store/authStore'
-import { PUBLIC_BASE } from '@/lib/constants'
 import { FilterBar } from '@/components/features/catalogue/FilterBar'
 import { Pagination } from '@/components/ui/Pagination'
+import { ProductCard } from '@/components/features/catalogue/ProductCard'
 
 const DEFAULT_FILTERS = { search: '', category: 'Tout', priceMin: '', priceMax: '', sort: 'recent' }
 
@@ -18,91 +16,6 @@ function ProductCardSkeleton() {
       <div className="p-3 flex flex-col gap-1.5">
         <div className="h-4 bg-white/10 rounded w-full" />
         <div className="h-4 bg-white/10 rounded w-1/2" />
-      </div>
-    </div>
-  )
-}
-
-function ProductCard({ product, slug }) {
-  const lowStock  = product.stock > 0 && product.stock <= 5
-  const outOfStock = product.stock === 0
-  const thumb = product.images?.[0]?.url ?? product.image_url ?? null
-  const [shared, setShared] = useState(false)
-
-  async function handleShare(e) {
-    e.preventDefault()
-    e.stopPropagation()
-    if (!slug) return
-    const url = `${PUBLIC_BASE}/boutique/${slug}/produit/${product.id}`
-    const result = await shareOrCopy(product.name, url)
-    if (result === 'shared' || result === 'copied') {
-      setShared(true)
-      setTimeout(() => setShared(false), 1400)
-    }
-  }
-
-  return (
-    <div className={cn(
-      'glass rounded-3xl overflow-hidden flex flex-col',
-      outOfStock && 'opacity-60',
-    )}>
-      <div className="relative bg-navy-light aspect-square flex items-center justify-center">
-        {thumb ? (
-          <img
-            src={thumb}
-            alt={product.name}
-            className="w-full h-full object-cover"
-            loading="lazy"
-            decoding="async"
-          />
-        ) : (
-          <div className="flex flex-col items-center gap-2 text-white/20">
-            <Package size={28} />
-            <span className="text-micro">Aucune photo</span>
-          </div>
-        )}
-
-        <button
-          type="button"
-          onClick={handleShare}
-          aria-label="Partager cet article"
-          className="absolute top-2 left-2 w-8 h-8 rounded-xl bg-navy/70 backdrop-blur-glass flex items-center justify-center text-white/70 hover:text-white hover:bg-navy/90 active:scale-95 transition-all"
-        >
-          {shared ? <Check size={14} /> : <Share2 size={14} />}
-        </button>
-
-        <Link
-          to={`/app/catalogue/${product.id}/modifier`}
-          className="absolute top-2 right-2 w-8 h-8 rounded-xl bg-navy/70 backdrop-blur-glass flex items-center justify-center text-white/70 hover:text-white hover:bg-navy/90 active:scale-95 transition-all"
-          aria-label="Modifier"
-        >
-          <Edit3 size={14} />
-        </Link>
-
-        {lowStock && (
-          <div className="absolute bottom-2 left-2 flex items-center gap-1 px-2 py-1 rounded-lg bg-amber/20 backdrop-blur-xs">
-            <AlertTriangle size={10} className="text-amber" />
-            <span className="text-[10px] font-semibold text-amber">Stock bas</span>
-          </div>
-        )}
-        {outOfStock && (
-          <div className="absolute bottom-2 left-2 px-2 py-1 rounded-lg bg-red-500/20 backdrop-blur-xs">
-            <span className="text-[10px] font-semibold text-red-400">Épuisé</span>
-          </div>
-        )}
-      </div>
-
-      <div className="p-3 flex flex-col gap-1 flex-1">
-        <p className="text-label font-semibold text-white leading-snug line-clamp-2 min-h-[2.25rem]">{product.name}</p>
-        <div className="flex items-center justify-between mt-auto">
-          <p className="text-body font-bold text-amber">{formatFCFA(product.price)}</p>
-          <p className={cn(
-            'text-micro',
-            outOfStock ? 'text-red-400' : lowStock ? 'text-amber' : 'text-white/40',
-          )}>
-            {outOfStock ? 'Épuisé' : `${product.stock} en stock`}
-          </p>
-        </div>
       </div>
     </div>
   )
@@ -226,7 +139,7 @@ export function CatalogueMarchandPage() {
         ) : (
           <>
             <div ref={gridRef} className="grid grid-cols-2 gap-3 scroll-mt-24">
-              {products.map(p => <ProductCard key={p.id} product={p} slug={merchant?.slug} />)}
+              {products.map(p => <ProductCard key={p.id} product={p} slug={merchant?.slug} variant="merchant" />)}
             </div>
 
             <Pagination page={page} pages={pages} onChange={changePage} />

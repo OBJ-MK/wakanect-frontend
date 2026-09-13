@@ -40,7 +40,7 @@ export default function ParsingPage() {
       {/* En-tête */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-          <h2 className="text-h2 font-display font-bold text-navy">Parsing & Haiku</h2>
+          <h2 className="text-h2 font-display font-bold text-navy">Parsing & IA</h2>
           <p className="text-body text-admin-muted">Coûts et escalade du moteur de parsing</p>
         </div>
         <RangeSelector value={range} onChange={setRange} />
@@ -58,15 +58,15 @@ export default function ParsingPage() {
             icon={Percent}
           />
           <KpiCard
-            label="Escalade Haiku"
-            value={`${data?.pctEscalateHaiku ?? 0}%`}
+            label="Escalade DeepSeek"
+            value={`${data?.pctEscalateDeepseek ?? 0}%`}
             sub="Payant"
             icon={Zap}
           />
           <KpiCard
-            label="Tokens Haiku / boutique"
-            value={data?.haikuTokensPerShopAvg ? `${(data.haikuTokensPerShopAvg / 1000).toFixed(1)}k` : '—'}
-            sub={`Médiane : ${data?.haikuTokensPerShopMedian ? `${(data.haikuTokensPerShopMedian / 1000).toFixed(1)}k` : '—'}`}
+            label="Tokens DeepSeek / boutique"
+            value={data?.deepseekTokensPerShopAvg ? `${(data.deepseekTokensPerShopAvg / 1000).toFixed(1)}k` : '—'}
+            sub={`Médiane : ${data?.deepseekTokensPerShopMedian ? `${(data.deepseekTokensPerShopMedian / 1000).toFixed(1)}k` : '—'}`}
             icon={Hash}
           />
           <KpiCard
@@ -89,10 +89,10 @@ export default function ParsingPage() {
         )}
       </div>
 
-      {/* Graphique coût Haiku / jour + note marge */}
+      {/* Graphique coût DeepSeek / jour + note marge */}
       <div className="bg-white rounded-xl shadow-admin-card p-5">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
-          <h3 className="text-h3 font-semibold text-navy">Coût Haiku / jour</h3>
+          <h3 className="text-h3 font-semibold text-navy">Coût DeepSeek / jour</h3>
           <div className="text-label text-admin-muted">
             Total période :{' '}
             <span className="font-semibold text-orange tabular-nums">
@@ -118,7 +118,7 @@ export default function ParsingPage() {
         {/* Note marge */}
         <p className="mt-3 text-micro text-admin-muted bg-amber/10 rounded-lg px-3 py-2 border border-amber/20">
           ⚠️ Ces coûts sont à comparer à vos revenus d'abonnement pour calculer la marge réelle.
-          Un ratio Haiku / MRR {'>'} 15 % mérite une revue du seuil d'escalade.
+          Un ratio DeepSeek / MRR {'>'} 15 % mérite une revue du seuil d'escalade.
         </p>
       </div>
     </div>

@@ -22,10 +22,12 @@ const VARIANTS = {
   info:    'bg-navy/8 text-navy border-navy/15',
 
   // Parsing tiers
-  regex:      'bg-admin-fill text-admin-ink-2 border-admin-line',
-  cloudflare: 'bg-amber/20 text-amber-700 border-amber/30',
-  haiku:      'bg-orange/10 text-orange border-orange/20',
-  failed:     'bg-danger/10 text-danger border-danger/20',
+  regex:              'bg-admin-fill text-admin-ink-2 border-admin-line',
+  cloudflare:         'bg-amber/20 text-amber-700 border-amber/30',
+  deepseek_correction:'bg-orange/10 text-orange border-orange/20',
+  deepseek_full:      'bg-orange/10 text-orange border-orange/20',
+  haiku:              'bg-admin-fill text-admin-muted border-admin-line',
+  failed:             'bg-danger/10 text-danger border-danger/20',
 
   // Paiement
   paid:    'bg-wa-green/10 text-green-700 border-wa-green/20',
@@ -40,7 +42,7 @@ const LABELS = {
   pro: 'Pro', premium: 'Business', business: 'Business', trial: 'Essai', free: 'Gratuit',
   active: 'Active', suspended: 'Suspendue', dormant: 'Inactive',
   error: 'Erreur', warning: 'Attention', info: 'Info',
-  regex: 'Regex', cloudflare: 'Cloudflare', haiku: 'Haiku', failed: 'Échec',
+  regex: 'Regex', cloudflare: 'Cloudflare', deepseek_correction: 'DeepSeek', deepseek_full: 'DeepSeek', haiku: 'Haiku (secours)', failed: 'Échec',
   paid: 'Payé', pending: 'En attente', overdue: 'Impayé',
 }
 

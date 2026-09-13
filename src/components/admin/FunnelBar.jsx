@@ -1,10 +1,11 @@
 /**
  * FunnelBar — entonnoir d'escalade parsing
  * Mapping couleur (§1 design system) :
- *   Regex     = admin.fill/line  (gratuit, neutre)
- *   Cloudflare = amber           (attention)
- *   Haiku      = orange          (payant, ressort)
- *   Échec      = danger          (anomalie)
+ *   Regex      = admin.fill/line  (gratuit, neutre)
+ *   Cloudflare = amber            (attention)
+ *   DeepSeek   = orange           (payant, seule IA facturée en prod)
+ *   Haiku      = gris admin-muted (filet de secours, quasi jamais sollicité)
+ *   Échec      = danger           (anomalie)
  */
 const SEGMENTS = [
   {
@@ -24,12 +25,20 @@ const SEGMENTS = [
     text: 'text-amber-700',
   },
   {
-    key: 'pctEscalateHaiku',
-    label: 'Haiku',
+    key: 'pctEscalateDeepseek',
+    label: 'DeepSeek',
     note: 'Payant',
     bar: 'bg-orange',
     dot: 'bg-orange',
     text: 'text-orange font-semibold',
+  },
+  {
+    key: 'pctEscalateHaiku',
+    label: 'Haiku',
+    note: 'Secours',
+    bar: 'bg-admin-muted',
+    dot: 'bg-admin-muted',
+    text: 'text-admin-muted',
   },
   {
     key: 'pctFailed',

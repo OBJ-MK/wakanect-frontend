@@ -10,6 +10,7 @@ import { KpiSkeleton } from '@/components/admin/LoadingState'
 import { ErrorState } from '@/components/admin/ErrorState'
 import { AlertsPanel } from '@/components/admin/AlertsPanel'
 import { RangeSelector } from '@/components/admin/RangeSelector'
+import { PilotRangeConfig } from '@/components/admin/PilotRangeConfig'
 
 function fmt(n) {
   if (n == null) return '—'
@@ -52,7 +53,10 @@ export default function OverviewPage() {
           <h2 className="text-h2 font-display font-bold text-navy">Vue d'ensemble</h2>
           <p className="text-body text-admin-muted">Tableau de bord opérateur</p>
         </div>
-        <RangeSelector value={range} onChange={setRange} />
+        <div className="flex items-center gap-1.5">
+          <RangeSelector value={range} onChange={setRange} />
+          <PilotRangeConfig onSaved={refetch} />
+        </div>
       </div>
 
       {/* KPI row */}
@@ -78,9 +82,9 @@ export default function OverviewPage() {
             icon={Zap}
           />
           <KpiCard
-            label="Coût Haiku aujourd'hui"
-            value={fmtCurrency(data?.haikuCostToday)}
-            sub={`Proj. mois : ${fmtCurrency(data?.haikuCostMonthProj)}`}
+            label="Coût DeepSeek aujourd'hui"
+            value={fmtCurrency(data?.deepseekCostToday)}
+            sub={`Proj. mois : ${fmtCurrency(data?.deepseekCostMonthProj)}`}
             variant="accent"
             icon={DollarSign}
           />

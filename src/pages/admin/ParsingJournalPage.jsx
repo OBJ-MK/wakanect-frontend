@@ -9,16 +9,16 @@ import { ErrorState } from '@/components/admin/ErrorState'
 import { EmptyState } from '@/components/admin/EmptyState'
 import { RangeSelector } from '@/components/admin/RangeSelector'
 
-const TIER_VARIANT = { regex: 'regex', cloudflare: 'cloudflare', haiku: 'haiku', failed: 'failed' }
+const TIER_VARIANT = { regex: 'regex', cloudflare: 'cloudflare', deepseek_correction: 'deepseek_correction', deepseek_full: 'deepseek_full', haiku: 'haiku', failed: 'failed' }
 
 const TOP_COLS = [
-  { key: 'name',        label: 'Boutique' },
-  { key: 'country',     label: 'Pays' },
-  { key: 'haikuCalls',  label: 'Appels Haiku', className: 'text-right' },
-  { key: 'tokens',      label: 'Tokens',        className: 'text-right' },
-  { key: 'escalatePct', label: '% escalade',    className: 'text-right' },
-  { key: 'costFcfa',    label: 'Coût (XOF)',     className: 'text-right' },
-  { key: 'anomaly',     label: 'Anomalie' },
+  { key: 'name',          label: 'Boutique' },
+  { key: 'country',       label: 'Pays' },
+  { key: 'deepseekCalls', label: 'Appels DeepSeek', className: 'text-right' },
+  { key: 'tokens',        label: 'Tokens',        className: 'text-right' },
+  { key: 'escalatePct',   label: '% escalade',    className: 'text-right' },
+  { key: 'costFcfa',      label: 'Coût (XOF)',     className: 'text-right' },
+  { key: 'anomaly',       label: 'Anomalie' },
 ]
 
 const EVENT_COLS = [
@@ -116,7 +116,7 @@ export default function ParsingJournalPage() {
       {/* Top consommateurs */}
       <div className="bg-white rounded-xl shadow-admin-card overflow-hidden">
         <div className="px-4 py-3.5 border-b border-admin-line">
-          <h3 className="text-h3 font-semibold text-navy">Top consommateurs Haiku</h3>
+          <h3 className="text-h3 font-semibold text-navy">Top consommateurs DeepSeek</h3>
         </div>
         {topLoading ? (
           <div className="p-4"><LoadingState rows={5} /></div>
@@ -130,7 +130,7 @@ export default function ParsingJournalPage() {
                 ? (val) => <span className="tabular-nums">{fmtCurrency(val)}</span>
                 : col.key === 'escalatePct'
                 ? (val) => <span className="tabular-nums">{val}%</span>
-                : col.key === 'haikuCalls' || col.key === 'tokens'
+                : col.key === 'deepseekCalls' || col.key === 'tokens'
                 ? (val) => <span className="tabular-nums">{fmtCurrency(val)}</span>
                 : undefined,
             }))}

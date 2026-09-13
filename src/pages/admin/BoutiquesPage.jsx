@@ -20,7 +20,7 @@ const COLUMNS = [
   { key: 'plan',         label: 'Plan' },
   { key: 'status',       label: 'Statut' },
   { key: 'products',     label: 'Produits' },
-  { key: 'haikuUsage',   label: 'Haiku / j' },
+  { key: 'deepseekUsage', label: 'DeepSeek / j' },
   { key: 'lastActivity', label: 'Dernière activité' },
 ]
 
@@ -123,7 +123,7 @@ export default function BoutiquesPage() {
                 ? (val) => <AdminBadge variant={val} />
                 : col.key === 'status'
                 ? (val) => <AdminBadge variant={val} />
-                : col.key === 'haikuUsage'
+                : col.key === 'deepseekUsage'
                 ? (val) => <span className="tabular-nums">{val ?? 0}</span>
                 : col.key === 'lastActivity'
                 ? (val) => <span className="text-admin-muted">{fmtDate(val)}</span>

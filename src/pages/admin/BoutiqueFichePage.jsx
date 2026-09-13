@@ -168,7 +168,7 @@ export default function BoutiqueFichePage() {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <KpiCard label="Produits" value={boutique?.products ?? '—'} icon={Package} />
-          <KpiCard label="Appels Haiku / j" value={stats.haikuPerDay ?? '—'} icon={Activity} />
+          <KpiCard label="Appels DeepSeek / j" value={stats.deepseekPerDay ?? '—'} icon={Activity} />
           <KpiCard label="Renouvellement" value={sub.renewal ?? '—'} sub={sub.plan} />
         </div>
       )}

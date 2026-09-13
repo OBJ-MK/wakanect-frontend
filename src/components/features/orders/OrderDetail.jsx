@@ -55,7 +55,11 @@ export function OrderDetail({ order, onStatusUpdate, onCancel, onMarkPaid, onNot
         <div className="flex items-center justify-between">
           <div>
             <p className="text-micro text-white/45 uppercase tracking-wider mb-1">Paiement</p>
-            <PaymentBadge status={order.payment_status} />
+            {order.status !== 'Annulée' ? (
+              <PaymentBadge status={order.payment_status} />
+            ) : (
+              <p className="text-label text-white/40">Sans objet — commande annulée</p>
+            )}
           </div>
           <p className="text-h2 font-display font-bold text-amber">{formatFCFA(order.total)}</p>
         </div>

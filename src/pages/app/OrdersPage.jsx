@@ -137,7 +137,9 @@ export function OrdersPage() {
               </h1>
               <div className="flex items-center gap-2 mt-0.5">
                 <StatusBadge status={selectedOrder.status} />
-                <PaymentBadge status={selectedOrder.payment_status} />
+                {selectedOrder.status !== 'Annulée' && (
+                  <PaymentBadge status={selectedOrder.payment_status} />
+                )}
               </div>
             </div>
           </div>
@@ -199,8 +201,12 @@ export function OrdersPage() {
                     <p className="text-micro text-white/40 mb-1.5">{formatRelativeTime(order.created_at)}</p>
                     <div className="flex flex-wrap items-center gap-1.5">
                       <StatusBadge status={order.status} />
-                      <span className="text-white/20 text-micro">·</span>
-                      <PaymentBadge status={order.payment_status} />
+                      {order.status !== 'Annulée' && (
+                        <>
+                          <span className="text-white/20 text-micro">·</span>
+                          <PaymentBadge status={order.payment_status} />
+                        </>
+                      )}
                     </div>
                     <PerformedBy actor={order.performed_by} className="mt-1.5" />
                   </div>

@@ -79,4 +79,11 @@ export const adminApi = {
 
   updatePlan: (planKey, data) =>
     api.patch(`/api/admin/plans/${planKey}`, data),
+
+  // ── Réglages · Pilote ─────────────────────────────────────────────────────
+  pilotConfig: () =>
+    api.get('/api/admin/settings/pilot'),
+
+  updatePilotConfig: (data) =>
+    api.patch('/api/admin/settings/pilot', data),
 }

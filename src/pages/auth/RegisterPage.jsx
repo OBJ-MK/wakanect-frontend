@@ -4,7 +4,8 @@ import { useAuth } from '@/hooks/useAuth'
 import { slugify } from '@/lib/formatters'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
-import { Store, User, Phone, Lock, AtSign } from 'lucide-react'
+import { PhoneInput } from '@/components/ui/PhoneInput'
+import { Store, User, Lock, AtSign, Check } from 'lucide-react'
 import { PUBLIC_BASE } from '@/lib/constants'
 
 export function RegisterPage() {
@@ -13,9 +14,12 @@ export function RegisterPage() {
     shop_name: '',
     slug: '',
     owner_name: '',
-    whatsapp_number: '',
+    phone_dial: '+221',
+    phone_number: '',
     password: '',
+    accepted_terms: false,
   })
+  const [touchedTerms, setTouchedTerms] = useState(false)
 
   const set = (key) => (e) => {
     const value = e.target.value
@@ -28,11 +32,15 @@ export function RegisterPage() {
 
   function onSubmit(e) {
     e.preventDefault()
+    if (!form.accepted_terms) {
+      setTouchedTerms(true)
+      return
+    }
     handleRegister({
       businessName: form.shop_name,
       slug: form.slug,
       ownerName: form.owner_name,
-      whatsappPhone: form.whatsapp_number,
+      whatsappPhone: `${form.phone_dial} ${form.phone_number}`.trim(),
       password: form.password,
     })
   }
@@ -74,13 +82,12 @@ export function RegisterPage() {
           required
         />
 
-        <Input
+        <PhoneInput
           label="Numéro WhatsApp"
-          type="tel"
-          placeholder="+221 77 000 00 00"
-          value={form.whatsapp_number}
-          onChange={set('whatsapp_number')}
-          icon={<Phone size={16} />}
+          dialCode={form.phone_dial}
+          onDialCodeChange={(v) => setForm(f => ({ ...f, phone_dial: v }))}
+          number={form.phone_number}
+          onNumberChange={(v) => setForm(f => ({ ...f, phone_number: v }))}
           hint="Pour recevoir les notifications de commandes"
           required
         />
@@ -96,11 +103,44 @@ export function RegisterPage() {
           required
         />
 
+        <div className="flex flex-col gap-1.5">
+          <label className="flex items-start gap-2.5 cursor-pointer select-none">
+            <span className={`mt-0.5 shrink-0 w-5 h-5 rounded-md border flex items-center justify-center transition-colors ${
+              form.accepted_terms
+                ? 'bg-orange border-orange'
+                : touchedTerms
+                  ? 'border-red-400'
+                  : 'border-white/20'
+            }`}>
+              {form.accepted_terms && <Check size={13} className="text-white" strokeWidth={3} />}
+            </span>
+            <input
+              type="checkbox"
+              checked={form.accepted_terms}
+              onChange={(e) => {
+                setForm(f => ({ ...f, accepted_terms: e.target.checked }))
+                setTouchedTerms(true)
+              }}
+              className="sr-only"
+            />
+            <span className="text-label text-white/70 leading-snug">
+              J'accepte les conditions d'utilisation et la{' '}
+              <Link to="/politique-confidentialite" target="_blank" className="text-orange font-semibold hover:text-orange-hi">
+                politique de confidentialité
+              </Link>{' '}
+              de Wakanect
+            </span>
+          </label>
+          {touchedTerms && !form.accepted_terms && (
+            <p className="text-label text-red-400">Vous devez accepter les conditions pour continuer</p>
+          )}
+        </div>
+
         {error && (
           <p className="text-label text-red-400 bg-red-500/10 rounded-xl px-4 py-2.5">{error}</p>
         )}
 
-        <Button type="submit" size="lg" fullWidth loading={loading} className="mt-2">
+        <Button type="submit" size="lg" fullWidth loading={loading} disabled={!form.accepted_terms} className="mt-2">
           Créer ma boutique
         </Button>
       </form>

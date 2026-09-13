@@ -31,8 +31,8 @@ export const PAYMENT_METHODS = [
     icon: Banknote, 
     requiresProof: false 
   },
-  { id: 'wave', label: 'Wave', icon: '/images/waveicon.jpeg', isImage: true },
-  { id: 'orange_money', label: 'Orange Money', icon: '/images/orangelogo.png', isImage: true },
+  { id: 'wave', label: 'Wave', icon: '/images/waveicon.jpeg', isImage: true, requiresProof: true },
+  { id: 'orange_money', label: 'Orange Money', icon: '/images/orangelogo.png', isImage: true, requiresProof: true },
   { 
     id: 'proof', 
     label: "J'ai déjà payé — envoyer une preuve", 
@@ -51,4 +51,41 @@ export const CATEGORIES = [
   'Beauté',
   'Maison',
   'Autre',
+]
+
+// Indicatifs pays pour le sélecteur téléphone (inscription, réglages…).
+// Miroir exact de backend/src/constants/countries.js (source de vérité des pays
+// supportés par Wakanect) — mêmes pays, même ordre, on ajoute juste le drapeau
+// et le "+" pour l'affichage. Si un pays est ajouté/retiré côté backend,
+// reporter le changement ici.
+export const COUNTRY_CODES = [
+  // AFRIQUE DE L'OUEST
+  { dial: '+229', flag: '🇧🇯', name: 'Bénin' },
+  { dial: '+226', flag: '🇧🇫', name: 'Burkina Faso' },
+  { dial: '+238', flag: '🇨🇻', name: 'Cap-Vert' },
+  { dial: '+225', flag: '🇨🇮', name: "Côte d'Ivoire" },
+  { dial: '+220', flag: '🇬🇲', name: 'Gambie' },
+  { dial: '+233', flag: '🇬🇭', name: 'Ghana' },
+  { dial: '+224', flag: '🇬🇳', name: 'Guinée' },
+  { dial: '+245', flag: '🇬🇼', name: 'Guinée-Bissau' },
+  { dial: '+231', flag: '🇱🇷', name: 'Libéria' },
+  { dial: '+223', flag: '🇲🇱', name: 'Mali' },
+  { dial: '+222', flag: '🇲🇷', name: 'Mauritanie' },
+  { dial: '+227', flag: '🇳🇪', name: 'Niger' },
+  { dial: '+234', flag: '🇳🇬', name: 'Nigéria' },
+  { dial: '+221', flag: '🇸🇳', name: 'Sénégal' },
+  { dial: '+232', flag: '🇸🇱', name: 'Sierra Leone' },
+  { dial: '+228', flag: '🇹🇬', name: 'Togo' },
+  // AFRIQUE CENTRALE
+  { dial: '+244', flag: '🇦🇴', name: 'Angola' },
+  { dial: '+257', flag: '🇧🇮', name: 'Burundi' },
+  { dial: '+237', flag: '🇨🇲', name: 'Cameroun' },
+  { dial: '+236', flag: '🇨🇫', name: 'Centrafrique' },
+  { dial: '+242', flag: '🇨🇬', name: 'Congo-Brazzaville' },
+  { dial: '+243', flag: '🇨🇩', name: 'Congo-Kinshasa (RDC)' },
+  { dial: '+241', flag: '🇬🇦', name: 'Gabon' },
+  { dial: '+240', flag: '🇬🇶', name: 'Guinée équatoriale' },
+  { dial: '+250', flag: '🇷🇼', name: 'Rwanda' },
+  { dial: '+239', flag: '🇸🇹', name: 'Sao Tomé-et-Principe' },
+  { dial: '+235', flag: '🇹🇩', name: 'Tchad' },
 ]

@@ -16,6 +16,7 @@ const EMPTY_STATS = {
   revenue_today: 0,
   revenue_change: null,
   pending_validation: 0,
+  pending_orders_count: 0,
   orders_count: 0,
   low_stock_count: 0,
 }
@@ -101,7 +102,9 @@ export function DashboardPage() {
           >
             <Bell size={20} />
             {unreadNotifs > 0 && (
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-orange" />
+              <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-[16px] rounded-full bg-orange flex items-center justify-center px-1">
+                <span className="text-[9px] font-bold text-white leading-none">{unreadNotifs}</span>
+              </span>
             )}
           </Link>
         </div>
@@ -191,7 +194,7 @@ export function DashboardPage() {
             icon={ShoppingBag}
             label="Commandes"
             description={`${data.orders_count ?? 0} au total`}
-            badge={data.orders_breakdown?.new}
+            badge={data.pending_orders_count}
             color="orange"
           />
           <ActionTile

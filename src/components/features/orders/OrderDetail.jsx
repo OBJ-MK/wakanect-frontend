@@ -29,10 +29,13 @@ export function OrderDetail({ order, onStatusUpdate, onCancel, onMarkPaid, onNot
   const proofRequired = PAYMENT_METHODS.find(m => m.id === order.payment_method)?.requiresProof
   const proofMissing  = proofRequired && !order.payment_proof_url
 
+  // Séquence imposée : Nouvelle → Confirmée → Payée → Livrée, une seule action
+  // possible à la fois (miroir des règles serveur dans updateOrderStatus /
+  // updateOrderPayment).
   const canConfirm = status === 'Nouvelle' && !proofMissing
-  const canDeliver = status === 'Confirmée'
-  const canCancel  = status !== 'Livrée' && status !== 'Annulée'
-  const canMarkPaid = !isPaid && status !== 'Annulée'
+  const canMarkPaid = status === 'Confirmée' && !isPaid
+  const canDeliver = status === 'Confirmée' && isPaid
+  const canCancel = !isPaid && status !== 'Livrée' && status !== 'Annulée'
   const hasActionBar = canConfirm || canDeliver || canMarkPaid || canCancel
 
   return (

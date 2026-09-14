@@ -15,6 +15,8 @@ export function VerifierNumeroPage() {
   const { merchant, setMerchant } = useAuthStore()
   const [checking, setChecking] = useState(false)
   const [notYet, setNotYet] = useState(false)
+  const [regenerating, setRegenerating] = useState(false)
+  const [regenerateError, setRegenerateError] = useState(null)
 
   const code          = merchant?.phone_verification_code
   const wakaNumber    = (merchant?.wakanect_whatsapp_number || '').replace(/\D/g, '')
@@ -34,6 +36,21 @@ export function VerifierNumeroPage() {
       setNotYet(true)
     } finally {
       setChecking(false)
+    }
+  }
+
+  async function regenerateCode() {
+    setRegenerating(true)
+    setRegenerateError(null)
+    try {
+      await authService.regenerateVerificationCode()
+      const fresh = await authService.me()
+      setMerchant(fresh)
+      setNotYet(false)
+    } catch (e) {
+      setRegenerateError(e?.response?.data?.error || 'Impossible de régénérer le code pour le moment.')
+    } finally {
+      setRegenerating(false)
     }
   }
 
@@ -100,9 +117,25 @@ export function VerifierNumeroPage() {
               J'ai envoyé le code
             </Button>
             {notYet && (
-              <p className="text-label text-amber bg-amber/10 rounded-xl px-4 py-2.5 text-center">
-                Pas encore reçu — envoie le code sur WhatsApp puis réessaie dans quelques secondes.
-              </p>
+              <div className="flex flex-col gap-2">
+                <p className="text-label text-amber bg-amber/10 rounded-xl px-4 py-2.5 text-center">
+                  Pas encore reçu ? Le code a peut-être expiré — régénère-en un nouveau.
+                </p>
+                <Button
+                  variant="secondary"
+                  size="md"
+                  fullWidth
+                  loading={regenerating}
+                  onClick={regenerateCode}
+                  className="!bg-white/6 !text-white/80 border border-white/10"
+                >
+                  <RefreshCw size={14} />
+                  Régénérer un code
+                </Button>
+                {regenerateError && (
+                  <p className="text-micro text-red-400 text-center">{regenerateError}</p>
+                )}
+              </div>
             )}
           </>
         )}

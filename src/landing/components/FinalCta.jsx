@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useReveal } from '../hooks/useReveal';
 import { usePlans } from '@/hooks/usePlans';
-import Button from './ui/Button';
+import {Button} from './ui/Button';
 import Icon from './Icon';
 import { LogoMark } from './Logo';
 

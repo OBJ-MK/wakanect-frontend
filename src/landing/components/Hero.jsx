@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { gsap, prefersReducedMotion } from '../lib/gsap';
 import { usePlans } from '@/hooks/usePlans';
-import Button from './ui/Button';
+import {Button} from './ui/Button';
 import Icon from './Icon';
 import HeroVisual from './HeroVisual';
 

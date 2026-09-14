@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { useReveal } from '../hooks/useReveal';
 import { usePlans } from '@/hooks/usePlans';
 import SectionHeading from './ui/SectionHeading';
-import Button from './ui/Button';
+import {Button} from './ui/Button';
 import Icon from './Icon';
 
 // ── Helpers ──────────────────────────────────────────────────────────────────

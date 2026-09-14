@@ -2,8 +2,8 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ChevronLeft, Copy, Check, MessageCircle, Send, Package, Sparkles } from 'lucide-react'
 
-const WAKANECT_NUMBER = '+221 77 XXX XX XX'
-const WAKANECT_RAW = '221770000000'
+const WAKANECT_NUMBER = (merchant?.wakanect_whatsapp_number || '').replace(/\D/g, '')
+
 
 const STEPS = [
   {
@@ -101,7 +101,7 @@ export function CommentAjouterPage() {
 
         {/* CTA */}
         <a
-          href={`https://wa.me/${WAKANECT_RAW}`}
+          href={`https://wa.me/${WAKANECT_NUMBER}`}
           target="_blank"
           rel="noopener noreferrer"
           className="flex items-center justify-center gap-3 py-4 rounded-3xl bg-wa-green text-white font-semibold text-body hover:opacity-90 active:scale-[0.98] transition-all"

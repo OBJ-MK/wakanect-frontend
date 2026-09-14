@@ -2,8 +2,8 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Check, Copy, MessageCircle, ChevronRight } from 'lucide-react'
 
-const WAKANECT_NUMBER = '+221 77 XXX XX XX'
-const WAKANECT_RAW = '221770000000'
+const WAKANECT_NUMBER = (merchant?.wakanect_whatsapp_number || '').replace(/\D/g, '')
+
 
 export function CompteCreePage() {
   const navigate = useNavigate()
@@ -53,7 +53,7 @@ export function CompteCreePage() {
       {/* Action buttons */}
       <div className="flex flex-col gap-3">
         <a
-          href={`https://wa.me/${WAKANECT_RAW}`}
+          href={`https://wa.me/${WAKANECT_NUMBER}`}
           target="_blank"
           rel="noopener noreferrer"
           className="flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-wa-green text-white font-semibold text-body hover:opacity-90 active:scale-95 transition-all"

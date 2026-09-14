@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import {
-  TrendingUp, ShoppingBag, CheckSquare, LayoutGrid,
-  Share2, Bell, Package, ChevronRight, AlertTriangle, BarChart2, ShieldAlert
+  TrendingUp, CheckSquare,
+  Bell, ChevronRight, AlertTriangle, ShieldAlert
 } from 'lucide-react'
 import { useDashboard } from '@/hooks/useDashboard'
 import { useAuthStore } from '@/store/authStore'
@@ -28,40 +28,6 @@ const PERIODS = [
   { id: 'all',   label: 'Tous',    title: 'Revenu total',            compare: null },
 ]
 
-
-function ActionTile({ to, icon: Icon, label, description, badge, color = 'orange', accent }) {
-  const colorMap = {
-    orange: { icon: 'text-orange', bg: 'bg-orange/12', ring: 'border-orange/15' },
-    amber: { icon: 'text-amber', bg: 'bg-amber/12', ring: 'border-amber/15' },
-    emerald: { icon: 'text-emerald', bg: 'bg-emerald/12', ring: 'border-emerald/15' },
-    blue: { icon: 'text-blue-400', bg: 'bg-blue-500/12', ring: 'border-blue-400/15' },
-  }
-  const c = colorMap[color] ?? colorMap.orange
-
-  return (
-    <Link
-      to={to}
-      className={`glass rounded-3xl p-4 flex flex-col gap-3 border ${c.ring} hover:bg-white/6 active:scale-[0.97] transition-all`}
-    >
-      <div className="relative self-start">
-        <div className={`w-10 h-10 rounded-2xl ${c.bg} flex items-center justify-center`}>
-          <Icon size={20} className={c.icon} />
-        </div>
-        {badge != null && badge > 0 && (
-          <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] rounded-full bg-orange flex items-center justify-center px-1">
-            <span className="text-[10px] font-bold text-white leading-none">{badge}</span>
-          </span>
-        )}
-      </div>
-      <div>
-        <p className="text-body font-semibold text-white leading-tight">{label}</p>
-        {description && (
-          <p className="text-micro text-white/45 mt-0.5">{description}</p>
-        )}
-      </div>
-    </Link>
-  )
-}
 
 export function DashboardPage() {
   const { merchant } = useAuthStore()
@@ -179,39 +145,26 @@ export function DashboardPage() {
           </div>
         </div>
 
-        {/* 4 action tiles — 2×2 grid */}
-        <div className="grid grid-cols-2 gap-3">
-          <ActionTile
-            to="/app/validation"
-            icon={CheckSquare}
-            label="Valider un produit"
-            description="Via WhatsApp"
-            badge={data.pending_validation}
-            color="amber"
-          />
-          <ActionTile
-            to="/app/commandes"
-            icon={ShoppingBag}
-            label="Commandes"
-            description={`${data.orders_count ?? 0} au total`}
-            badge={data.pending_orders_count}
-            color="orange"
-          />
-          <ActionTile
-            to="/app/catalogue"
-            icon={LayoutGrid}
-            label="Mon catalogue"
-            description="Gérer mes produits"
-            color="blue"
-          />
-          <ActionTile
-            to="/app/profil/partager"
-            icon={Share2}
-            label="Partager ma boutique"
-            description="Lien + QR code"
-            color="emerald"
-          />
-        </div>
+        {/* Action dashboard-spécifique : les autres (Commandes, Catalogue) sont
+            déjà à 1 tap via la bottom nav, pas besoin de les redupliquer ici. */}
+        <Link
+          to="/app/validation"
+          className="flex items-center gap-3 glass rounded-3xl px-4 py-3 border border-amber/20 hover:bg-amber/8 active:scale-[0.98] transition-all"
+        >
+          <div className="w-8 h-8 rounded-xl bg-amber/15 flex items-center justify-center shrink-0">
+            <CheckSquare size={16} className="text-amber" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-body font-semibold text-white">Valider un produit</p>
+            <p className="text-micro text-white/45">Via WhatsApp</p>
+          </div>
+          {data.pending_validation > 0 && (
+            <span className="shrink-0 min-w-[20px] h-5 px-1.5 rounded-full bg-amber flex items-center justify-center">
+              <span className="text-[10px] font-bold text-navy-deep leading-none">{data.pending_validation}</span>
+            </span>
+          )}
+          <ChevronRight size={16} className="text-white/30 shrink-0" />
+        </Link>
 
         {/* Stock bas alert — compact */}
         {data.low_stock_count > 0 && (
@@ -232,35 +185,6 @@ export function DashboardPage() {
           </Link>
         )}
 
-        {/* Comment ajouter un produit — permanent help link */}
-        <Link
-          to="/app/profil/comment-ajouter"
-          className="flex items-center gap-3 glass rounded-3xl px-4 py-3 border border-wa-green/20 hover:bg-wa-green/8 active:scale-[0.98] transition-all"
-        >
-          <div className="w-8 h-8 rounded-xl bg-wa-green/15 flex items-center justify-center shrink-0">
-            <Package size={16} className="text-wa-green" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-body font-semibold text-white">Comment ajouter un produit ?</p>
-            <p className="text-micro text-white/45">Transférez un message WhatsApp</p>
-          </div>
-          <ChevronRight size={16} className="text-white/30 shrink-0" />
-        </Link>
-
-        {/* Statistiques détaillées — page dédiée (Profil → Statistiques) */}
-        <Link
-          to="/app/profil/stats"
-          className="flex items-center gap-3 glass rounded-3xl px-4 py-3 border border-white/8 hover:bg-white/6 active:scale-[0.98] transition-all"
-        >
-          <div className="w-8 h-8 rounded-xl bg-amber/15 flex items-center justify-center shrink-0">
-            <BarChart2 size={16} className="text-amber" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-body font-semibold text-white">Statistiques détaillées</p>
-            <p className="text-micro text-white/45">Panier moyen, top produits, commandes…</p>
-          </div>
-          <ChevronRight size={16} className="text-white/30 shrink-0" />
-        </Link>
       </div>
     </div>
   )

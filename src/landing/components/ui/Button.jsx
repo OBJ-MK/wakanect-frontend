@@ -1,59 +1,51 @@
-import { useRef } from 'react';
-import { prefersReducedMotion } from '../../lib/gsap';
-
-const base =
-  'group relative inline-flex items-center justify-center gap-2 font-medium rounded-xl ' +
-  'transition-[transform,background-color,border-color,box-shadow] duration-200 ease-out ' +
-  'select-none whitespace-nowrap active:scale-[0.98] focus-visible:outline-2 ' +
-  'focus-visible:outline-offset-2 focus-visible:outline-amber';
-
-const sizes = {
-  md: 'h-11 px-5 text-[0.95rem]',
-  lg: 'h-[3.25rem] px-7 text-base',
-};
+import { cn } from '@/lib/utils'
 
 const variants = {
-  primary:
-    'bg-orange text-navy-deep shadow-[0_10px_30px_-12px_rgba(236,94,42,0.7)] ' +
-    'hover:-translate-y-0.5 hover:brightness-105 hover:shadow-[0_18px_40px_-14px_rgba(236,94,42,0.85)]',
-  ghost:
-    'border border-cream/25 text-cream hover:border-amber/70 hover:bg-cream/[0.06] hover:-translate-y-0.5',
-  link: 'text-orange hover:text-amber px-0 h-auto rounded-none',
-};
+  primary: 'bg-gradient-to-r from-orange to-orange-hi text-white shadow-orange-glow hover:shadow-lg active:scale-[0.98]',
+  secondary: 'bg-white/10 text-white border border-white/15 hover:bg-white/15 active:scale-[0.98]',
+  ghost: 'text-white/80 hover:text-white hover:bg-white/8 active:scale-[0.98]',
+  danger: 'bg-red-500/15 text-red-400 border border-red-500/25 hover:bg-red-500/25 active:scale-[0.98]',
+  'wa-green': 'bg-wa-green text-white hover:bg-green-500 shadow-sm active:scale-[0.98]',
+  light: 'bg-navy text-white hover:bg-navy-light active:scale-[0.98]',
+  outline: 'border border-navy/20 text-navy hover:bg-navy/5 dark:border-white/15 dark:text-white dark:hover:bg-white/8 active:scale-[0.98]',
+}
 
-export default function Button({
-  as = 'a',
+const sizes = {
+  sm: 'h-8 px-3 text-label rounded-lg gap-1.5',
+  md: 'h-11 px-5 text-body rounded-xl gap-2',
+  lg: 'h-12 px-6 text-body-lg font-semibold rounded-xl gap-2',
+  xl: 'h-14 px-8 text-body-lg font-semibold rounded-2xl gap-2',
+}
+
+export function Button({
   variant = 'primary',
   size = 'md',
-  magnetic = false,
-  className = '',
+  className,
   children,
+  loading = false,
+  fullWidth = false,
   ...props
 }) {
-  const ref = useRef(null);
-  const Tag = as;
-
-  const onMove = (e) => {
-    if (!magnetic || prefersReducedMotion) return;
-    const el = ref.current;
-    const r = el.getBoundingClientRect();
-    const x = e.clientX - (r.left + r.width / 2);
-    const y = e.clientY - (r.top + r.height / 2);
-    el.style.transform = `translate(${x * 0.18}px, ${y * 0.28}px)`;
-  };
-  const onLeave = () => {
-    if (ref.current) ref.current.style.transform = '';
-  };
-
   return (
-    <Tag
-      ref={ref}
-      onMouseMove={onMove}
-      onMouseLeave={onLeave}
-      className={`${base} ${variant !== 'link' ? sizes[size] : ''} ${variants[variant]} ${className}`}
+    <button
+      className={cn(
+        'inline-flex items-center justify-center font-display font-semibold py-3',
+        'transition-all duration-150 focus-visible:ring-2 focus-visible:ring-orange focus-visible:ring-offset-2',
+        'disabled:opacity-50 disabled:pointer-events-none select-none tap-highlight-none',
+        variants[variant],
+        sizes[size],
+        fullWidth && 'w-full',
+        className,
+      )}
+      disabled={loading || props.disabled}
       {...props}
     >
-      {children}
-    </Tag>
-  );
+      {loading ? (
+        <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
+          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" />
+          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+        </svg>
+      ) : children}
+    </button>
+  )
 }

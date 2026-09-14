@@ -164,57 +164,49 @@ export function StatsPage() {
           </div>
         )}
 
-        {/* Funnel de conversion (pixel) — gated Pro/Premium comme Top produits */}
+        {/* Parcours client : funnel (compteurs) + temps moyen par étape, réunis
+            dans une seule carte — c'était la même histoire racontée deux fois. */}
         {advancedStats === true && data.funnel && data.funnel.page_views > 0 && (
           <div className="glass rounded-3xl p-4">
             <p className="text-micro text-white/45 uppercase tracking-wider mb-3">
               Parcours client — {activePeriod.label.toLowerCase()}
             </p>
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-2.5">
               {[
-                { label: 'Visites boutique', value: data.funnel.page_views },
-                { label: 'Fiches produit vues', value: data.funnel.product_views },
-                { label: 'Ajouts au panier', value: data.funnel.add_to_carts },
-                { label: 'Commandes démarrées', value: data.funnel.checkouts_started },
-                { label: 'Commandes passées', value: data.funnel.orders_placed },
-              ].map(row => (
-                <div key={row.label} className="flex items-center justify-between">
-                  <span className="text-label text-white/60">{row.label}</span>
-                  <span className="text-label font-bold text-white">{row.value}</span>
-                </div>
-              ))}
-            </div>
-            <div className="flex items-center justify-between mt-3 pt-3 border-t border-white/8">
-              <span className="text-label text-white/60">Taux de conversion</span>
-              <span className="text-label font-bold text-emerald">{data.funnel.conversion_rate}%</span>
-            </div>
-          </div>
-        )}
-
-        {advancedStats === true && data.avg_duration_seconds && (
-          <div className="glass rounded-3xl p-4">
-            <p className="text-micro text-white/45 uppercase tracking-wider mb-3">
-              Temps moyen passé par étape — {activePeriod.label.toLowerCase()}
-            </p>
-            <div className="flex flex-col gap-2">
-              {[
-                { key: 'catalogue', label: 'Catalogue' },
-                { key: 'product', label: 'Fiche produit' },
-                { key: 'checkout', label: 'Commande' },
-                { key: 'confirmation', label: 'Confirmation' },
-                { key: 'tracking', label: 'Suivi commande' },
-              ].filter(row => data.avg_duration_seconds[row.key] > 0).map(row => {
-                const s = data.avg_duration_seconds[row.key]
+                { key: 'catalogue',   label: 'Visites boutique',      value: data.funnel.page_views },
+                { key: 'product',     label: 'Fiches produit vues',   value: data.funnel.product_views },
+                { key: null,          label: 'Ajouts au panier',      value: data.funnel.add_to_carts },
+                { key: 'checkout',    label: 'Commandes démarrées',   value: data.funnel.checkouts_started },
+                { key: 'confirmation',label: 'Commandes passées',     value: data.funnel.orders_placed },
+              ].map(row => {
+                const s = row.key ? data.avg_duration_seconds?.[row.key] : null
                 return (
-                  <div key={row.key} className="flex items-center justify-between">
+                  <div key={row.label} className="flex items-center justify-between gap-3">
                     <span className="text-label text-white/60">{row.label}</span>
-                    <span className="text-label font-bold text-white">
-                      {s >= 60 ? `${Math.floor(s / 60)}min ${s % 60}s` : `${s}s`}
+                    <span className="flex items-baseline gap-1.5 shrink-0">
+                      <span className="text-label font-bold text-white">{row.value}</span>
+                      {s > 0 && (
+                        <span className="text-micro text-white/35">
+                          · {s >= 60 ? `${Math.floor(s / 60)}min ${s % 60}s` : `${s}s`} en moy.
+                        </span>
+                      )}
                     </span>
                   </div>
                 )
               })}
             </div>
+            <div className="flex items-center justify-between mt-3 pt-3 border-t border-white/8">
+              <span className="text-label text-white/60">Taux de conversion</span>
+              <span className="text-label font-bold text-emerald">{data.funnel.conversion_rate}%</span>
+            </div>
+            {data.avg_duration_seconds?.tracking > 0 && (
+              <div className="flex items-center justify-between mt-2">
+                <span className="text-label text-white/60">Temps sur le suivi de commande</span>
+                <span className="text-label font-bold text-white">
+                  {(() => { const s = data.avg_duration_seconds.tracking; return s >= 60 ? `${Math.floor(s / 60)}min ${s % 60}s` : `${s}s` })()}
+                </span>
+              </div>
+            )}
           </div>
         )}
 

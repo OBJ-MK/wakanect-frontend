@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { ChevronLeft, ImagePlus, X } from 'lucide-react'
+import { ChevronLeft, ImagePlus, X, Loader2 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useValidationStore } from '@/store/validationStore'
 import { ConfidenceBadge } from '@/components/features/parsing/ConfidenceBadge'
@@ -81,6 +81,22 @@ function OrphanMediaPanel({ orphans, candidates, onAttach, onDelete }) {
 }
 
 function PendingRow({ product }) {
+  if (product.status === 'processing') {
+    return (
+      <div className="w-full flex items-center gap-3 px-4 py-4 border-b border-white/6 last:border-0">
+        <div className="h-12 w-12 rounded-2xl shrink-0 bg-white/6 border border-white/10 flex items-center justify-center">
+          <Loader2 size={18} className="text-white/40 animate-spin" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-body font-semibold text-white/70 truncate">
+            {product.raw_text?.slice(0, 40) || 'Nouveau message'}
+          </p>
+          <p className="text-micro text-white/40 mt-1">Analyse en cours…</p>
+        </div>
+      </div>
+    )
+  }
+
   const thumb = product.images?.[0]
   return (
     <Link
@@ -116,6 +132,15 @@ export function ValidationListPage() {
   const { pending, orphans, loading, fetchPending, attachOrphan, deleteOrphan } = useValidationStore()
 
   useEffect(() => { fetchPending(true) }, [])
+
+  // Tant qu'un message est encore en cours d'analyse (parsing IA, 4-10s en
+  // pratique), on repolle pour que la carte se complète automatiquement.
+  const hasProcessing = pending.some(p => p.status === 'processing')
+  useEffect(() => {
+    if (!hasProcessing) return
+    const interval = setInterval(() => fetchPending(true, true), 2500)
+    return () => clearInterval(interval)
+  }, [hasProcessing])
 
   return (
     <div className="min-h-screen bg-navy-deep">

@@ -8,9 +8,9 @@ export const useValidationStore = create((set, get) => ({
   loaded: false,
   error: null,
 
-  fetchPending: async (force = false) => {
+  fetchPending: async (force = false, silent = false) => {
     if (get().loaded && !force) return
-    set({ loading: true, error: null })
+    if (!silent) set({ loading: true, error: null })
     try {
       const [data, orphanData] = await Promise.all([
         stockService.getPending(),
@@ -23,7 +23,7 @@ export const useValidationStore = create((set, get) => ({
         loaded: true,
       })
     } catch (e) {
-      set({ error: e.message, loading: false })
+      if (!silent) set({ error: e.message, loading: false })
     }
   },
 

@@ -1,13 +1,13 @@
 import { useNavigate } from 'react-router-dom'
-import { XCircle, RefreshCw, MessageCircle } from 'lucide-react'
+import { XCircle, RefreshCw, Mail } from 'lucide-react'
 import { WakanectLogo } from '@/components/brand/WakanectLogo'
 
-const WAKANECT_SUPPORT = '221770000000'
+const SUPPORT_EMAIL = 'contact@wakanect.com'
 
 export function AbonnementEchecPage() {
   const navigate = useNavigate()
 
-  const supportLink = `https://wa.me/${WAKANECT_SUPPORT}?text=${encodeURIComponent("Bonjour, mon paiement a échoué sur Wakanect. Pouvez-vous m'aider ?")}`
+  const supportLink = `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent('Paiement échoué sur Wakanect')}`
 
   return (
     <div className="min-h-dvh bg-navy-deep flex flex-col items-center justify-center px-5">
@@ -41,11 +41,9 @@ export function AbonnementEchecPage() {
           </button>
           <a
             href={supportLink}
-            target="_blank"
-            rel="noopener noreferrer"
             className="flex items-center justify-center gap-2 py-3.5 rounded-3xl glass border border-white/15 text-white font-semibold text-body hover:bg-white/8 active:scale-[0.98] transition-all"
           >
-            <MessageCircle size={18} />
+            <Mail size={18} />
             Contacter le support
           </a>
         </div>

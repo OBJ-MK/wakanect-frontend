@@ -1,9 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ChevronLeft, Copy, Check, MessageCircle, Send, Package, Sparkles } from 'lucide-react'
-
-const WAKANECT_NUMBER = (merchant?.wakanect_whatsapp_number || '').replace(/\D/g, '')
-
+import { useAuth } from '@/hooks/useAuth'
 
 const STEPS = [
   {
@@ -27,10 +25,13 @@ const STEPS = [
 ]
 
 export function CommentAjouterPage() {
+  const { merchant } = useAuth()
+  const wakaNumber = merchant?.wakanect_whatsapp_number || ''
+  const wakaRaw = wakaNumber.replace(/\D/g, '')
   const [copied, setCopied] = useState(false)
 
   function copyNumber() {
-    navigator.clipboard.writeText(WAKANECT_NUMBER)
+    navigator.clipboard.writeText(wakaNumber)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }
@@ -67,7 +68,7 @@ export function CommentAjouterPage() {
           </div>
           <div className="text-center">
             <p className="text-micro text-white/45 uppercase tracking-wider mb-1">Numéro Wakanect</p>
-            <p className="font-display font-bold text-h1 text-white">{WAKANECT_NUMBER}</p>
+            <p className="font-display font-bold text-h1 text-white">{wakaNumber || 'Bientôt disponible'}</p>
           </div>
           <button
             onClick={copyNumber}
@@ -100,15 +101,17 @@ export function CommentAjouterPage() {
         </div>
 
         {/* CTA */}
-        <a
-          href={`https://wa.me/${WAKANECT_NUMBER}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center justify-center gap-3 py-4 rounded-3xl bg-wa-green text-white font-semibold text-body hover:opacity-90 active:scale-[0.98] transition-all"
-        >
-          <MessageCircle size={20} />
-          Ouvrir WhatsApp
-        </a>
+        {wakaNumber && (
+          <a
+            href={`https://wa.me/${wakaRaw}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-center gap-3 py-4 rounded-3xl bg-wa-green text-white font-semibold text-body hover:opacity-90 active:scale-[0.98] transition-all"
+          >
+            <MessageCircle size={20} />
+            Ouvrir WhatsApp
+          </a>
+        )}
       </div>
     </div>
   )

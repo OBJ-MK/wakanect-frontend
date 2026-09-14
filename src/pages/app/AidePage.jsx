@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ChevronLeft, ChevronDown, MessageCircle } from 'lucide-react'
+import { ChevronLeft, ChevronDown, Mail } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
-const WAKANECT_SUPPORT = '+221770000000'
+const SUPPORT_EMAIL = 'contact@wakanect.com'
 
 const FAQ = [
   {
@@ -60,7 +60,7 @@ function FaqItem({ item }) {
 }
 
 export function AidePage() {
-  const supportLink = `https://wa.me/${WAKANECT_SUPPORT.replace(/\D/g, '')}?text=${encodeURIComponent("Bonjour, j'ai besoin d'aide avec Wakanect.")}`
+  const supportLink = `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent('Besoin d\'aide avec Wakanect')}`
 
   return (
     <div className="min-h-screen bg-navy-deep">
@@ -92,16 +92,14 @@ export function AidePage() {
           </div>
           <div>
             <p className="font-display font-semibold text-h3 text-white">Une autre question ?</p>
-            <p className="text-label text-white/50 mt-1">Notre équipe vous répond sur WhatsApp en moins de 24h</p>
+            <p className="text-label text-white/50 mt-1">Écrivez-nous, on vous répond en moins de 24h</p>
           </div>
           <a
             href={supportLink}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-2 px-6 py-3 rounded-2xl bg-wa-green text-white font-semibold text-body hover:opacity-90 active:scale-95 transition-all w-full justify-center"
+            className="flex items-center gap-2 px-6 py-3 rounded-2xl bg-orange text-white font-semibold text-body hover:bg-orange-hi active:scale-95 transition-all w-full justify-center"
           >
-            <MessageCircle size={18} />
-            Nous écrire sur WhatsApp
+            <Mail size={18} />
+            {SUPPORT_EMAIL}
           </a>
         </div>
       </div>

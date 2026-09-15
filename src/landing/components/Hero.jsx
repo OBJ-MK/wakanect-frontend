@@ -103,7 +103,6 @@ export default function Hero() {
             {[
               [trialScans.toLocaleString('fr-FR'), `scans — essai ${trialDays} jours`],
               ['0 %', 'prélevé sur vos ventes'],
-              ['1,2s', 'pour publier'],
             ].map(([n, l]) => (
               <div key={l} className="flex items-baseline gap-2">
                 <dt className="font-display text-2xl font-bold text-cream">{n}</dt>

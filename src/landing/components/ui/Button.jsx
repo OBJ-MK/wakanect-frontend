@@ -18,16 +18,20 @@ const sizes = {
 }
 
 export function Button({
+  as: Component = 'button',
   variant = 'primary',
   size = 'md',
   className,
   children,
   loading = false,
   fullWidth = false,
+  magnetic, // effet non implémenté — juste retiré du spread pour ne pas fuiter sur le DOM
   ...props
 }) {
+  const isButton = Component === 'button'
+
   return (
-    <button
+    <Component
       className={cn(
         'inline-flex items-center justify-center font-display font-semibold py-3',
         'transition-all duration-150 focus-visible:ring-2 focus-visible:ring-orange focus-visible:ring-offset-2',
@@ -37,8 +41,8 @@ export function Button({
         fullWidth && 'w-full',
         className,
       )}
-      disabled={loading || props.disabled}
       {...props}
+      {...(isButton ? { disabled: loading || props.disabled } : {})}
     >
       {loading ? (
         <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
@@ -46,6 +50,6 @@ export function Button({
           <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
         </svg>
       ) : children}
-    </button>
+    </Component>
   )
 }

@@ -11,27 +11,23 @@ const variants = {
 }
 
 const sizes = {
-  sm: 'h-8 px-3 text-label rounded-lg gap-1.5',
-  md: 'h-11 px-5 text-body rounded-xl gap-2',
-  lg: 'h-12 px-6 text-body-lg font-semibold rounded-xl gap-2',
-  xl: 'h-14 px-8 text-body-lg font-semibold rounded-2xl gap-2',
+  sm: 'h-8 px-3 text-label rounded-xl gap-1.5',
+  md: 'h-11 px-5 text-body rounded-2xl gap-2',
+  lg: 'h-13 px-6 text-body-lg font-semibold rounded-2xl gap-2',
+  xl: 'h-14 px-8 text-body-lg font-semibold rounded-3xl gap-2',
 }
 
 export function Button({
-  as: Component = 'button',
   variant = 'primary',
   size = 'md',
   className,
   children,
   loading = false,
   fullWidth = false,
-  magnetic, // effet non implémenté — juste retiré du spread pour ne pas fuiter sur le DOM
   ...props
 }) {
-  const isButton = Component === 'button'
-
   return (
-    <Component
+    <button
       className={cn(
         'inline-flex items-center justify-center font-display font-semibold py-3',
         'transition-all duration-150 focus-visible:ring-2 focus-visible:ring-orange focus-visible:ring-offset-2',
@@ -41,8 +37,8 @@ export function Button({
         fullWidth && 'w-full',
         className,
       )}
+      disabled={loading || props.disabled}
       {...props}
-      {...(isButton ? { disabled: loading || props.disabled } : {})}
     >
       {loading ? (
         <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
@@ -50,6 +46,6 @@ export function Button({
           <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
         </svg>
       ) : children}
-    </Component>
+    </button>
   )
 }

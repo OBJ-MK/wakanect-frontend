@@ -1,14 +1,7 @@
 import { NavLink } from 'react-router-dom'
-import { Home, ShoppingBag, LayoutGrid, User } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useDashboard } from '@/hooks/useDashboard'
-
-const NAV_ITEMS = [
-  { to: '/app', label: 'Accueil', icon: Home, exact: true },
-  { to: '/app/commandes', label: 'Commandes', icon: ShoppingBag, badgeKey: 'pending_orders_count' },
-  { to: '/app/catalogue', label: 'Catalogue', icon: LayoutGrid },
-  { to: '/app/profil', label: 'Profil', icon: User },
-]
+import { APP_NAV_ITEMS } from '@/lib/appNav'
 
 export function BottomNav() {
   // pending_orders_count est un compteur absolu (pas scopé sur une période),
@@ -17,11 +10,11 @@ export function BottomNav() {
 
   return (
     <nav
-      className="fixed bottom-0 inset-x-0 z-40 glass bottom-nav-bg border-t border-white/8 safe-bottom"
+      className="fixed bottom-0 inset-x-0 z-40 glass bottom-nav-bg border-t border-white/8 safe-bottom lg:hidden"
       aria-label="Navigation principale"
     >
       <div className="flex items-end justify-around px-2 pt-2 pb-1 max-w-lg mx-auto">
-        {NAV_ITEMS.map((item) => {
+        {APP_NAV_ITEMS.map((item) => {
           const badge = item.badgeKey ? stats?.[item.badgeKey] : null
           return (
             <NavLink

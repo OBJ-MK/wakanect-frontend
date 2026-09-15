@@ -78,7 +78,7 @@
   }
 
   .page-container {
-    @apply max-w-lg mx-auto px-4;
+    @apply max-w-lg mx-auto px-4 lg:max-w-3xl lg:px-8;
   }
 
   .safe-bottom {

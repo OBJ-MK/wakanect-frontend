@@ -1,6 +1,7 @@
 import { Outlet, useNavigate } from 'react-router-dom'
 import { X } from 'lucide-react'
 import { BottomNav } from '@/components/ui/BottomNav'
+import { Sidebar } from '@/components/ui/Sidebar'
 import { useAuthStore } from '@/store/authStore'
 
 export function AppShell() {
@@ -21,7 +22,7 @@ export function AppShell() {
   return (
     <div className="min-h-dvh bg-navy-deep dark:bg-navy-deep">
       {backup && (
-        <div className="bg-amber flex items-center justify-between px-4 py-2.5 text-sm font-medium text-navy">
+        <div className="bg-amber flex items-center justify-between px-4 py-2.5 text-sm font-medium text-navy lg:pl-64">
           <span>
             Connecté en tant que <strong>{merchant?.businessName}</strong>
           </span>
@@ -35,7 +36,8 @@ export function AppShell() {
           </button>
         </div>
       )}
-      <main className="pb-24">
+      <Sidebar />
+      <main className="pb-24 lg:pb-8 lg:pl-60">
         <Outlet />
       </main>
       <BottomNav />

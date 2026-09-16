@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { ChevronLeft } from 'lucide-react'
+import { ChevronLeft, ShoppingBag } from 'lucide-react'
 import { useOrders } from '@/hooks/useOrders'
 import { OrderDetail } from '@/components/features/orders/OrderDetail'
 import { StatusBadge } from '@/components/ui/StatusBadge'
@@ -120,108 +120,125 @@ export function OrdersPage() {
     }
   }
 
-  if (selectedOrder) {
-    return (
-      <div className="min-h-screen bg-navy-deep">
-        <div className="sticky top-0 z-20 glass border-b border-white/6 px-4 py-3">
-          <div className="max-w-lg mx-auto flex items-center gap-3">
-            <button
-              onClick={() => setSelected(null)}
-              className="p-2 -ml-2 rounded-xl text-white/60 hover:text-white hover:bg-white/8 transition-colors"
-            >
-              <ChevronLeft size={20} />
-            </button>
-            <div className="flex-1">
-              <h1 className="font-display font-semibold text-h3 text-white">
-                {selectedOrder.customer_name}
-              </h1>
-              <div className="flex items-center gap-2 mt-0.5">
-                <StatusBadge status={selectedOrder.status} />
-                {selectedOrder.status !== 'Annulée' && (
-                  <PaymentBadge status={selectedOrder.payment_status} />
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className="page-container py-5 pb-56">
-          <OrderDetail
-            order={selectedOrder}
-            onStatusUpdate={handleStatusUpdate}
-            onCancel={handleCancel}
-            onMarkPaid={handleMarkPaid}
-            onNotifyLinkOpened={handleNotifyLinkOpened}
-            onNotifyConfirm={handleNotifyConfirm}
-            loading={statusUpdating}
-          />
-        </div>
-      </div>
-    )
-  }
-
   return (
-    <div className="min-h-screen bg-navy-deep">
-      <div className="sticky top-0 z-20 glass border-b border-white/6 px-4 py-3">
-        <div className="max-w-lg mx-auto">
-          <div className="flex items-center justify-between mb-3">
-            <h1 className="font-display font-bold text-h2 text-white">Commandes</h1>
-            {total > 0 && (
-              <span className="text-micro text-white/40">{total} au total</span>
-            )}
-          </div>
-          <FilterBar
-            filters={filters}
-            onChange={updateFilters}
-            onReset={() => { setFilters(DEFAULT_FILTERS); setPage(1) }}
-            categories={STATUS_FILTERS}
-            defaultCategory="Toutes"
-            showPrice={false}
-            sortOptions={ORDER_SORT_OPTIONS}
-            total={loading ? null : total}
-          />
-        </div>
-      </div>
-
-      <div className="page-container py-4 flex flex-col gap-3">
-        {loading ? (
-          <div ref={listRef} className="glass rounded-3xl overflow-hidden">
-            {Array.from({ length: 5 }).map((_, i) => <OrderRowSkeleton key={i} />)}
-          </div>
-        ) : (
-          <>
-            <div ref={listRef} className="glass rounded-3xl overflow-hidden scroll-mt-40">
-              {fetchedOrders.map(order => (
-                <button
-                  key={order.id}
-                  onClick={() => setSelected(order.id)}
-                  className="w-full flex items-start gap-3 px-4 py-4 border-b border-white/6 last:border-0 hover:bg-white/4 active:bg-white/8 transition-colors text-left"
-                >
-                  <div className="flex-1 min-w-0">
-                    <p className="text-body font-semibold text-white">{order.customer_name}</p>
-                    <p className="text-micro text-white/40 mb-1.5">{formatRelativeTime(order.created_at)}</p>
-                    <div className="flex flex-wrap items-center gap-1.5">
-                      <StatusBadge status={order.status} />
-                      {order.status !== 'Annulée' && (
-                        <>
-                          <span className="text-white/20 text-micro">·</span>
-                          <PaymentBadge status={order.payment_status} />
-                        </>
-                      )}
-                    </div>
-                    <PerformedBy actor={order.performed_by} className="mt-1.5" />
-                  </div>
-                  <p className="text-label font-bold text-amber shrink-0">{formatFCFA(order.total)}</p>
-                </button>
-              ))}
-              {fetchedOrders.length === 0 && (
-                <div className="flex flex-col items-center py-12 text-center">
-                  <p className="text-body text-white/50">Aucune commande trouvée</p>
-                </div>
+    // lg: split liste/détail côte à côte — sur mobile, un seul des deux est
+    // affiché à la fois (comportement inchangé, plein écran).
+    <div className="min-h-screen bg-navy-deep lg:flex lg:items-start">
+      {/* Colonne liste */}
+      <div className={`${selectedOrder ? 'hidden lg:block' : 'block'} lg:w-[400px] lg:shrink-0 lg:sticky lg:top-0 lg:self-start lg:border-r lg:border-white/8 lg:min-h-screen`}>
+        <div className="sticky top-0 z-20 glass border-b border-white/6 px-4 py-3 lg:static lg:bg-transparent lg:backdrop-blur-none lg:px-5 lg:pt-6">
+          <div className="max-w-lg mx-auto lg:max-w-none">
+            <div className="flex items-center justify-between mb-3">
+              <h1 className="font-display font-bold text-h2 text-white">Commandes</h1>
+              {total > 0 && (
+                <span className="text-micro text-white/40">{total} au total</span>
               )}
             </div>
+            <FilterBar
+              filters={filters}
+              onChange={updateFilters}
+              onReset={() => { setFilters(DEFAULT_FILTERS); setPage(1) }}
+              categories={STATUS_FILTERS}
+              defaultCategory="Toutes"
+              showPrice={false}
+              sortOptions={ORDER_SORT_OPTIONS}
+              total={loading ? null : total}
+            />
+          </div>
+        </div>
 
-            <Pagination page={page} pages={pages} onChange={changePage} />
-          </>
+        <div className="page-container py-4 flex flex-col gap-3 lg:max-w-none lg:px-5">
+          {loading ? (
+            <div ref={listRef} className="glass rounded-3xl overflow-hidden">
+              {Array.from({ length: 5 }).map((_, i) => <OrderRowSkeleton key={i} />)}
+            </div>
+          ) : (
+            <>
+              <div ref={listRef} className="glass rounded-3xl overflow-hidden scroll-mt-40">
+                {fetchedOrders.map(order => (
+                  <button
+                    key={order.id}
+                    onClick={() => setSelected(order.id)}
+                    className={`w-full flex items-start gap-3 px-4 py-4 border-b border-white/6 last:border-0 hover:bg-white/4 active:bg-white/8 transition-colors text-left ${
+                      selected === order.id ? 'lg:bg-orange/8' : ''
+                    }`}
+                  >
+                    <div className="flex-1 min-w-0">
+                      <p className="text-body font-semibold text-white">{order.customer_name}</p>
+                      <p className="text-micro text-white/40 mb-1.5">{formatRelativeTime(order.created_at)}</p>
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        <StatusBadge status={order.status} />
+                        {order.status !== 'Annulée' && (
+                          <>
+                            <span className="text-white/20 text-micro">·</span>
+                            <PaymentBadge status={order.payment_status} />
+                          </>
+                        )}
+                      </div>
+                      <PerformedBy actor={order.performed_by} className="mt-1.5" />
+                    </div>
+                    <p className="text-label font-bold text-amber shrink-0">{formatFCFA(order.total)}</p>
+                  </button>
+                ))}
+                {fetchedOrders.length === 0 && (
+                  <div className="flex flex-col items-center py-12 text-center">
+                    <p className="text-body text-white/50">Aucune commande trouvée</p>
+                  </div>
+                )}
+              </div>
+
+              <Pagination page={page} pages={pages} onChange={changePage} />
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* Colonne détail — plein écran sur mobile si sélectionnée, sinon
+          état vide visible seulement sur desktop (rien à montrer sur mobile
+          tant que rien n'est sélectionné, la liste occupe déjà l'écran). */}
+      <div className={`${selectedOrder ? 'block' : 'hidden lg:block'} flex-1`}>
+        {selectedOrder ? (
+          <div className="min-h-screen bg-navy-deep">
+            <div className="sticky top-0 z-20 glass border-b border-white/6 px-4 py-3 lg:static lg:bg-transparent lg:backdrop-blur-none lg:px-8 lg:pt-6">
+              <div className="max-w-lg mx-auto lg:max-w-none flex items-center gap-3">
+                <button
+                  onClick={() => setSelected(null)}
+                  className="p-2 -ml-2 rounded-xl text-white/60 hover:text-white hover:bg-white/8 transition-colors lg:hidden"
+                >
+                  <ChevronLeft size={20} />
+                </button>
+                <div className="flex-1">
+                  <h1 className="font-display font-semibold text-h3 text-white">
+                    {selectedOrder.customer_name}
+                  </h1>
+                  <div className="flex items-center gap-2 mt-0.5">
+                    <StatusBadge status={selectedOrder.status} />
+                    {selectedOrder.status !== 'Annulée' && (
+                      <PaymentBadge status={selectedOrder.payment_status} />
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="page-container py-5 pb-56 lg:max-w-none lg:px-8">
+              <OrderDetail
+                order={selectedOrder}
+                onStatusUpdate={handleStatusUpdate}
+                onCancel={handleCancel}
+                onMarkPaid={handleMarkPaid}
+                onNotifyLinkOpened={handleNotifyLinkOpened}
+                onNotifyConfirm={handleNotifyConfirm}
+                loading={statusUpdating}
+              />
+            </div>
+          </div>
+        ) : (
+          <div className="hidden lg:flex flex-col items-center justify-center min-h-screen text-center px-8">
+            <div className="w-16 h-16 rounded-full bg-white/6 flex items-center justify-center mb-4">
+              <ShoppingBag size={26} className="text-white/25" />
+            </div>
+            <p className="text-body text-white/40">Sélectionnez une commande pour voir le détail</p>
+          </div>
         )}
       </div>
     </div>

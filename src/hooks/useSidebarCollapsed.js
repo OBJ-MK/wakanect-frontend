@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react'
 
-const KEY = 'waka_sidebar_collapsed'
+const KEY = 'waka_sidebar_collapsed_v2'
 
 export function useSidebarCollapsed() {
   const [collapsed, setCollapsed] = useState(() => {
     try {
-      return localStorage.getItem(KEY) === '1'
+      return localStorage.getItem(KEY) === '0' ? false : true
     } catch {
       return false
     }

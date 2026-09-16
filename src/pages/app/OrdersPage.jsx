@@ -123,9 +123,9 @@ export function OrdersPage() {
   return (
     // lg: split liste/détail côte à côte — sur mobile, un seul des deux est
     // affiché à la fois (comportement inchangé, plein écran).
-    <div className="min-h-screen bg-navy-deep lg:flex lg:items-start lg:gap-5 lg:p-6">
+    <div className="min-h-screen bg-navy-deep lg:h-[calc(100dvh-2rem)] lg:overflow-hidden lg:flex lg:items-stretch lg:gap-5 lg:p-6">
       {/* Colonne liste */}
-      <div className={`${selectedOrder ? 'hidden lg:flex' : 'flex'} lg:w-[390px] lg:shrink-0 lg:flex-col lg:sticky lg:top-6 lg:self-start lg:h-[calc(100dvh-3rem)] lg:rounded-3xl lg:bg-navy/45 lg:ring-1 lg:ring-white/8 lg:shadow-card lg:overflow-hidden`}>
+      <div className={`${selectedOrder ? 'hidden lg:flex' : 'flex'} lg:w-[390px] lg:shrink-0 lg:flex-col lg:sticky lg:top-6 lg:self-start lg:h-full lg:rounded-3xl lg:bg-navy/45 lg:ring-1 lg:ring-white/8 lg:shadow-card lg:overflow-hidden`}>
         <div className="sticky top-0 z-20 glass border-b border-white/6 px-4 py-3 lg:static lg:bg-transparent lg:backdrop-blur-none lg:border-0 lg:px-5 lg:pt-5 lg:pb-4">
           <div className="max-w-lg mx-auto lg:max-w-none">
             <div className="flex items-center justify-between mb-3">
@@ -148,7 +148,7 @@ export function OrdersPage() {
           </div>
         </div>
 
-        <div className="page-container py-4 flex flex-col gap-3 lg:max-w-none lg:px-4 lg:pb-5 lg:overflow-y-auto">
+        <div className="page-container py-4 flex flex-col gap-3 lg:max-w-none lg:px-4 lg:pb-5 lg:min-h-0 lg:overflow-y-auto">
           {loading ? (
             <div ref={listRef} className="glass rounded-3xl overflow-hidden">
               {Array.from({ length: 5 }).map((_, i) => <OrderRowSkeleton key={i} />)}
@@ -165,8 +165,8 @@ export function OrdersPage() {
                     }`}
                   >
                     <div className="flex-1 min-w-0">
-                      <p className="text-[14px] leading-5 font-semibold text-white truncate">{order.customer_name}</p>
-                      <p className="text-micro text-white/40 mb-1.5">{formatRelativeTime(order.created_at)}</p>
+                      <p className="text-[13px] leading-5 font-semibold text-white truncate">{order.customer_name}</p>
+                      <p className="text-[11px] leading-4 text-white/40 mb-1">{formatRelativeTime(order.created_at)}</p>
                       <div className="flex flex-wrap items-center gap-1">
                         <StatusBadge status={order.status} />
                         {order.status !== 'Annulée' && (
@@ -178,7 +178,7 @@ export function OrdersPage() {
                       </div>
                       <PerformedBy actor={order.performed_by} className="mt-1" />
                     </div>
-                    <p className="text-[13px] leading-5 font-bold text-amber shrink-0">{formatFCFA(order.total)}</p>
+                    <p className="text-[12px] leading-4 font-bold text-amber shrink-0">{formatFCFA(order.total)}</p>
                   </button>
                 ))}
                 {fetchedOrders.length === 0 && (
@@ -199,7 +199,7 @@ export function OrdersPage() {
           tant que rien n'est sélectionné, la liste occupe déjà l'écran). */}
       <div className={`${selectedOrder ? 'block' : 'hidden lg:block'} flex-1 min-w-0`}>
         {selectedOrder ? (
-          <div className="min-h-screen bg-navy-deep lg:min-h-[calc(100dvh-3rem)] lg:rounded-3xl lg:bg-navy/25 lg:ring-1 lg:ring-white/8 lg:shadow-card lg:overflow-y-auto">
+          <div className="min-h-screen bg-navy-deep lg:h-full lg:min-h-0 lg:rounded-3xl lg:bg-navy/25 lg:ring-1 lg:ring-white/8 lg:shadow-card lg:overflow-y-auto">
             <div className="sticky top-0 z-20 glass border-b border-white/6 px-4 py-3 lg:static lg:bg-transparent lg:backdrop-blur-none lg:border-0 lg:px-7 lg:pt-6 lg:pb-3">
               <div className="max-w-lg mx-auto lg:max-w-none flex items-center gap-3">
                 <button

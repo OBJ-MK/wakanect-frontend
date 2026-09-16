@@ -49,7 +49,7 @@ export function FilterBar({
         placeholder="Rechercher..."
         value={filters.search}
         onChange={e => onChange({ search: e.target.value })}
-        className={cn(compact ? 'py-2.5 rounded-xl text-[14px]' : 'py-2.5')}
+        className={cn(compact ? 'py-2 rounded-lg text-[13px]' : 'py-2.5')}
       />
 
       {categories && categories.length > 1 && (
@@ -91,7 +91,7 @@ export function FilterBar({
           aria-label="Trier"
           value={filters.sort}
           onChange={e => onChange({ sort: e.target.value })}
-          className={cn(selectClass, compact && 'rounded-xl py-2 text-[13px]')}
+          className={cn(selectClass, compact && 'rounded-lg py-1.5 text-[12px]')}
         >
           {sortOptions.map(o => (
             <option key={o.value} value={o.value}>{o.label}</option>
@@ -102,8 +102,8 @@ export function FilterBar({
           <button
             onClick={onReset}
             className={cn(
-              'flex items-center gap-1.5 px-3 py-2.5 rounded-2xl text-label font-semibold text-[var(--text-secondary)] bg-[var(--bg-surface)] border border-[var(--border-default)] hover:border-orange/40 transition-colors',
-              compact && 'rounded-xl py-2 text-[13px]'
+              'flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[12px] font-semibold text-[var(--text-secondary)] bg-[var(--bg-surface)] border border-[var(--border-default)] hover:border-orange/40 transition-colors',
+              compact && 'rounded-lg py-1.5 text-[12px]'
             )}
           >
             <RotateCcw size={13} />

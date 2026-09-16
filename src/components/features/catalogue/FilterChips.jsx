@@ -15,7 +15,7 @@ export function FilterChips({ categories = [], active, onChange, compact = false
             cn(
               'flex-shrink-0 font-semibold transition-colors whitespace-nowrap',
               compact
-                ? 'px-3 py-1.5 rounded-lg text-[13px]'
+                ? 'px-2.5 py-1.5 rounded-md text-[12px]'
                 : 'px-4 py-2 rounded-full text-label',
             ),
             active === cat

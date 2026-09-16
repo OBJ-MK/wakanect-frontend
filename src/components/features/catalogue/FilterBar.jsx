@@ -32,6 +32,7 @@ export function FilterBar({
   showPrice = true,
   sortOptions = DEFAULT_SORT_OPTIONS,
   className,
+  compact = false,
 }) {
   const isDirty =
     filters.search !== '' ||
@@ -43,12 +44,12 @@ export function FilterBar({
   return (
     <div className={cn('flex flex-col gap-3', className)}>
       <Input
-        icon={<Search size={16} />}
+        icon={<Search size={15} />}
         type="search"
         placeholder="Rechercher..."
         value={filters.search}
         onChange={e => onChange({ search: e.target.value })}
-        className="py-2.5"
+        className={cn(compact ? 'py-2.5 rounded-xl text-[14px]' : 'py-2.5')}
       />
 
       {categories && categories.length > 1 && (
@@ -56,6 +57,7 @@ export function FilterBar({
           categories={categories}
           active={filters.category}
           onChange={category => onChange({ category })}
+          compact={compact}
         />
       )}
 
@@ -89,7 +91,7 @@ export function FilterBar({
           aria-label="Trier"
           value={filters.sort}
           onChange={e => onChange({ sort: e.target.value })}
-          className={selectClass}
+          className={cn(selectClass, compact && 'rounded-xl py-2 text-[13px]')}
         >
           {sortOptions.map(o => (
             <option key={o.value} value={o.value}>{o.label}</option>
@@ -99,7 +101,10 @@ export function FilterBar({
         {isDirty && (
           <button
             onClick={onReset}
-            className="flex items-center gap-1.5 px-3 py-2.5 rounded-2xl text-label font-semibold text-[var(--text-secondary)] bg-[var(--bg-surface)] border border-[var(--border-default)] hover:border-orange/40 transition-colors"
+            className={cn(
+              'flex items-center gap-1.5 px-3 py-2.5 rounded-2xl text-label font-semibold text-[var(--text-secondary)] bg-[var(--bg-surface)] border border-[var(--border-default)] hover:border-orange/40 transition-colors',
+              compact && 'rounded-xl py-2 text-[13px]'
+            )}
           >
             <RotateCcw size={13} />
             Réinitialiser

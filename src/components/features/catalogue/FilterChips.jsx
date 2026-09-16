@@ -1,6 +1,6 @@
 import { cn } from '@/lib/utils'
 
-export function FilterChips({ categories = [], active, onChange }) {
+export function FilterChips({ categories = [], active, onChange, compact = false }) {
   return (
     <div
       className="flex gap-2 overflow-x-auto no-scrollbar pb-1"
@@ -12,7 +12,12 @@ export function FilterChips({ categories = [], active, onChange }) {
           key={cat}
           onClick={() => onChange(cat)}
           className={cn(
-            'flex-shrink-0 px-4 py-2 rounded-full text-label font-semibold transition-colors whitespace-nowrap',
+            cn(
+              'flex-shrink-0 font-semibold transition-colors whitespace-nowrap',
+              compact
+                ? 'px-3 py-1.5 rounded-lg text-[13px]'
+                : 'px-4 py-2 rounded-full text-label',
+            ),
             active === cat
               ? 'bg-orange text-white shadow-orange-glow'
               : 'bg-[var(--bg-surface)] text-[var(--text-secondary)] border border-[var(--border-default)] hover:border-orange/40',

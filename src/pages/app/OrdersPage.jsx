@@ -143,6 +143,7 @@ export function OrdersPage() {
               showPrice={false}
               sortOptions={ORDER_SORT_OPTIONS}
               total={loading ? null : total}
+              compact
             />
           </div>
         </div>
@@ -159,25 +160,25 @@ export function OrdersPage() {
                   <button
                     key={order.id}
                     onClick={() => setSelected(order.id)}
-                    className={`w-full flex items-start gap-3 px-4 py-4 border-b border-white/6 last:border-0 hover:bg-white/4 active:bg-white/8 transition-colors text-left ${
+                    className={`w-full flex items-start gap-3 px-4 py-3 border-b border-white/6 last:border-0 hover:bg-white/4 active:bg-white/8 transition-colors text-left ${
                       selected === order.id ? 'lg:bg-orange/8' : ''
                     }`}
                   >
                     <div className="flex-1 min-w-0">
-                      <p className="text-body font-semibold text-white">{order.customer_name}</p>
+                      <p className="text-[14px] leading-5 font-semibold text-white truncate">{order.customer_name}</p>
                       <p className="text-micro text-white/40 mb-1.5">{formatRelativeTime(order.created_at)}</p>
-                      <div className="flex flex-wrap items-center gap-1.5">
+                      <div className="flex flex-wrap items-center gap-1">
                         <StatusBadge status={order.status} />
                         {order.status !== 'Annulée' && (
                           <>
                             <span className="text-white/20 text-micro">·</span>
-                            <PaymentBadge status={order.payment_status} />
+                            <PaymentBadge status={order.payment_status} compact />
                           </>
                         )}
                       </div>
-                      <PerformedBy actor={order.performed_by} className="mt-1.5" />
+                      <PerformedBy actor={order.performed_by} className="mt-1" />
                     </div>
-                    <p className="text-label font-bold text-amber shrink-0">{formatFCFA(order.total)}</p>
+                    <p className="text-[13px] leading-5 font-bold text-amber shrink-0">{formatFCFA(order.total)}</p>
                   </button>
                 ))}
                 {fetchedOrders.length === 0 && (

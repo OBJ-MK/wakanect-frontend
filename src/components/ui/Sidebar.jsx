@@ -13,15 +13,15 @@ export function Sidebar({ collapsed = false, onToggle }) {
   return (
     <aside
       className={cn(
-        'hidden lg:flex fixed inset-y-0 left-0 z-40 flex-col',
-        'border-r border-white/8 bg-navy-deep shadow-sidebar',
+        'hidden lg:flex fixed inset-y-4 left-4 z-40 flex-col',
+        'bg-navy/95 backdrop-blur-glass shadow-lift ring-1 ring-white/8 rounded-2xl overflow-visible',
         'transition-[width] duration-200 ease-out',
         collapsed ? 'w-[4.5rem]' : 'w-60',
       )}
       aria-label="Navigation de l’espace marchand"
     >
       <div className={cn(
-        'relative flex items-center h-[4.5rem] border-b border-white/8 shrink-0',
+        'relative flex items-center h-[4.5rem] shrink-0',
         collapsed ? 'justify-center px-2' : 'gap-3 px-4',
       )}>
         <img
@@ -106,7 +106,7 @@ export function Sidebar({ collapsed = false, onToggle }) {
           )
         })}
 
-        <div className={cn('border-t border-white/8 mt-4 pt-4', collapsed ? 'mx-1' : 'mx-1')}>
+        <div className={cn('mt-4 pt-4', collapsed ? 'mx-1' : 'mx-1')}>
           <NavLink
             to={merchant?.slug ? `/boutique/${merchant.slug}` : '/app'}
             title={collapsed ? 'Ma boutique' : undefined}
@@ -125,7 +125,7 @@ export function Sidebar({ collapsed = false, onToggle }) {
         </div>
       </nav>
 
-      <div className={cn('border-t border-white/8 shrink-0', collapsed ? 'p-2' : 'p-3')}>
+      <div className={cn('shrink-0 mt-2', collapsed ? 'p-2' : 'p-3')}>
         {!collapsed && (
           <div className="px-3 py-2.5 mb-1">
             <span className="block text-label font-semibold text-white truncate">

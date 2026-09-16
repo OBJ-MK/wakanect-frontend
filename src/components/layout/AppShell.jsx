@@ -27,7 +27,7 @@ export function AppShell() {
       {backup && (
         <div className={cn(
           'bg-amber flex items-center justify-between px-4 py-2.5 text-sm font-medium text-navy',
-          collapsed ? 'lg:pl-[4.5rem]' : 'lg:pl-64',
+          collapsed ? 'lg:pl-[6rem]' : 'lg:pl-[17rem]',
         )}>
           <span>
             Connecté en tant que <strong>{merchant?.businessName}</strong>
@@ -43,7 +43,7 @@ export function AppShell() {
         </div>
       )}
       <Sidebar collapsed={collapsed} onToggle={() => setCollapsed(v => !v)} />
-      <main className={cn('pb-24 lg:pb-8 transition-[padding] duration-200', collapsed ? 'lg:pl-[4.5rem]' : 'lg:pl-60')}>
+      <main className={cn('pb-24 lg:pb-8 transition-[padding] duration-200', collapsed ? 'lg:pl-[6rem]' : 'lg:pl-[17rem]')}>
         <Outlet />
       </main>
       <BottomNav />

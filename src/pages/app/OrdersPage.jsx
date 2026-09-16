@@ -123,10 +123,10 @@ export function OrdersPage() {
   return (
     // lg: split liste/détail côte à côte — sur mobile, un seul des deux est
     // affiché à la fois (comportement inchangé, plein écran).
-    <div className="min-h-screen bg-navy-deep lg:flex lg:items-start">
+    <div className="min-h-screen bg-navy-deep lg:flex lg:items-start lg:gap-5 lg:p-6">
       {/* Colonne liste */}
-      <div className={`${selectedOrder ? 'hidden lg:block' : 'block'} lg:w-[400px] lg:shrink-0 lg:sticky lg:top-0 lg:self-start lg:border-r lg:border-white/8 lg:min-h-screen`}>
-        <div className="sticky top-0 z-20 glass border-b border-white/6 px-4 py-3 lg:static lg:bg-transparent lg:backdrop-blur-none lg:px-5 lg:pt-6">
+      <div className={`${selectedOrder ? 'hidden lg:flex' : 'flex'} lg:w-[390px] lg:shrink-0 lg:flex-col lg:sticky lg:top-6 lg:self-start lg:h-[calc(100dvh-3rem)] lg:rounded-3xl lg:bg-navy/45 lg:ring-1 lg:ring-white/8 lg:shadow-card lg:overflow-hidden`}>
+        <div className="sticky top-0 z-20 glass border-b border-white/6 px-4 py-3 lg:static lg:bg-transparent lg:backdrop-blur-none lg:border-0 lg:px-5 lg:pt-5 lg:pb-4">
           <div className="max-w-lg mx-auto lg:max-w-none">
             <div className="flex items-center justify-between mb-3">
               <h1 className="font-display font-bold text-h2 text-white">Commandes</h1>
@@ -147,14 +147,14 @@ export function OrdersPage() {
           </div>
         </div>
 
-        <div className="page-container py-4 flex flex-col gap-3 lg:max-w-none lg:px-5">
+        <div className="page-container py-4 flex flex-col gap-3 lg:max-w-none lg:px-4 lg:pb-5 lg:overflow-y-auto">
           {loading ? (
             <div ref={listRef} className="glass rounded-3xl overflow-hidden">
               {Array.from({ length: 5 }).map((_, i) => <OrderRowSkeleton key={i} />)}
             </div>
           ) : (
             <>
-              <div ref={listRef} className="glass rounded-3xl overflow-hidden scroll-mt-40">
+              <div ref={listRef} className="glass rounded-2xl overflow-hidden scroll-mt-40">
                 {fetchedOrders.map(order => (
                   <button
                     key={order.id}
@@ -196,10 +196,10 @@ export function OrdersPage() {
       {/* Colonne détail — plein écran sur mobile si sélectionnée, sinon
           état vide visible seulement sur desktop (rien à montrer sur mobile
           tant que rien n'est sélectionné, la liste occupe déjà l'écran). */}
-      <div className={`${selectedOrder ? 'block' : 'hidden lg:block'} flex-1`}>
+      <div className={`${selectedOrder ? 'block' : 'hidden lg:block'} flex-1 min-w-0`}>
         {selectedOrder ? (
-          <div className="min-h-screen bg-navy-deep">
-            <div className="sticky top-0 z-20 glass border-b border-white/6 px-4 py-3 lg:static lg:bg-transparent lg:backdrop-blur-none lg:px-8 lg:pt-6">
+          <div className="min-h-screen bg-navy-deep lg:min-h-[calc(100dvh-3rem)] lg:rounded-3xl lg:bg-navy/25 lg:ring-1 lg:ring-white/8 lg:shadow-card lg:overflow-y-auto">
+            <div className="sticky top-0 z-20 glass border-b border-white/6 px-4 py-3 lg:static lg:bg-transparent lg:backdrop-blur-none lg:border-0 lg:px-7 lg:pt-6 lg:pb-3">
               <div className="max-w-lg mx-auto lg:max-w-none flex items-center gap-3">
                 <button
                   onClick={() => setSelected(null)}
@@ -220,7 +220,7 @@ export function OrdersPage() {
                 </div>
               </div>
             </div>
-            <div className="page-container py-5 pb-56 lg:max-w-none lg:px-8">
+            <div className="page-container py-5 pb-56 lg:max-w-none lg:px-7 lg:pb-10">
               <OrderDetail
                 order={selectedOrder}
                 onStatusUpdate={handleStatusUpdate}
@@ -233,7 +233,7 @@ export function OrdersPage() {
             </div>
           </div>
         ) : (
-          <div className="hidden lg:flex flex-col items-center justify-center min-h-screen text-center px-8">
+          <div className="hidden lg:flex flex-col items-center justify-center min-h-[calc(100dvh-3rem)] text-center px-8 rounded-3xl bg-navy/25 ring-1 ring-white/8">
             <div className="w-16 h-16 rounded-full bg-white/6 flex items-center justify-center mb-4">
               <ShoppingBag size={26} className="text-white/25" />
             </div>

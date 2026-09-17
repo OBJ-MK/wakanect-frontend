@@ -66,11 +66,11 @@ export function CatalogueMarchandPage() {
   return (
     <div className="min-h-screen bg-navy-deep">
       {/* Header */}
-      <div className="sticky top-0 z-20 glass border-b border-white/6 px-4 py-3">
+      <div className="sticky top-0 z-20 glass border-b border-white/6 px-4 py-3 lg:static lg:!bg-transparent lg:!backdrop-blur-none lg:!border-0 lg:!shadow-none lg:px-8 lg:pt-7 lg:pb-1">
         <div className="max-w-lg mx-auto lg:max-w-5xl">
-          <div className="flex items-center gap-3 mb-3">
+          <div className="flex items-center gap-3 mb-3 lg:mb-6">
             <div className="flex items-center gap-2 flex-1">
-              <LayoutGrid size={18} className="text-orange" />
+              <LayoutGrid size={18} className="text-orange lg:hidden" />
               <h1 className="font-display font-bold text-h2 text-white">Mon catalogue</h1>
               {total > 0 && (
                 <span className="text-micro text-white/40">({total})</span>
@@ -78,10 +78,11 @@ export function CatalogueMarchandPage() {
             </div>
             <Link
               to="/app/catalogue/ajouter"
-              className="w-9 h-9 rounded-2xl bg-orange flex items-center justify-center text-white hover:bg-orange-hi active:scale-95 transition-all shadow-orange-glow"
+              className="w-9 h-9 rounded-2xl bg-orange flex items-center justify-center text-white hover:bg-orange-hi active:scale-95 transition-all shadow-orange-glow lg:w-auto lg:h-10 lg:gap-2 lg:px-4 lg:rounded-xl"
               aria-label="Ajouter un produit"
             >
               <Plus size={18} />
+              <span className="hidden lg:inline text-label font-semibold">Ajouter un produit</span>
             </Link>
           </div>
         </div>

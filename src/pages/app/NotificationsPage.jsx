@@ -64,24 +64,24 @@ export function NotificationsPage() {
 
   return (
     <div className="min-h-screen bg-navy-deep">
-      <div className="sticky top-0 z-20 glass border-b border-white/6 px-4 py-3">
-        <div className="max-w-lg mx-auto flex items-center gap-3">
+      <div className="sticky top-0 z-20 glass border-b border-white/6 px-4 py-3 lg:static lg:!bg-transparent lg:!backdrop-blur-none lg:!border-0 lg:!shadow-none lg:px-8 lg:pt-7 lg:pb-1">
+        <div className="max-w-lg mx-auto flex items-center gap-3 lg:max-w-[1440px] lg:mx-auto lg:w-full">
           <Link
             to="/app"
-            className="p-2 -ml-2 rounded-xl text-white/60 hover:text-white hover:bg-white/8 transition-colors"
+            className="p-2 -ml-2 rounded-xl text-white/60 hover:text-white hover:bg-white/8 transition-colors lg:hidden"
           >
             <ChevronLeft size={20} />
           </Link>
           <div className="flex-1">
-            <h1 className="font-display font-bold text-h3 text-white">Notifications</h1>
+            <h1 className="font-display font-bold text-h3 text-white lg:text-h2">Notifications</h1>
             {unread.length > 0 && (
-              <p className="text-micro text-white/45">{unread.length} non lu{unread.length > 1 ? 'es' : 'e'}</p>
+              <p className="text-micro text-white/45 lg:text-label lg:mt-1">{unread.length} non lu{unread.length > 1 ? 'es' : 'e'}</p>
             )}
           </div>
           {unread.length > 0 && (
             <button
               onClick={handleMarkAllRead}
-              className="text-label font-semibold text-orange px-2 py-1 -mr-2"
+              className="text-label font-semibold text-orange px-2 py-1 -mr-2 lg:mr-0 lg:px-3 lg:py-1.5 lg:rounded-xl lg:hover:bg-orange/10 lg:transition-colors"
             >
               Tout marquer lu
             </button>
@@ -89,7 +89,7 @@ export function NotificationsPage() {
         </div>
       </div>
 
-      <div className="page-container py-4">
+      <div className="page-container py-4 lg:max-w-[1440px] lg:px-8 lg:pt-2 lg:pb-10">
         {loading ? (
           <div className="flex flex-col gap-2">
             {[1, 2, 3].map(i => (

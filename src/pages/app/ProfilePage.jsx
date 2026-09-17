@@ -65,11 +65,11 @@ export function ProfilePage() {
   return (
     <div className="min-h-screen bg-navy-deep">
       {/* Header / profile card */}
-      <div className="glass border-b border-white/6 px-4 pt-safe pt-4 pb-6">
-        <div className="max-w-lg mx-auto">
-          <h1 className="font-display font-bold text-h2 text-white mb-5">Profil</h1>
+      <div className="glass border-b border-white/6 px-4 pt-safe pt-4 pb-6 lg:!bg-transparent lg:!backdrop-blur-none lg:!border-0 lg:!shadow-none lg:px-8 lg:pt-7 lg:pb-6">
+        <div className="max-w-lg mx-auto lg:max-w-[1440px] lg:mx-auto lg:w-full">
+          <h1 className="font-display font-bold text-h2 text-white mb-5 lg:mb-6">Profil</h1>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 lg:bg-navy/45 lg:backdrop-blur-glass lg:ring-1 lg:ring-white/8 lg:rounded-3xl lg:shadow-card lg:p-6">
             <div className="w-16 h-16 rounded-full bg-gradient-to-br from-orange to-amber flex items-center justify-center shrink-0 overflow-hidden">
               {merchant?.logo_url ? (
                 <img src={merchant.logo_url} alt="Logo" className="w-full h-full object-cover" />
@@ -94,7 +94,7 @@ export function ProfilePage() {
         </div>
       </div>
 
-      <div className="page-container py-5 flex flex-col gap-4">
+      <div className="page-container py-5 flex flex-col gap-4 lg:max-w-[1440px] lg:px-8 lg:pt-2 lg:pb-10 lg:grid lg:grid-cols-2 lg:gap-5 lg:items-start">
         {/* Boutique */}
         <div className="glass rounded-3xl overflow-hidden">
           <p className="text-micro text-white/40 uppercase tracking-wider px-4 pt-4 pb-2">Boutique</p>
@@ -202,7 +202,7 @@ export function ProfilePage() {
         </div>
 
         {/* Logout */}
-        <div className="glass rounded-3xl overflow-hidden">
+        <div className="glass rounded-3xl overflow-hidden lg:col-span-2">
           <button
             onClick={handleLogout}
             className="w-full flex items-center gap-3 px-4 py-3.5 hover:bg-red-500/8 active:bg-red-500/15 transition-colors"
@@ -214,7 +214,7 @@ export function ProfilePage() {
           </button>
         </div>
 
-        <p className="text-micro text-white/20 text-center">
+        <p className="text-micro text-white/20 text-center lg:col-span-2">
           Wakanect v0.1.0 — Fait avec ❤️ pour les commerçants africains
         </p>
       </div>

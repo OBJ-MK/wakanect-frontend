@@ -41,6 +41,7 @@ export function OrdersPage() {
   const [filters, setFilters] = useState(DEFAULT_FILTERS)
   const [page, setPage] = useState(1)
   const listRef = useRef(null)
+  const listScrollRef = useRef(null)
 
   // Filtrage server-side : statut + recherche (débouncée dans le hook) + tri
   const { orders: fetchedOrders, loading, total, pages, changeStatus, markPaid, notifyLinkOpened, notifyConfirm } = useOrders({
@@ -63,12 +64,20 @@ export function OrdersPage() {
   }
 
   // Scroll doux vers le haut de la LISTE (pas de la page)
- function changePage(n) {
+  function changePage(n) {
   setPage(n)
-  listRef.current?.scrollIntoView({
-    behavior: 'smooth',
-    block: 'nearest',
-  })
+
+  if (window.matchMedia('(min-width: 1024px)').matches) {
+    listScrollRef.current?.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    })
+  } else {
+    listRef.current?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start',
+    })
+  }
 }
 
   async function handleStatusUpdate(status) {
@@ -151,46 +160,89 @@ export function OrdersPage() {
           </div>
         </div>
 
-        <div className="page-container py-4 flex flex-col gap-3 lg:max-w-none lg:px-4 lg:pb-5 lg:min-h-0 lg:flex-1 lg:overflow-y-auto">
+        <div className="page-container py-4 flex flex-col gap-3 lg:max-w-none lg:px-4 lg:pb-5 lg:min-h-0 lg:flex-1 lg:overflow-hidden">
           {loading ? (
-            <div ref={listRef} className="glass rounded-3xl overflow-hidden">
-              {Array.from({ length: 5 }).map((_, i) => <OrderRowSkeleton key={i} />)}
+            <div
+              ref={listScrollRef}
+              className="glass rounded-3xl overflow-y-auto lg:min-h-0 lg:flex-1"
+            >
+              <div ref={listRef}>
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <OrderRowSkeleton key={i} />
+                ))}
+              </div>
             </div>
           ) : (
             <>
-              <div ref={listRef} className="glass rounded-2xl overflow-hidden scroll-mt-40">
-                {fetchedOrders.map(order => (
-                  <button
-                    key={order.id}
-                    onClick={() => setSelected(order.id)}
-                    className={`w-full flex items-start gap-3 px-4 py-3 border-b border-white/6 last:border-0 hover:bg-white/4 active:bg-white/8 transition-colors text-left ${selected === order.id ? 'lg:bg-orange/8' : ''
-                      }`}
-                  >
-                    <div className="flex-1 min-w-0">
-                      <p className="text-[13px] leading-5 font-semibold text-white truncate">{order.customer_name}</p>
-                      <p className="text-[11px] leading-4 text-white/40 mb-1">{formatRelativeTime(order.created_at)}</p>
-                      <div className="flex flex-wrap items-center gap-1">
-                        <StatusBadge status={order.status} />
-                        {order.status !== 'Annulée' && (
-                          <>
-                            <span className="text-white/20 text-micro">·</span>
-                            <PaymentBadge status={order.payment_status} compact />
-                          </>
-                        )}
+              {/* LISTE DES COMMANDES : c'est elle qui scroll sur desktop */}
+              <div
+                ref={listScrollRef}
+                className="lg:min-h-0 lg:flex-1 lg:overflow-y-auto lg:overscroll-contain"
+              >
+                <div
+                  ref={listRef}
+                  className="glass rounded-2xl overflow-hidden scroll-mt-40"
+                >
+                  {fetchedOrders.map(order => (
+                    <button
+                      key={order.id}
+                      onClick={() => setSelected(order.id)}
+                      className={`w-full flex items-start gap-3 px-4 py-3 border-b border-white/6 last:border-0 hover:bg-white/4 active:bg-white/8 transition-colors text-left ${selected === order.id ? 'lg:bg-orange/8' : ''
+                        }`}
+                    >
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[13px] leading-5 font-semibold text-white truncate">
+                          {order.customer_name}
+                        </p>
+
+                        <p className="text-[11px] leading-4 text-white/40 mb-1">
+                          {formatRelativeTime(order.created_at)}
+                        </p>
+
+                        <div className="flex flex-wrap items-center gap-1">
+                          <StatusBadge status={order.status} />
+
+                          {order.status !== 'Annulée' && (
+                            <>
+                              <span className="text-white/20 text-micro">·</span>
+                              <PaymentBadge
+                                status={order.payment_status}
+                                compact
+                              />
+                            </>
+                          )}
+                        </div>
+
+                        <PerformedBy
+                          actor={order.performed_by}
+                          className="mt-1"
+                        />
                       </div>
-                      <PerformedBy actor={order.performed_by} className="mt-1" />
+
+                      <p className="text-[12px] leading-4 font-bold text-amber shrink-0">
+                        {formatFCFA(order.total)}
+                      </p>
+                    </button>
+                  ))}
+
+                  {fetchedOrders.length === 0 && (
+                    <div className="flex flex-col items-center py-12 text-center">
+                      <p className="text-body text-white/50">
+                        Aucune commande trouvée
+                      </p>
                     </div>
-                    <p className="text-[12px] leading-4 font-bold text-amber shrink-0">{formatFCFA(order.total)}</p>
-                  </button>
-                ))}
-                {fetchedOrders.length === 0 && (
-                  <div className="flex flex-col items-center py-12 text-center">
-                    <p className="text-body text-white/50">Aucune commande trouvée</p>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
 
-              <Pagination page={page} pages={pages} onChange={changePage} />
+              {/* Pagination fixe en bas du panneau desktop */}
+              <div className="shrink-0">
+                <Pagination
+                  page={page}
+                  pages={pages}
+                  onChange={changePage}
+                />
+              </div>
             </>
           )}
         </div>

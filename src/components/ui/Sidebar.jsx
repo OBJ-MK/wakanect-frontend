@@ -13,7 +13,7 @@ export function Sidebar({ collapsed = false, onToggle }) {
   return (
     <aside
       className={cn(
-        'hidden lg:flex fixed inset-y-4 left-4 z-40 flex-col',
+        'sidebar-dark hidden lg:flex fixed inset-y-4 left-4 z-40 flex-col',
         'bg-navy/95 backdrop-blur-glass shadow-lift ring-1 ring-white/8 rounded-2xl overflow-visible',
         'transition-[width] duration-200 ease-out',
         collapsed ? 'w-[4.5rem]' : 'w-60',

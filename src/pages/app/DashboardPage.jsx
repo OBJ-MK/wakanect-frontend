@@ -91,7 +91,7 @@ export function DashboardPage() {
   return (
     <div className="min-h-screen bg-navy-deep">
       {/* Header mobile inchangé ; desktop devient un vrai header de contenu. */}
-      <div className="sticky top-0 z-20 glass border-b border-white/6 px-4 py-3 lg:static lg:border-0 lg:px-8 lg:pt-7 lg:pb-1 lg:bg-transparent lg:backdrop-blur-none">
+      <div className="sticky top-0 z-20 glass border-b border-white/6 px-4 py-3 lg:static lg:!border-0 lg:!shadow-none lg:px-8 lg:pt-7 lg:pb-1 lg:!bg-transparent lg:!backdrop-blur-none">
         <div className="flex items-center justify-between max-w-lg mx-auto lg:max-w-none lg:mx-auto lg:w-full lg:max-w-[1440px]">
           <div className="flex items-center gap-2 lg:hidden">
             <WakanectLogo variant="mark" className="h-8 w-8" />

@@ -168,6 +168,25 @@
 .admin-shell .hover\:bg-white\/6:hover  { background-color: rgba(255,255,255,0.06); }
 .admin-shell .hover\:bg-white\/8:hover  { background-color: rgba(255,255,255,0.08); }
 
+/* ─── SIDEBAR DESKTOP — palette toujours dark, indépendante du mode light/dark ─
+   La sidebar flottante (bg-navy/95) reste sombre en light mode (choix de
+   design assumé, comme la plupart des apps SaaS modernes). Scoping via
+   .sidebar-dark pour annuler les overrides light-mode de text-white ci-dessous
+   qui sinon rendent le texte illisible (texte navy sur fond navy).
+   !important nécessaire : les overrides light-mode ont une spécificité plus
+   haute (:root:not(.dark) .texte-white) et s'appliquent réellement en light
+   mode (contrairement à .admin-shell qui ne coexiste jamais avec le light
+   mode, donc n'a pas besoin de !important). ────────────────────────────── */
+.sidebar-dark .text-white              { color: rgba(255, 255, 255, 0.95) !important; }
+.sidebar-dark .text-white\/55          { color: rgba(255, 255, 255, 0.55) !important; }
+.sidebar-dark .text-white\/50          { color: rgba(255, 255, 255, 0.50) !important; }
+.sidebar-dark .text-white\/40          { color: rgba(255, 255, 255, 0.40) !important; }
+.sidebar-dark .text-white\/25          { color: rgba(255, 255, 255, 0.25) !important; }
+.sidebar-dark .border-white\/10        { border-color: rgba(255, 255, 255, 0.10) !important; }
+.sidebar-dark .hover\:bg-white\/6:hover { background-color: rgba(255, 255, 255, 0.06) !important; }
+.sidebar-dark .hover\:bg-white\/8:hover { background-color: rgba(255, 255, 255, 0.08) !important; }
+.sidebar-dark .hover\:text-white:hover  { color: rgba(255, 255, 255, 0.95) !important; }
+
 /* ─── LIGHT MODE OVERRIDES ──────────────────────────────────────────────────
    L'app est dark-first. Quand .dark est absent on adapte les tokens hardcodés.
    Toutes ces règles sont hors @layer pour battre les utilities Tailwind.

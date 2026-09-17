@@ -65,20 +65,20 @@ export function OrdersPage() {
 
   // Scroll doux vers le haut de la LISTE (pas de la page)
   function changePage(n) {
-  setPage(n)
+    setPage(n)
 
-  if (window.matchMedia('(min-width: 1024px)').matches) {
-    listScrollRef.current?.scrollTo({
-      top: 0,
-      behavior: 'smooth',
-    })
-  } else {
-    listRef.current?.scrollIntoView({
-      behavior: 'smooth',
-      block: 'start',
-    })
+    if (window.matchMedia('(min-width: 1024px)').matches) {
+      listScrollRef.current?.scrollTo({
+        top: 0,
+        behavior: 'smooth',
+      })
+    } else {
+      listRef.current?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      })
+    }
   }
-}
 
   async function handleStatusUpdate(status) {
     if (!selected) return
@@ -135,7 +135,7 @@ export function OrdersPage() {
   return (
     // lg: split liste/détail côte à côte — sur mobile, un seul des deux est
     // affiché à la fois (comportement inchangé, plein écran).
-    <div className="min-h-screen bg-navy-deep lg:h-[calc(100dvh-2rem)] lg:overflow-hidden lg:flex lg:items-stretch lg:gap-5 lg:p-6">
+    <div className="min-h-screen w-full max-w-full overflow-x-hidden bg-navy-deep lg:h-[calc(100dvh-2rem)] lg:overflow-hidden lg:flex lg:items-stretch lg:gap-5 lg:p-6">
       {/* Colonne liste */}
       <div className={`${selectedOrder ? 'hidden lg:flex' : 'flex'} lg:w-[390px] lg:shrink-0 lg:flex-col lg:min-h-0 lg:sticky lg:top-6 lg:self-start lg:h-full lg:rounded-3xl lg:bg-navy/45 lg:ring-1 lg:ring-white/8 lg:shadow-card lg:overflow-hidden`}>
         <div className="sticky top-0 z-20 glass border-b border-white/6 px-4 py-3 lg:shrink-0 lg:static lg:bg-transparent lg:backdrop-blur-none lg:border-0 lg:px-5 lg:pt-5 lg:pb-4">
@@ -187,19 +187,27 @@ export function OrdersPage() {
                     <button
                       key={order.id}
                       onClick={() => setSelected(order.id)}
-                      className={`w-full flex items-start gap-3 px-4 py-3 border-b border-white/6 last:border-0 hover:bg-white/4 active:bg-white/8 transition-colors text-left ${selected === order.id ? 'lg:bg-orange/8' : ''
+                      className={`w-full min-w-0 flex flex-col gap-2.5 px-4 py-3.5 border-b border-white/6 last:border-0 hover:bg-white/4 active:bg-white/8 transition-colors text-left lg:flex-row lg:items-start lg:gap-3 lg:py-3 ${selected === order.id ? 'lg:bg-orange/8' : ''
                         }`}
                     >
-                      <div className="flex-1 min-w-0">
-                        <p className="text-[13px] leading-5 font-semibold text-white truncate">
-                          {order.customer_name}
-                        </p>
+                      <div className="w-full min-w-0">
+                        <div className="flex items-start justify-between gap-3 min-w-0">
+                          <div className="min-w-0 flex-1">
+                            <p className="text-[13px] leading-5 font-semibold text-white break-words lg:truncate">
+                              {order.customer_name}
+                            </p>
 
-                        <p className="text-[11px] leading-4 text-white/40 mb-1">
-                          {formatRelativeTime(order.created_at)}
-                        </p>
+                            <p className="text-[11px] leading-4 text-white/40">
+                              {formatRelativeTime(order.created_at)}
+                            </p>
+                          </div>
 
-                        <div className="flex flex-wrap items-center gap-1">
+                          <p className="text-[12px] leading-4 font-bold text-amber shrink-0 whitespace-nowrap">
+                            {formatFCFA(order.total)}
+                          </p>
+                        </div>
+
+                        <div className="flex flex-wrap items-center gap-1 mt-1.5 min-w-0">
                           <StatusBadge status={order.status} />
 
                           {order.status !== 'Annulée' && (
@@ -218,10 +226,6 @@ export function OrdersPage() {
                           className="mt-1"
                         />
                       </div>
-
-                      <p className="text-[12px] leading-4 font-bold text-amber shrink-0">
-                        {formatFCFA(order.total)}
-                      </p>
                     </button>
                   ))}
 

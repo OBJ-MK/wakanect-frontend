@@ -9,10 +9,10 @@ import { PerformedBy } from '@/components/ui/PerformedBy'
 import { PAYMENT_METHODS } from '@/lib/constants'
 
 const CANCEL_REASON_LABELS = {
-  stock_epuise:          'Stock épuisé',
+  stock_epuise: 'Stock épuisé',
   variante_indisponible: 'Couleur / taille non disponible',
-  client_injoignable:    'Client injoignable',
-  autre:                 null, // affiche cancel_reason_detail directement
+  client_injoignable: 'Client injoignable',
+  autre: null, // affiche cancel_reason_detail directement
 }
 
 export function OrderDetail({ order, onStatusUpdate, onCancel, onMarkPaid, onNotifyLinkOpened, onNotifyConfirm, loading }) {
@@ -27,7 +27,7 @@ export function OrderDetail({ order, onStatusUpdate, onCancel, onMarkPaid, onNot
   // moyen de le vérifier autrement que la capture jointe par le client — on
   // bloque la confirmation tant qu'elle n'est pas là (miroir de la règle serveur).
   const proofRequired = PAYMENT_METHODS.find(m => m.id === order.payment_method)?.requiresProof
-  const proofMissing  = proofRequired && !order.payment_proof_url
+  const proofMissing = proofRequired && !order.payment_proof_url
 
   // Séquence imposée : Nouvelle → Confirmée → Payée → Livrée, une seule action
   // possible à la fois (miroir des règles serveur dans updateOrderStatus /
@@ -52,7 +52,7 @@ export function OrderDetail({ order, onStatusUpdate, onCancel, onMarkPaid, onNot
 
       {/* Payment */}
       <div className="glass rounded-3xl p-5 flex flex-col gap-3">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <p className="text-micro text-white/45 uppercase tracking-wider mb-1">Paiement</p>
             {order.status !== 'Annulée' ? (
@@ -91,20 +91,24 @@ export function OrderDetail({ order, onStatusUpdate, onCancel, onMarkPaid, onNot
         </div>
         {order.customer_phone && (
           <a
-          
+
             href={`https://wa.me/${order.customer_phone.replace(/\D/g, '')}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-2 text-body text-wa-green"
+            className="flex items-center gap-2 min-w-0 text-body text-wa-green"
           >
             <MessageCircle size={15} className="shrink-0" />
-            {order.customer_phone}
+            <span className="min-w-0 break-all">
+              {order.customer_phone}
+            </span>
           </a>
         )}
         {order.delivery_address && (
-          <div className="flex items-start gap-2 text-body text-white/70">
+          <div className="flex items-start gap-2 min-w-0 text-body text-white/70">
             <MapPin size={15} className="text-white/40 shrink-0 mt-0.5" />
-            {order.delivery_address}
+            <span className="min-w-0 break-words">
+              {order.delivery_address}
+            </span>
           </div>
         )}
         {order.note && (
@@ -204,7 +208,7 @@ export function OrderDetail({ order, onStatusUpdate, onCancel, onMarkPaid, onNot
             <div className="border-t border-white/8 pt-3 flex flex-col gap-2.5">
               <p className="text-micro text-white/45 uppercase tracking-wider">Prévenir le client</p>
               <a
-              
+
                 href={order.whatsapp_cancel_link}
                 target="_blank"
                 rel="noopener noreferrer"

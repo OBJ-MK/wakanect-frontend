@@ -137,7 +137,7 @@ export function OrdersPage() {
     // affiché à la fois (comportement inchangé, plein écran).
     <div className="min-h-screen w-full max-w-full overflow-x-hidden bg-navy-deep lg:h-[calc(100dvh-2rem)] lg:overflow-hidden lg:flex lg:items-stretch lg:gap-5 lg:p-6">
       {/* Colonne liste */}
-      <div className={`${selectedOrder ? 'hidden lg:flex' : 'flex'} lg:w-[390px] lg:shrink-0 lg:flex-col lg:min-h-0 lg:sticky lg:top-6 lg:self-start lg:h-full lg:rounded-3xl lg:bg-navy/45 lg:ring-1 lg:ring-white/8 lg:shadow-card lg:overflow-hidden`}>
+      <div className={`${selectedOrder ? 'hidden lg:flex' : 'flex'} flex-col w-full lg:w-[390px] lg:shrink-0 lg:min-h-0 lg:sticky lg:top-6 lg:self-start lg:h-full lg:rounded-3xl lg:bg-navy/45 lg:ring-1 lg:ring-white/8 lg:shadow-card lg:overflow-hidden`}>
         <div className="sticky top-0 z-20 glass border-b border-white/6 px-4 py-3 lg:shrink-0 lg:static lg:bg-transparent lg:backdrop-blur-none lg:border-0 lg:px-5 lg:pt-5 lg:pb-4">
           <div className="max-w-lg mx-auto lg:max-w-none">
             <div className="flex items-center justify-between mb-3">

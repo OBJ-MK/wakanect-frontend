@@ -263,17 +263,19 @@ export function DashboardPage() {
                   <Link
                     key={order.id}
                     to="/app/commandes"
-                    className="flex items-center gap-4 px-5 py-3.5 hover:bg-white/4 transition-colors lg:px-6"
+                    className="flex items-center gap-3 px-4 py-3.5 hover:bg-white/4 transition-colors lg:gap-4 lg:px-6"
                   >
-                    <div className="w-9 h-9 rounded-xl bg-white/5 flex items-center justify-center shrink-0">
+                    <div className="w-9 h-9 rounded-xl bg-white/5 flex items-center justify-center shrink-0 hidden sm:flex">
                       <ShoppingBag size={16} className="text-white/40" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-body font-semibold text-white truncate">{order.customer_name}</p>
                       <p className="text-micro text-white/35 mt-0.5">{formatRelativeTime(order.created_at)}</p>
                     </div>
-                    <StatusBadge status={order.status} />
-                    <p className="text-label font-bold text-amber shrink-0">{formatFCFA(order.total)}</p>
+                    <div className="flex flex-col items-end gap-1 shrink-0">
+                      <p className="text-label font-bold text-amber whitespace-nowrap">{formatFCFA(order.total)}</p>
+                      <StatusBadge status={order.status} />
+                    </div>
                     <ChevronRight size={15} className="text-white/20 shrink-0" />
                   </Link>
                 ))}

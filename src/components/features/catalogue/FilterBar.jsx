@@ -4,8 +4,8 @@ import { FilterChips } from './FilterChips'
 import { cn } from '@/lib/utils'
 
 const DEFAULT_SORT_OPTIONS = [
-  { value: 'recent',     label: 'Plus récents' },
-  { value: 'price_asc',  label: 'Prix croissant' },
+  { value: 'recent', label: 'Plus récents' },
+  { value: 'price_asc', label: 'Prix croissant' },
   { value: 'price_desc', label: 'Prix décroissant' },
 ]
 
@@ -102,8 +102,8 @@ export function FilterBar({
           <button
             onClick={onReset}
             className={cn(
-              'flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[12px] font-semibold text-[var(--text-secondary)] bg-[var(--bg-surface)] border border-[var(--border-default)] hover:border-orange/40 transition-colors',
-              compact && 'rounded-lg py-1.5 text-[12px]'
+              'flex items-center gap-1.5 px-3 py-2.5 rounded-2xl text-label font-semibold text-[var(--text-secondary)] bg-[var(--bg-surface)] border border-[var(--border-default)] hover:border-orange/40 transition-colors',
+              compact && 'lg:px-2.5 lg:py-1.5 lg:rounded-lg lg:text-[12px]'
             )}
           >
             <RotateCcw size={13} />

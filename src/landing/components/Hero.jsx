@@ -1,25 +1,22 @@
 import { useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
 import { gsap, prefersReducedMotion } from '../lib/gsap';
-import { usePlans } from '@/hooks/usePlans';
 import {Button} from './ui/Button';
-import Icon from './Icon';
+import WhatsAppLeadForm from './WhatsAppLeadForm';
 import HeroVisual from './HeroVisual';
 
 const LINES = [
   [{ t: 'Vendez sur' }],
   [{ t: 'WhatsApp.' }],
-  [{ t: 'Encaissez' }],
-  [{ t: 'avec ' }, { t: 'Wave.', grad: true }],
+  [{ t: 'Sans ' }, { t: 'effort.', grad: true }],
+];
+
+const STATS = [
+  ['2 mois', 'gratuits — aucun engagement'],
+  ['0 %', 'prélevé sur vos ventes'],
 ];
 
 export default function Hero() {
   const root = useRef(null);
-  const { data } = usePlans();
-
-  // Valeurs issues de /api/plans, avec fallback raisonnable
-  const trialDays  = data?.trial?.days  ?? 14;
-  const trialScans = data?.plans?.[0]?.scan_quota ?? 100;
 
   useEffect(() => {
     if (prefersReducedMotion) return;
@@ -84,26 +81,19 @@ export default function Hero() {
             data-hero-fade
             className="mt-7 max-w-prose text-pretty text-lg text-cream/70 sm:text-xl"
           >
-            Wakanect transforme vos messages produit en boutique en ligne publiée.
-            Vos clients commandent sans compte et paient avec Wave.
-            <span className="text-cream"> Zéro friction, 0 % sur vos ventes.</span>
+            Wakanect transforme vos messages WhatsApp en vraie boutique en ligne — automatiquement.
+            <span className="text-cream"> Testez gratuitement pendant 2 mois, sans engagement.</span>
           </p>
 
-          <div data-hero-fade className="mt-9 flex flex-col gap-3 sm:flex-row">
-            <Button as={Link} to="/register" size="lg" magnetic>
-              Essayer gratuitement
-              <Icon name="arrowRight" size={18} className="transition-transform duration-200 group-hover:translate-x-1" />
-            </Button>
-            <Button as="a" href="#demo" variant="ghost" size="lg">
+          <div data-hero-fade className="mt-9 max-w-md">
+            <WhatsAppLeadForm />
+            <Button as="a" href="#demo" variant="ghost" size="lg" className="mt-3 w-full sm:w-auto">
               Voir la démo
             </Button>
           </div>
 
           <dl data-hero-fade className="mt-10 flex flex-wrap items-center gap-x-8 gap-y-4">
-            {[
-              [trialScans.toLocaleString('fr-FR'), `scans — essai ${trialDays} jours`],
-              ['0 %', 'prélevé sur vos ventes'],
-            ].map(([n, l]) => (
+            {STATS.map(([n, l]) => (
               <div key={l} className="flex items-baseline gap-2">
                 <dt className="font-display text-2xl font-bold text-cream">{n}</dt>
                 <dd className="text-sm text-cream/55">{l}</dd>

@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
 import Icon from './Icon';
 
 export default function StickyCta() {
@@ -27,12 +26,12 @@ export default function StickyCta() {
       }`}
     >
       <div className="glass flex items-center gap-2 rounded-2xl border-cream/15 bg-navy/90 p-2 shadow-lift">
-        <Link
-          to="/register"
+        <a
+          href="#hero"
           className="flex h-11 flex-1 items-center justify-center rounded-xl bg-orange font-semibold text-navy-deep active:scale-[0.98]"
         >
           Essayer gratuitement
-        </Link>
+        </a>
         <button
           type="button"
           onClick={() => {

@@ -1,14 +1,11 @@
 import { Link } from 'react-router-dom';
 import { useReveal } from '../hooks/useReveal';
-import { usePlans } from '@/hooks/usePlans';
 import {Button} from './ui/Button';
 import Icon from './Icon';
 import { LogoMark } from './Logo';
 
 export default function FinalCta() {
   const scope = useReveal();
-  const { data } = usePlans();
-  const trialDays = data?.trial?.days ?? 14;
 
   return (
     <section ref={scope} className="relative py-20 sm:py-28">
@@ -25,14 +22,13 @@ export default function FinalCta() {
               <LogoMark size={52} />
             </span>
             <h2 data-reveal className="mx-auto mt-7 max-w-2xl font-display text-display-md font-bold">
-              Prêt à lancer votre boutique ?
+              Rejoignez les commerçants qui testent Wakanect
             </h2>
             <p data-reveal className="mx-auto mt-5 max-w-lg text-lg text-cream/65">
-              Accès Premium complet pendant {trialDays} jours — sans carte bancaire.
-              Votre premier produit est en ligne en quelques minutes.
+              2 mois gratuits, sans engagement. Votre boutique en ligne est prête en quelques minutes.
             </p>
             <div data-reveal className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
-              <Button as={Link} to="/register" size="lg" magnetic>
+              <Button as="a" href="#hero" size="lg" magnetic>
                 Essayer gratuitement
                 <Icon name="arrowRight" size={18} className="transition-transform duration-200 group-hover:translate-x-1" />
               </Button>

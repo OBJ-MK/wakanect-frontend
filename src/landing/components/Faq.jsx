@@ -11,8 +11,7 @@ function empLabel(max) {
 }
 
 function buildItems(data) {
-  const trialDays = data?.trial?.days ?? 14;
-  const plans     = data?.plans;
+  const plans = data?.plans;
 
   // Lookup par clé pour éviter tout crash si l'ordre ou le nombre de plans change
   const planMap = plans ? Object.fromEntries(plans.map(p => [p.key, p])) : {};
@@ -23,12 +22,16 @@ function buildItems(data) {
 
   return [
     {
+      q: 'Comment je m\'inscris au test gratuit ?',
+      a: "Remplissez le formulaire en haut de page avec votre nom et prénom. Vous serez contacté sur WhatsApp pour démarrer en quelques minutes.",
+    },
+    {
       q: "Pourquoi aucun compte client n'est requis ?",
       a: "Les comptes créent de la friction. En Afrique de l'Ouest, les clients veulent acheter vite, sans mot de passe. La confirmation de paiement Wave suffit : plus simple, plus de conversions.",
     },
     {
       q: 'Comment fonctionne le parsing des produits ?',
-      a: "Trois niveaux : regex (Gratuit), Cloudflare Workers AI (Pro), puis Claude Haiku (Premium). Si un niveau n'est pas assez confiant, il escalade. Vous voyez toujours le score et corrigez si besoin.",
+      a: "Trois niveaux : regex, Cloudflare Workers AI, puis DeepSeek pour les cas les plus complexes. Si un niveau n'est pas assez confiant, il escalade automatiquement. Vous voyez toujours le score de confiance et corrigez si besoin.",
     },
     {
       q: "Où va l'argent de mes clients ?",
@@ -50,7 +53,7 @@ function buildItems(data) {
     },
     {
       q: "Y a-t-il une période d'essai ?",
-      a: `Oui — ${trialDays} jours d'accès complet (niveau Premium), sans carte bancaire. Après l'essai, vous choisissez un plan payant ou restez sur le plan Gratuit.`,
+      a: "Oui — 2 mois d'accès complet, sans carte bancaire et sans engagement. Vous arrêtez quand vous voulez.",
     },
   ];
 }

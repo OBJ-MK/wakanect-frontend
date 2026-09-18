@@ -8,7 +8,7 @@ const NAV = [
   { label: 'Fonctionnalités', href: '#features' },
   { label: 'Comment ça marche', href: '#how-it-works' },
   { label: 'Démo', href: '#demo' },
-  { label: 'Tarifs', href: '#pricing' },
+  { label: "L'offre", href: '#pricing' },
   { label: 'FAQ', href: '#faq' },
 ];
 
@@ -66,7 +66,7 @@ export default function Header() {
           >
             Se connecter
           </Link>
-          <Button as={Link} to="/register" magnetic>
+          <Button as="a" href="#hero" magnetic>
             Essayer gratuitement
           </Button>
         </div>
@@ -132,7 +132,7 @@ export default function Header() {
             <Button as={Link} to="/login" variant="ghost" size="lg" className="w-full" onClick={() => setOpen(false)}>
               Se connecter
             </Button>
-            <Button as={Link} to="/register" size="lg" className="w-full" onClick={() => setOpen(false)}>
+            <Button as="a" href="#hero" size="lg" className="w-full" onClick={() => setOpen(false)}>
               Essayer gratuitement
             </Button>
           </div>

@@ -17,5 +17,18 @@ export function useAppSummary() {
     fetchSummary()
   }, [fetchSummary])
 
-  return { summary, loading, error }
+  // Sidebar/BottomNav ne se démontent jamais pendant la navigation : sans ça
+  // le badge reste figé si l'utilisateur revient sur l'onglet après un moment.
+  // La garde de fraîcheur 30s du store (fetchSummary non forcé) évite le spam.
+  useEffect(() => {
+    function onVisibilityChange() {
+      if (document.visibilityState === 'visible') fetchSummary()
+    }
+    document.addEventListener('visibilitychange', onVisibilityChange)
+    return () => document.removeEventListener('visibilitychange', onVisibilityChange)
+  }, [fetchSummary])
+
+  const refreshSummary = () => fetchSummary(true)
+
+  return { summary, loading, error, refreshSummary }
 }

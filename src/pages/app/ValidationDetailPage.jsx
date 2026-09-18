@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { ChevronLeft, Copy } from 'lucide-react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useValidationStore } from '@/store/validationStore'
+import { useAppSummary } from '@/hooks/useAppSummary'
 import { WhatsAppBubble } from '@/components/features/parsing/WhatsAppBubble'
 import { ConfidenceBadge } from '@/components/features/parsing/ConfidenceBadge'
 import { LineActionBar } from '@/components/features/parsing/LineActionBar'
@@ -43,6 +44,7 @@ export function ValidationDetailPage() {
   const { id } = useParams()
   const navigate = useNavigate()
   const { pending, loading, fetchPending, applyProduct, ignoreProduct } = useValidationStore()
+  const { refreshSummary } = useAppSummary()
 
   // Filet de sécurité : accès direct / rechargement de page → liste vide en store
   useEffect(() => {
@@ -113,6 +115,7 @@ export function ValidationDetailPage() {
         colors: form.variants.map(v => v.color.trim()).filter(Boolean),
         variants: cleanVariants,
       })
+      refreshSummary()
       navigate('/app/validation', { replace: true }) // retour instantané, pas de délai artificiel
     } finally {
       setBusy(false)
@@ -123,6 +126,7 @@ export function ValidationDetailPage() {
     setBusy(true)
     try {
       await ignoreProduct(product.id)
+      refreshSummary()
       navigate('/app/validation', { replace: true })
     } finally {
       setBusy(false)

@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { ChevronLeft, ShoppingBag } from 'lucide-react'
 import { useOrders } from '@/hooks/useOrders'
+import { useAppSummary } from '@/hooks/useAppSummary'
 import { OrderDetail } from '@/components/features/orders/OrderDetail'
 import { StatusBadge } from '@/components/ui/StatusBadge'
 import { PaymentBadge } from '@/components/features/orders/PaymentBadge'
@@ -54,6 +55,7 @@ export function OrdersPage() {
   const [selected, setSelected] = useState(null)
   const [statusUpdating, setStatusUpdating] = useState(false)
   const { ensure } = usePermissions()
+  const { refreshSummary } = useAppSummary()
 
   const selectedOrder = selected ? (fetchedOrders.find(o => o.id === selected) ?? null) : null
 
@@ -90,6 +92,7 @@ export function OrdersPage() {
     setStatusUpdating(true)
     try {
       await changeStatus(selected, status)
+      refreshSummary()
     } finally {
       setStatusUpdating(false)
     }
@@ -101,6 +104,7 @@ export function OrdersPage() {
     setStatusUpdating(true)
     try {
       await markPaid(selected)
+      refreshSummary()
     } finally {
       setStatusUpdating(false)
     }
@@ -112,6 +116,7 @@ export function OrdersPage() {
     setStatusUpdating(true)
     try {
       await changeStatus(selected, 'Annulée', reason, reasonDetail)
+      refreshSummary()
     } finally {
       setStatusUpdating(false)
     }

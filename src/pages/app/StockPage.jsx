@@ -11,7 +11,7 @@ import { PerformedBy } from '@/components/ui/PerformedBy'
 
 const MOCK_PRODUCTS = []
 
-function StockRow({ product, onSave }) {
+function StockRow({ product, onSave, card = false }) {
   const { ensure } = usePermissions()
   const [editing, setEditing] = useState(false)
   const [qty, setQty] = useState(String(product.stock))
@@ -30,7 +30,8 @@ function StockRow({ product, onSave }) {
 
   return (
     <div className={cn(
-      'flex items-start gap-3 px-4 py-4 border-b border-white/6 last:border-0',
+      'flex items-start gap-3 px-4 py-4',
+      card ? 'rounded-2xl glass' : 'border-b border-white/6 last:border-0',
       out && 'opacity-60',
     )}>
       {/* Thumbnail */}
@@ -129,10 +130,10 @@ export function StockPage() {
   return (
     <div className="min-h-screen bg-navy-deep">
       {/* Header */}
-      <div className="sticky top-0 z-20 glass border-b border-white/6 px-4 py-3">
-        <div className="max-w-lg mx-auto">
+      <div className="sticky top-0 z-20 glass border-b border-white/6 px-4 py-3 lg:static lg:!bg-transparent lg:!backdrop-blur-none lg:!border-0 lg:!shadow-none lg:px-8 lg:pt-7 lg:pb-1">
+        <div className="max-w-lg mx-auto lg:max-w-[1440px] lg:mx-auto lg:w-full">
           <div className="flex items-center gap-3 mb-3">
-            <h1 className="font-display font-bold text-h2 text-white flex-1">Stock</h1>
+            <h1 className="font-display font-bold text-h2 text-white flex-1 lg:text-h1">Stock</h1>
           </div>
           <Input
             icon={<Search size={16} />}
@@ -140,29 +141,39 @@ export function StockPage() {
             placeholder="Rechercher un produit..."
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="py-2.5"
+            className="py-2.5 lg:max-w-sm"
           />
         </div>
       </div>
 
-      <div className="page-container py-4">
+      <div className="page-container py-4 lg:max-w-[1440px] lg:px-8 lg:pt-2 lg:pb-10">
         {loading ? (
           <div className="flex justify-center py-12">
             <div className="w-8 h-8 rounded-full border-2 border-orange/30 border-t-orange animate-spin" />
           </div>
-        ) : (
+        ) : filtered.length === 0 ? (
           <div className="glass rounded-3xl overflow-hidden">
-            {filtered.length === 0 ? (
-              <div className="flex flex-col items-center py-12 text-center">
-                <Package size={32} className="text-white/20 mb-3" />
-                <p className="text-body text-white/50">Aucun produit trouvé</p>
-              </div>
-            ) : (
-              filtered.map(product => (
-                <StockRow key={product.id} product={product} onSave={updateStock} />
-              ))
-            )}
+            <div className="flex flex-col items-center py-12 text-center">
+              <Package size={32} className="text-white/20 mb-3" />
+              <p className="text-body text-white/50">Aucun produit trouvé</p>
+            </div>
           </div>
+        ) : (
+          <>
+            {/* Mobile — liste empilée inchangée */}
+            <div className="glass rounded-3xl overflow-hidden lg:hidden">
+              {filtered.map(product => (
+                <StockRow key={product.id} product={product} onSave={updateStock} />
+              ))}
+            </div>
+
+            {/* Desktop — grille dense de cartes, une par produit */}
+            <div className="hidden lg:grid lg:grid-cols-2 xl:grid-cols-3 lg:gap-4">
+              {filtered.map(product => (
+                <StockRow key={product.id} product={product} onSave={updateStock} card />
+              ))}
+            </div>
+          </>
         )}
       </div>
     </div>

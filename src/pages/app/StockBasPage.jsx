@@ -4,11 +4,11 @@ import { ChevronLeft, AlertTriangle, Package, Plus, Minus, Loader2, Check } from
 import { formatFCFA } from '@/lib/formatters'
 import { stockService } from '@/services/stockService'
 
-function StockRow({ product, qty, onChange }) {
+function StockRow({ product, qty, onChange, card = false }) {
   const dirty = qty !== product.stock
 
   return (
-    <div className="flex items-center gap-3 px-4 py-4 border-b border-white/6 last:border-0">
+    <div className={`flex items-center gap-3 px-4 py-4 ${card ? 'rounded-2xl glass' : 'border-b border-white/6 last:border-0'}`}>
       <div className="w-12 h-12 rounded-2xl bg-navy-light flex items-center justify-center shrink-0">
         {product.image_url ? (
           <img src={product.image_url} alt="" className="w-full h-full object-cover rounded-2xl" />
@@ -130,18 +130,18 @@ export function StockBasPage() {
 
   return (
     <div className="min-h-screen bg-navy-deep pb-28">
-      <div className="sticky top-0 z-20 glass border-b border-white/6 px-4 py-3">
-        <div className="max-w-lg mx-auto flex items-center gap-3">
+      <div className="sticky top-0 z-20 glass border-b border-white/6 px-4 py-3 lg:static lg:!bg-transparent lg:!backdrop-blur-none lg:!border-0 lg:!shadow-none lg:px-8 lg:pt-7 lg:pb-1">
+        <div className="max-w-lg mx-auto flex items-center gap-3 lg:max-w-[1440px] lg:mx-auto lg:w-full">
           <Link
             to="/app"
-            className="p-2 -ml-2 rounded-xl text-white/60 hover:text-white hover:bg-white/8 transition-colors"
+            className="p-2 -ml-2 rounded-xl text-white/60 hover:text-white hover:bg-white/8 transition-colors lg:hidden"
           >
             <ChevronLeft size={20} />
           </Link>
           <div className="flex-1">
-            <h1 className="font-display font-bold text-h3 text-white">Stock bas</h1>
+            <h1 className="font-display font-bold text-h3 text-white lg:text-h1">Stock bas</h1>
             {!loading && (
-              <p className="text-micro text-white/45">
+              <p className="text-micro text-white/45 lg:text-label lg:mt-1">
                 {products.length} produit{products.length > 1 ? 's' : ''} à approvisionner
               </p>
             )}
@@ -149,8 +149,8 @@ export function StockBasPage() {
         </div>
       </div>
 
-      <div className="page-container py-4 flex flex-col gap-4">
-        <div className="glass rounded-2xl px-4 py-3 border border-amber/20">
+      <div className="page-container py-4 flex flex-col gap-4 lg:max-w-[1440px] lg:px-8 lg:pt-2 lg:pb-10">
+        <div className="glass rounded-2xl px-4 py-3 border border-amber/20 lg:max-w-2xl">
           <p className="text-label text-white/70">
             Ajustez les quantités directement ici, ou transférez un message WhatsApp au numéro Wakanect pour recréer du stock.
           </p>
@@ -173,16 +173,32 @@ export function StockBasPage() {
             <p className="text-label text-white/40 mt-1">Aucun produit en stock bas</p>
           </div>
         ) : (
-          <div className="glass rounded-3xl overflow-hidden">
-            {products.map(p => (
-              <StockRow
-                key={p.id}
-                product={p}
-                qty={overrides[p.id] ?? p.stock}
-                onChange={handleChange}
-              />
-            ))}
-          </div>
+          <>
+            {/* Mobile — liste empilée inchangée */}
+            <div className="glass rounded-3xl overflow-hidden lg:hidden">
+              {products.map(p => (
+                <StockRow
+                  key={p.id}
+                  product={p}
+                  qty={overrides[p.id] ?? p.stock}
+                  onChange={handleChange}
+                />
+              ))}
+            </div>
+
+            {/* Desktop — grille dense de cartes, une par produit */}
+            <div className="hidden lg:grid lg:grid-cols-2 xl:grid-cols-3 lg:gap-4">
+              {products.map(p => (
+                <StockRow
+                  key={p.id}
+                  product={p}
+                  qty={overrides[p.id] ?? p.stock}
+                  onChange={handleChange}
+                  card
+                />
+              ))}
+            </div>
+          </>
         )}
 
         {Object.keys(saveErrors).length > 0 && (
@@ -215,12 +231,14 @@ export function StockBasPage() {
       </div>
 
       {hasDirty && (
-        <div className=" left-0 right-0 z-30 p-4">
-          <div className="max-w-lg mx-auto">
+        // bottom-16 : dégage la BottomNav mobile (≈60px, fixed z-40) — sinon
+        // le bouton se retrouve caché dessous. Pas de BottomNav en desktop.
+        <div className="fixed bottom-16 lg:bottom-0 left-0 right-0 z-30 p-4 lg:px-8">
+          <div className="max-w-lg mx-auto lg:max-w-[1440px]">
             <button
               onClick={handleSave}
               disabled={saving}
-              className="w-full py-3.5 rounded-2xl bg-orange text-white font-semibold text-body flex items-center justify-center gap-2 hover:bg-orange-hi active:scale-[0.98] transition-all disabled:opacity-60"
+              className="w-full py-3.5 rounded-2xl bg-orange text-white font-semibold text-body flex items-center justify-center gap-2 hover:bg-orange-hi active:scale-[0.98] transition-all disabled:opacity-60 lg:w-auto lg:ml-auto lg:px-8 shadow-card"
             >
               {saving ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} />}
               {saving ? 'Enregistrement…' : `Enregistrer (${dirtyIds.length})`}

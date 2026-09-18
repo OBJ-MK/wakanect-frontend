@@ -422,139 +422,150 @@ export function ProductFormPage() {
       </div>
 
       <form onSubmit={handleSubmit}>
-        <div className="page-container py-5 flex flex-col gap-5">
+        {/* lg: deux colonnes — photos + variantes à gauche, infos/prix/stock
+            et actions à droite (les actions restent donc visibles sans
+            scroller jusqu'en bas de tout le formulaire). Aucun handler ni
+            ordre de soumission déplacé, seulement le regroupement visuel des
+            mêmes blocs — voir le même procédé sur CheckoutPage.jsx. */}
+        <div className="page-container py-5 flex flex-col gap-5 lg:flex-row lg:items-start lg:gap-6 lg:max-w-none">
 
-          {/* En édition : upload réel (le produit existe déjà).
-              En création : photos gardées en mémoire, envoyées avec le formulaire. */}
-          {isEdit ? (
-            <ImageManager
-              productId={id}
-              images={form.images}
-              onChange={images => setForm(f => ({ ...f, images }))}
-              onError={setError}
-            />
-          ) : (
-            <StagedImageManager
-              images={stagedImages}
-              onChange={setStagedImages}
-              disabled={saving}
-            />
-          )}
+          {/* Colonne gauche desktop — photos puis variantes (regroupées) */}
+          <div className="flex flex-col gap-5 lg:w-[380px] lg:shrink-0 lg:order-1">
+            {/* En édition : upload réel (le produit existe déjà).
+                En création : photos gardées en mémoire, envoyées avec le formulaire. */}
+            {isEdit ? (
+              <ImageManager
+                productId={id}
+                images={form.images}
+                onChange={images => setForm(f => ({ ...f, images }))}
+                onError={setError}
+              />
+            ) : (
+              <StagedImageManager
+                images={stagedImages}
+                onChange={setStagedImages}
+                disabled={saving}
+              />
+            )}
 
-          {/* Core fields */}
-          <div className="glass rounded-3xl p-4 flex flex-col gap-4">
-            <Input
-              label="Nom du produit"
-              placeholder="Ex: Robe Wax Ankara Premium"
-              value={form.name}
-              onChange={set('name')}
-              required
-            />
+            {/* Tailles & couleurs */}
+            <div className="glass rounded-3xl p-4 flex flex-col gap-4">
+              <p className="text-micro text-white/40 uppercase tracking-wider -mb-1">Variantes</p>
+              <TagInput
+                label="Tailles"
+                tags={form.sizes}
+                onAdd={v => setForm(f => ({ ...f, sizes: [...f.sizes, v.toUpperCase()] }))}
+                onRemove={v => setForm(f => ({ ...f, sizes: f.sizes.filter(s => s !== v) }))}
+                placeholder="Ex: M, L, 42..."
+                colorClass="bg-orange/15 text-orange"
+              />
+              <VariantEditor
+                variants={form.variants}
+                onChange={variants => setForm(f => ({ ...f, variants }))}
+              />
+            </div>
+          </div>
 
-            <div className="grid grid-cols-2 gap-3">
+          {/* Colonne droite desktop — infos, prix, stock, description, actions */}
+          <div className="flex flex-col gap-5 lg:flex-1 lg:min-w-0 lg:order-2">
+            {/* Core fields */}
+            <div className="glass rounded-3xl p-4 flex flex-col gap-4">
               <Input
-                label="Prix (FCFA)"
-                type="number"
-                min="0"
-                placeholder="25000"
-                value={form.price}
-                onChange={set('price')}
-                suffix="FCFA"
+                label="Nom du produit"
+                placeholder="Ex: Robe Wax Ankara Premium"
+                value={form.name}
+                onChange={set('name')}
                 required
               />
-              <Input
-                label="Prix en gros"
-                type="number"
-                min="0"
-                placeholder="20000"
-                value={form.wholesalePrice}
-                onChange={set('wholesalePrice')}
-                suffix="FCFA"
-                hint="Facultatif"
-              />
+
+              <div className="grid grid-cols-2 gap-3">
+                <Input
+                  label="Prix (FCFA)"
+                  type="number"
+                  min="0"
+                  placeholder="25000"
+                  value={form.price}
+                  onChange={set('price')}
+                  suffix="FCFA"
+                  required
+                />
+                <Input
+                  label="Prix en gros"
+                  type="number"
+                  min="0"
+                  placeholder="20000"
+                  value={form.wholesalePrice}
+                  onChange={set('wholesalePrice')}
+                  suffix="FCFA"
+                  hint="Facultatif"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <Input
+                  label="Quantité"
+                  type="number"
+                  min="0"
+                  placeholder="12"
+                  value={hasVariants ? String(variantsSum(form.variants)) : form.stock}
+                  onChange={set('stock')}
+                  disabled={hasVariants}
+                  readOnly={hasVariants}
+                  hint={hasVariants ? 'Somme des variantes' : undefined}
+                  required={!hasVariants}
+                />
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <label className="text-label font-semibold text-white/60">Catégorie</label>
+                <select
+                  value={form.category}
+                  onChange={set('category')}
+                  className="w-full rounded-2xl px-4 py-3 text-body bg-[var(--bg-surface)] border border-[var(--border-default)] text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-orange/40 focus:border-orange dark:bg-navy/60 dark:border-white/10"
+                >
+                  <option value="">Choisir une catégorie...</option>
+                  {CATEGORIES.filter(c => c !== 'Tout').map(c => (
+                    <option key={c} value={c}>{c}</option>
+                  ))}
+                </select>
+              </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              <Input
-                label="Quantité"
-                type="number"
-                min="0"
-                placeholder="12"
-                value={hasVariants ? String(variantsSum(form.variants)) : form.stock}
-                onChange={set('stock')}
-                disabled={hasVariants}
-                readOnly={hasVariants}
-                hint={hasVariants ? 'Somme des variantes' : undefined}
-                required={!hasVariants}
-              />
+            {/* Description facultative */}
+            <div className="glass rounded-3xl p-4">
+              <div className="flex flex-col gap-1.5">
+                <label className="text-label font-semibold text-white/60">
+                  Description <span className="text-white/35 font-normal">(facultatif)</span>
+                </label>
+                <textarea
+                  value={form.description}
+                  onChange={set('description')}
+                  placeholder="Décrivez le produit..."
+                  rows={3}
+                  className="w-full rounded-2xl px-4 py-3 text-body bg-[var(--bg-surface)] border border-[var(--border-default)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-orange/40 focus:border-orange resize-none dark:bg-navy/60 dark:border-white/10"
+                />
+              </div>
             </div>
 
-            <div className="flex flex-col gap-1.5">
-              <label className="text-label font-semibold text-white/60">Catégorie</label>
-              <select
-                value={form.category}
-                onChange={set('category')}
-                className="w-full rounded-2xl px-4 py-3 text-body bg-[var(--bg-surface)] border border-[var(--border-default)] text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-orange/40 focus:border-orange dark:bg-navy/60 dark:border-white/10"
-              >
-                <option value="">Choisir une catégorie...</option>
-                {CATEGORIES.filter(c => c !== 'Tout').map(c => (
-                  <option key={c} value={c}>{c}</option>
-                ))}
-              </select>
-            </div>
+            {/* Feedback erreur / succès */}
+            {error && (
+              <p className="text-label text-red-400 bg-red-500/10 rounded-2xl px-4 py-3">{error}</p>
+            )}
+            {success && (
+              <p className="text-label text-emerald-400 bg-emerald-500/10 rounded-2xl px-4 py-3">
+                {isEdit ? 'Modifications enregistrées !' : 'Produit publié !'}
+              </p>
+            )}
+            {uploadStep && (
+              <p className="text-micro text-white/40 text-center -mt-2">{uploadStep}</p>
+            )}
+
+            {/* Bouton d'action */}
+            <Button type="submit" size="lg" fullWidth loading={saving} className="mt-1">
+              <Check size={16} />
+              {isEdit ? 'Enregistrer les modifications' : 'Publier le produit'}
+            </Button>
           </div>
-
-          {/* Tailles & couleurs */}
-          <div className="glass rounded-3xl p-4 flex flex-col gap-4">
-            <p className="text-micro text-white/40 uppercase tracking-wider -mb-1">Variantes</p>
-            <TagInput
-              label="Tailles"
-              tags={form.sizes}
-              onAdd={v => setForm(f => ({ ...f, sizes: [...f.sizes, v.toUpperCase()] }))}
-              onRemove={v => setForm(f => ({ ...f, sizes: f.sizes.filter(s => s !== v) }))}
-              placeholder="Ex: M, L, 42..."
-              colorClass="bg-orange/15 text-orange"
-            />
-            <VariantEditor
-              variants={form.variants}
-              onChange={variants => setForm(f => ({ ...f, variants }))}
-            />
-          </div>
-
-          {/* Description facultative */}
-          <div className="glass rounded-3xl p-4">
-            <div className="flex flex-col gap-1.5">
-              <label className="text-label font-semibold text-white/60">
-                Description <span className="text-white/35 font-normal">(facultatif)</span>
-              </label>
-              <textarea
-                value={form.description}
-                onChange={set('description')}
-                placeholder="Décrivez le produit..."
-                rows={3}
-                className="w-full rounded-2xl px-4 py-3 text-body bg-[var(--bg-surface)] border border-[var(--border-default)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-orange/40 focus:border-orange resize-none dark:bg-navy/60 dark:border-white/10"
-              />
-            </div>
-          </div>
-
-          {/* Feedback erreur / succès */}
-          {error && (
-            <p className="text-label text-red-400 bg-red-500/10 rounded-2xl px-4 py-3">{error}</p>
-          )}
-          {success && (
-            <p className="text-label text-emerald-400 bg-emerald-500/10 rounded-2xl px-4 py-3">
-              {isEdit ? 'Modifications enregistrées !' : 'Produit publié !'}
-            </p>
-          )}
-          {uploadStep && (
-            <p className="text-micro text-white/40 text-center -mt-2">{uploadStep}</p>
-          )}
-
-          {/* Bouton d'action */}
-          <Button type="submit" size="lg" fullWidth loading={saving} className="mt-1">
-            <Check size={16} />
-            {isEdit ? 'Enregistrer les modifications' : 'Publier le produit'}
-          </Button>
         </div>
       </form>
     </div>

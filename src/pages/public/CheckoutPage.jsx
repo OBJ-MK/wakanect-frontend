@@ -172,10 +172,15 @@ export function CheckoutPage() {
         </div>
       </div>
 
-      <div className="max-w-lg mx-auto px-4 py-5">
-        <form onSubmit={handleSubmit} className="flex flex-col gap-5" noValidate>
+      <div className="boutique-container py-5 lg:py-10">
+        {/* Desktop : formulaire à gauche, récapitulatif sticky à droite.
+            Le récap est en premier dans le DOM (ordre mobile inchangé) et
+            passe en 2e colonne (lg:order-2) uniquement à partir de lg —
+            aucune logique de validation/soumission déplacée, seulement la
+            mise en page. */}
+        <form onSubmit={handleSubmit} className="flex flex-col gap-5 lg:flex-row lg:items-start lg:gap-8" noValidate>
           {/* Récapitulatif */}
-          <div className="bg-white dark:bg-navy rounded-3xl overflow-hidden shadow-card border border-navy/8 dark:border-white/8">
+          <div className="bg-white dark:bg-navy rounded-3xl overflow-hidden shadow-card border border-navy/8 dark:border-white/8 lg:w-[380px] lg:shrink-0 lg:order-2 lg:sticky lg:top-6">
             <p className="text-micro text-navy/50 dark:text-white/45 uppercase tracking-wider px-4 pt-4 pb-2">
               Récapitulatif
             </p>
@@ -231,6 +236,9 @@ export function CheckoutPage() {
             </div>
           </div>
 
+          {/* Colonne formulaire — Informations client / Mode de réception /
+              Paiement / bouton de soumission. Devient la colonne gauche en desktop. */}
+          <div className="flex flex-col gap-5 lg:flex-1 lg:min-w-0 lg:order-1">
           {/* Informations client */}
           <div className="bg-white dark:bg-navy rounded-3xl p-5 shadow-card border border-navy/8 dark:border-white/8 flex flex-col gap-4">
             <p className="text-micro text-navy/50 dark:text-white/45 uppercase tracking-wider">Vos informations</p>
@@ -415,6 +423,7 @@ export function CheckoutPage() {
           <Button type="submit" size="xl" fullWidth loading={loading} disabled={merchantPaymentMissing}>
             Confirmer la commande · {formatFCFA(total)}
           </Button>
+          </div>
         </form>
       </div>
     </div>

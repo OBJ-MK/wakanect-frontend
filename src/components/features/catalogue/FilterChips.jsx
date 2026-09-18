@@ -1,9 +1,14 @@
 import { cn } from '@/lib/utils'
 
-export function FilterChips({ categories = [], active, onChange, compact = false }) {
+export function FilterChips({ categories = [], active, onChange, compact = false, sidebar = false }) {
   return (
     <div
-      className="flex gap-2 overflow-x-auto no-scrollbar pb-1"
+      className={cn(
+        'flex gap-2 overflow-x-auto no-scrollbar pb-1',
+        // Colonne latérale desktop (voir CataloguePage) : les puces passent
+        // à la ligne au lieu de défiler horizontalement dans ~260px.
+        sidebar && 'lg:flex-wrap lg:overflow-x-visible lg:pb-0',
+      )}
       role="group"
       aria-label="Filtres par catégorie"
     >

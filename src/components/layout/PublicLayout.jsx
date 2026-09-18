@@ -9,9 +9,9 @@ export function PublicLayout() {
   const navigate = useNavigate()
   const getOrdersForSlug = useOrdersCacheStore(s => s.getOrdersForSlug)
   const [sheetOpen, setSheetOpen] = useState(false)
+  const orders = slug ? getOrdersForSlug(slug) : []
 
   function handleFabClick() {
-    const orders = slug ? getOrdersForSlug(slug) : []
     if (orders.length === 1) {
       navigate(`/boutique/${slug}/suivi/${orders[0].trackingCode}`)
     } else if (orders.length > 1) {
@@ -21,7 +21,10 @@ export function PublicLayout() {
 
   return (
     <div className="min-h-dvh bg-cream dark:bg-navy-deep">
-      <Outlet />
+      {/* myOrdersCount/onOpenMyOrders : repris tel quel par le bouton "Mes
+          commandes" de l'en-tête desktop de CataloguePage (voir B2) — même
+          logique de navigation que le FAB mobile, une seule source. */}
+      <Outlet context={{ myOrdersCount: orders.length, onOpenMyOrders: handleFabClick }} />
       <MyOrdersFab onOpen={handleFabClick} />
       <MyOrdersSheet isOpen={sheetOpen} onClose={() => setSheetOpen(false)} />
     </div>

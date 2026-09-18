@@ -29,7 +29,8 @@ export function ConfirmationPage() {
 
   return (
     <div className="min-h-screen bg-cream dark:bg-navy-deep flex flex-col items-center justify-center px-4 py-12">
-      <div className="w-full max-w-sm flex flex-col items-center text-center animate-scale-in">
+      {/* Contenu lu, pas parcouru : centré et borné même en grand écran. */}
+      <div className="w-full max-w-sm lg:max-w-2xl flex flex-col items-center text-center animate-scale-in">
         {/* Success icon */}
         <div className="relative mb-6">
           <div className="w-24 h-24 rounded-full bg-emerald/15 flex items-center justify-center">

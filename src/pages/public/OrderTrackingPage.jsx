@@ -90,7 +90,7 @@ export function OrderTrackingPage() {
     <div className="min-h-screen bg-cream dark:bg-navy-deep">
       {/* Header */}
       <div className="bg-white/80 dark:bg-navy/80 backdrop-blur-glass border-b border-navy/8 dark:border-white/8 px-4 py-4">
-        <div className="max-w-lg mx-auto flex items-center justify-between gap-3">
+        <div className="boutique-container-sm flex items-center justify-between gap-3">
           <div className="min-w-0">
             <p className="text-micro text-navy/40 dark:text-white/40 uppercase tracking-wider">Suivi de commande</p>
             <h1 className="font-display font-bold text-h2 text-navy dark:text-white mt-0.5">{order.id}</h1>
@@ -108,7 +108,7 @@ export function OrderTrackingPage() {
         </div>
       </div>
 
-      <div className="max-w-lg mx-auto px-4 py-5 flex flex-col gap-5">
+      <div className="boutique-container-sm py-5 flex flex-col gap-5">
         {/* Status stepper */}
         <div className="bg-white dark:glass rounded-3xl p-5 shadow-card dark:shadow-none">
           <div className="flex flex-col gap-0">

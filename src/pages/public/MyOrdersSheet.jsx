@@ -17,11 +17,13 @@ export function MyOrdersSheet({ isOpen, onClose }) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end">
+    // Bottom sheet en mobile, tiroir latéral droit plein hauteur en desktop
+    // (voir CartSheet — même pattern).
+    <div className="fixed inset-0 z-50 flex items-end lg:items-stretch lg:justify-end">
       <div className="absolute inset-0 bg-black/50 backdrop-blur-xs" onClick={onClose} aria-hidden="true" />
 
-      <div className="relative w-full max-w-lg mx-auto bg-white dark:bg-navy rounded-t-4xl shadow-modal animate-slide-up max-h-[75dvh] flex flex-col">
-        <div className="flex justify-center pt-3 pb-1 shrink-0">
+      <div className="relative w-full max-w-lg mx-auto bg-white dark:bg-navy rounded-t-4xl shadow-modal animate-slide-up max-h-[75dvh] flex flex-col lg:max-w-[420px] lg:mx-0 lg:h-full lg:max-h-none lg:rounded-t-none lg:rounded-l-4xl lg:animate-drawer-in">
+        <div className="flex justify-center pt-3 pb-1 shrink-0 lg:hidden">
           <div className="w-10 h-1 rounded-full bg-navy/15 dark:bg-white/15" />
         </div>
 

@@ -12,7 +12,7 @@ export function CartFab({ onOpen }) {
     <button
       onClick={onOpen}
       className={cn(
-        'fixed bottom-6 right-4 z-30',
+        'fixed bottom-6 right-4 z-30 lg:hidden',
         'flex items-center gap-2.5 px-5 py-3.5 rounded-full',
         'bg-orange shadow-orange-glow text-white',
         'font-display font-semibold text-body',

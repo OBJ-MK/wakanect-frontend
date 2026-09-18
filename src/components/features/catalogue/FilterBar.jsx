@@ -33,6 +33,10 @@ export function FilterBar({
   sortOptions = DEFAULT_SORT_OPTIONS,
   className,
   compact = false,
+  // Colonne latérale sticky de CataloguePage en desktop (~260px). N'affecte
+  // que des classes lg:, donc zéro impact sur les autres usages (OrdersPage,
+  // CatalogueMarchandPage) qui ne passent pas ce prop.
+  sidebar = false,
 }) {
   const isDirty =
     filters.search !== '' ||
@@ -42,7 +46,7 @@ export function FilterBar({
     filters.sort !== sortOptions[0].value
 
   return (
-    <div className={cn('flex flex-col gap-3', className)}>
+    <div className={cn('flex flex-col gap-3', sidebar && 'lg:gap-4', className)}>
       <Input
         icon={<Search size={15} />}
         type="search"
@@ -58,10 +62,11 @@ export function FilterBar({
           active={filters.category}
           onChange={category => onChange({ category })}
           compact={compact}
+          sidebar={sidebar}
         />
       )}
 
-      <div className="flex items-center gap-2 flex-wrap">
+      <div className={cn('flex items-center gap-2 flex-wrap', sidebar && 'lg:flex-col lg:items-stretch')}>
         {showPrice && (
           <>
             <input
@@ -72,7 +77,7 @@ export function FilterBar({
               aria-label="Prix minimum"
               value={filters.priceMin}
               onChange={e => onChange({ priceMin: e.target.value })}
-              className={cn(selectClass, 'w-24 placeholder:text-[var(--text-muted)]')}
+              className={cn(selectClass, 'w-24 placeholder:text-[var(--text-muted)]', sidebar && 'lg:w-full')}
             />
             <input
               type="number"
@@ -82,7 +87,7 @@ export function FilterBar({
               aria-label="Prix maximum"
               value={filters.priceMax}
               onChange={e => onChange({ priceMax: e.target.value })}
-              className={cn(selectClass, 'w-24 placeholder:text-[var(--text-muted)]')}
+              className={cn(selectClass, 'w-24 placeholder:text-[var(--text-muted)]', sidebar && 'lg:w-full')}
             />
           </>
         )}
@@ -91,7 +96,7 @@ export function FilterBar({
           aria-label="Trier"
           value={filters.sort}
           onChange={e => onChange({ sort: e.target.value })}
-          className={cn(selectClass, compact && 'rounded-lg py-1.5 text-[12px]')}
+          className={cn(selectClass, compact && 'rounded-lg py-1.5 text-[12px]', sidebar && 'lg:w-full')}
         >
           {sortOptions.map(o => (
             <option key={o.value} value={o.value}>{o.label}</option>
@@ -103,7 +108,8 @@ export function FilterBar({
             onClick={onReset}
             className={cn(
               'flex items-center gap-1.5 px-3 py-2.5 rounded-2xl text-label font-semibold text-[var(--text-secondary)] bg-[var(--bg-surface)] border border-[var(--border-default)] hover:border-orange/40 transition-colors',
-              compact && 'lg:px-2.5 lg:py-1.5 lg:rounded-lg lg:text-[12px]'
+              compact && 'lg:px-2.5 lg:py-1.5 lg:rounded-lg lg:text-[12px]',
+              sidebar && 'lg:w-full lg:justify-center',
             )}
           >
             <RotateCcw size={13} />
@@ -112,7 +118,7 @@ export function FilterBar({
         )}
 
         {total !== null && (
-          <span className="text-micro text-[var(--text-muted)] ml-auto" aria-live="polite">
+          <span className={cn('text-micro text-[var(--text-muted)] ml-auto', sidebar && 'lg:ml-0 lg:order-first')} aria-live="polite">
             {total} résultat{total > 1 ? 's' : ''}
           </span>
         )}

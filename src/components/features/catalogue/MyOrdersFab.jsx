@@ -14,7 +14,7 @@ export function MyOrdersFab({ onOpen }) {
     <button
       onClick={onOpen}
       className={cn(
-        'fixed bottom-24 right-4 z-30',
+        'fixed bottom-24 right-4 z-30 lg:hidden',
         'flex items-center gap-2.5 px-5 py-3.5 rounded-full',
         'bg-navy dark:bg-white/10 border border-white/10 dark:border-white/15 shadow-card text-white',
         'font-display font-semibold text-body',

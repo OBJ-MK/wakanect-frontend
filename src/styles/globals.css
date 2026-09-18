@@ -81,6 +81,18 @@
     @apply max-w-lg mx-auto px-4 lg:max-w-3xl lg:px-8;
   }
 
+  /* Boutique publique (client final) : conteneurs partagés entre les pages
+     /boutique/:slug — convention 1200px fixée par ProductDetailPage. */
+  .boutique-container {
+    @apply max-w-lg mx-auto px-4 lg:max-w-[1200px] lg:px-8;
+  }
+
+  /* Pages "lues, pas parcourues" (confirmation, suivi) : plus étroit, pas de
+     grille à faire respirer. */
+  .boutique-container-sm {
+    @apply max-w-lg mx-auto px-4 lg:max-w-2xl lg:px-8;
+  }
+
   .safe-bottom {
     padding-bottom: env(safe-area-inset-bottom, 1rem);
   }

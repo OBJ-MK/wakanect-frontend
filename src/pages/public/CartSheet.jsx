@@ -24,7 +24,9 @@ export function CartSheet({ isOpen, onClose }) {
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end">
+    // Bottom sheet en mobile, tiroir latéral droit plein hauteur en desktop
+    // (un panneau qui remonte du bas n'a pas de sens sur un grand écran).
+    <div className="fixed inset-0 z-50 flex items-end lg:items-stretch lg:justify-end">
       {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black/50 backdrop-blur-xs"
@@ -32,10 +34,10 @@ export function CartSheet({ isOpen, onClose }) {
         aria-hidden="true"
       />
 
-      {/* Sheet */}
-      <div className="relative w-full max-w-lg mx-auto bg-white dark:bg-navy rounded-t-4xl shadow-modal animate-slide-up max-h-[85dvh] flex flex-col">
-        {/* Handle */}
-        <div className="flex justify-center pt-3 pb-1 shrink-0">
+      {/* Sheet / tiroir */}
+      <div className="relative w-full max-w-lg mx-auto bg-white dark:bg-navy rounded-t-4xl shadow-modal animate-slide-up max-h-[85dvh] flex flex-col lg:max-w-[420px] lg:mx-0 lg:h-full lg:max-h-none lg:rounded-t-none lg:rounded-l-4xl lg:animate-drawer-in">
+        {/* Handle — mobile uniquement */}
+        <div className="flex justify-center pt-3 pb-1 shrink-0 lg:hidden">
           <div className="w-10 h-1 rounded-full bg-navy/15 dark:bg-white/15" />
         </div>
 

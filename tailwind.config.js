@@ -98,6 +98,7 @@ export default {
         'sparkline': 'sparkline 1.2s ease forwards',
         'slide-in-right': 'slideInRight 0.25s ease forwards',
         'bottom-sheet': 'slideUp 0.3s ease forwards',
+        'drawer-in': 'drawerIn 0.25s ease forwards',
         pulseDot: 'pulseDot 2s ease-in-out infinite',
         floaty: 'floaty 6s ease-in-out infinite',
         marquee: 'marquee 32s linear infinite',
@@ -122,6 +123,10 @@ export default {
         },
         slideInRight: {
           '0%':   { transform: 'translateX(-100%)' },
+          '100%': { transform: 'translateX(0)' },
+        },
+        drawerIn: {
+          '0%':   { transform: 'translateX(100%)' },
           '100%': { transform: 'translateX(0)' },
         },
         pulseDot: {

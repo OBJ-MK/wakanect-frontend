@@ -1,4 +1,4 @@
-import { createBrowserRouter } from 'react-router-dom'
+import { createBrowserRouter, Navigate } from 'react-router-dom'
 import { lazy, Suspense } from 'react'
 import { AuthLayout } from '@/components/layout/AuthLayout'
 import { AppShell } from '@/components/layout/AppShell'
@@ -137,7 +137,8 @@ export const router = createBrowserRouter([
           { path: 'profil/comment-ajouter', element: <CommentAjouterPage /> },
           { path: 'profil/abonnement', element: <RequirePermission perm={PERM.BILLING_MANAGE}><MonAbonnementPage /></RequirePermission> },
           { path: 'profil/installer', element: <InstallerAppPage /> },
-          { path: 'profil/stats', element: <StatsPage /> },
+          { path: 'stats', element: <RequirePermission perm={PERM.DASHBOARD_VIEW}><StatsPage /></RequirePermission> },
+          { path: 'profil/stats', element: <Navigate to="/app/stats" replace /> },
           { path: 'notifications/activer', element: <ActiverNotificationsPage /> },
           { path: 'verifier-numero', element: <VerifierNumeroPage /> },
           { path: 'equipe', element: <RequirePermission perm={PERM.TEAM_MANAGE}><MonEquipePage /></RequirePermission> },

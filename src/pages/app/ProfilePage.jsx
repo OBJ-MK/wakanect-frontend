@@ -107,13 +107,15 @@ export function ProfilePage() {
               action={<ChevronRight size={16} className="text-white/30 shrink-0" />}
             />
           )}
-          <SettingRow
-            icon={BarChart2}
-            label="Statistiques"
-            description="Revenu, panier moyen, top produits"
-            to="/app/profil/stats"
-            action={<ChevronRight size={16} className="text-white/30 shrink-0" />}
-          />
+          {can(PERM.DASHBOARD_VIEW) && (
+            <SettingRow
+              icon={BarChart2}
+              label="Statistiques"
+              description="Revenu, panier moyen, top produits"
+              to="/app/stats"
+              action={<ChevronRight size={16} className="text-white/30 shrink-0" />}
+            />
+          )}
           <SettingRow
             icon={Share2}
             label="Partager ma boutique"

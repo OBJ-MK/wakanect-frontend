@@ -1,14 +1,16 @@
 import { NavLink } from 'react-router-dom'
 import { LogOut, PanelLeftClose, PanelLeftOpen, Store } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { useDashboard } from '@/hooks/useDashboard'
+import { useAppSummary } from '@/hooks/useAppSummary'
 import { useAuth } from '@/hooks/useAuth'
+import { can } from '@/lib/permissions'
 import { APP_NAV_ITEMS } from '@/lib/appNav'
 
 // Sidebar desktop uniquement. La navigation mobile reste portée par BottomNav.
 export function Sidebar({ collapsed = false, onToggle }) {
-  const { stats } = useDashboard('day')
+  const { summary } = useAppSummary()
   const { merchant, handleLogout } = useAuth()
+  const navItems = APP_NAV_ITEMS.filter((item) => !item.perm || can(merchant, item.perm))
 
   return (
     <aside
@@ -67,8 +69,8 @@ export function Sidebar({ collapsed = false, onToggle }) {
           </p>
         )}
 
-        {APP_NAV_ITEMS.map((item) => {
-          const badge = item.badgeKey ? stats?.[item.badgeKey] : null
+        {navItems.map((item) => {
+          const badge = item.badgeKey ? summary?.[item.badgeKey] : null
           return (
             <NavLink
               key={item.to}

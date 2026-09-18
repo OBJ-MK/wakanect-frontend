@@ -21,6 +21,7 @@ export const stockService = {
   create: (data) => api.post('/api/products', data),
   update: (id, data) => api.patch(`/api/products/${id}`, data),
   getDashboardStats: (period = 'day') => api.get(`/api/dashboard/stats?period=${period}`),
+  getDashboardSummary: () => api.get('/api/dashboard/summary'),
   uploadImage: (productId, file) => {
     const formData = new FormData()
     formData.append('image', file)

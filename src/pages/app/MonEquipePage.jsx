@@ -65,7 +65,7 @@ export function MonEquipePage() {
   return (
     <div className="min-h-screen bg-navy-deep">
       <div className="sticky top-0 z-20 glass border-b border-white/6 px-4 py-3">
-        <div className="max-w-lg mx-auto flex items-center gap-3">
+        <div className="max-w-lg mx-auto lg:max-w-3xl flex items-center gap-3">
           <Link
             to="/app/profil"
             className="p-2 -ml-2 rounded-xl text-white/60 hover:text-white hover:bg-white/8 transition-colors"
@@ -102,53 +102,55 @@ export function MonEquipePage() {
           )}
         </div>
 
-        {/* Propriétaire */}
-        <div>
-          <p className="text-micro text-white/40 uppercase tracking-wider mb-2 px-1">Propriétaire</p>
-          <div className="glass rounded-3xl p-4 flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange to-amber flex items-center justify-center shrink-0 overflow-hidden">
-              {merchant?.logo_url ? (
-                <img src={merchant.logo_url} alt="Logo" className="w-full h-full object-cover" />
-              ) : (
-                <span className="text-sm font-bold text-white">{getInitials(merchant?.owner_name ?? 'W')}</span>
-              )}
+        <div className="lg:flex lg:items-start lg:gap-6">
+          {/* Propriétaire */}
+          <div className="lg:w-[300px] lg:shrink-0">
+            <p className="text-micro text-white/40 uppercase tracking-wider mb-2 px-1">Propriétaire</p>
+            <div className="glass rounded-3xl p-4 flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange to-amber flex items-center justify-center shrink-0 overflow-hidden">
+                {merchant?.logo_url ? (
+                  <img src={merchant.logo_url} alt="Logo" className="w-full h-full object-cover" />
+                ) : (
+                  <span className="text-sm font-bold text-white">{getInitials(merchant?.owner_name ?? 'W')}</span>
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-body font-semibold text-white">{merchant?.owner_name ?? 'Propriétaire'}</p>
+                <p className="text-micro text-white/40">{merchant?.whatsapp_number ?? ''} · Toi</p>
+              </div>
+              <span className="text-micro font-semibold text-white/60 border border-white/15 rounded-full px-2.5 py-1 shrink-0">
+                Tous les accès
+              </span>
             </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-body font-semibold text-white">{merchant?.owner_name ?? 'Propriétaire'}</p>
-              <p className="text-micro text-white/40">{merchant?.whatsapp_number ?? ''} · Toi</p>
-            </div>
-            <span className="text-micro font-semibold text-white/60 border border-white/15 rounded-full px-2.5 py-1 shrink-0">
-              Tous les accès
-            </span>
           </div>
-        </div>
 
-        {/* Employés */}
-        <div>
-          <p className="text-micro text-white/40 uppercase tracking-wider mb-2 px-1">
-            Employés · {loading ? '…' : employees.length}
-          </p>
+          {/* Employés */}
+          <div className="mt-4 lg:mt-0 lg:flex-1 lg:min-w-0">
+            <p className="text-micro text-white/40 uppercase tracking-wider mb-2 px-1">
+              Employés · {loading ? '…' : employees.length}
+            </p>
 
-          {loading ? (
-            <div className="glass rounded-3xl p-10 flex items-center justify-center">
-              <p className="text-body text-white/40">Chargement…</p>
-            </div>
-          ) : error ? (
-            <div className="glass rounded-3xl p-6 text-center">
-              <p className="text-sm text-red-400">{error}</p>
-            </div>
-          ) : employees.length === 0 ? (
-            <div className="glass rounded-3xl p-10 flex flex-col items-center text-center gap-3">
-              <Users size={28} className="text-white/15" />
-              <p className="text-body text-white/40">Aucun employé pour l'instant</p>
-            </div>
-          ) : (
-            <div className="glass rounded-3xl overflow-hidden">
-              {employees.map(emp => (
-                <EmployeeRow key={emp._id ?? emp.id} emp={{ ...emp, id: emp._id ?? emp.id }} />
-              ))}
-            </div>
-          )}
+            {loading ? (
+              <div className="glass rounded-3xl p-10 flex items-center justify-center">
+                <p className="text-body text-white/40">Chargement…</p>
+              </div>
+            ) : error ? (
+              <div className="glass rounded-3xl p-6 text-center">
+                <p className="text-sm text-red-400">{error}</p>
+              </div>
+            ) : employees.length === 0 ? (
+              <div className="glass rounded-3xl p-10 flex flex-col items-center text-center gap-3">
+                <Users size={28} className="text-white/15" />
+                <p className="text-body text-white/40">Aucun employé pour l'instant</p>
+              </div>
+            ) : (
+              <div className="glass rounded-3xl overflow-hidden">
+                {employees.map(emp => (
+                  <EmployeeRow key={emp._id ?? emp.id} emp={{ ...emp, id: emp._id ?? emp.id }} />
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Ajouter — désactivé si limite atteinte */}

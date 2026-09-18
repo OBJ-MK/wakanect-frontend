@@ -3,38 +3,7 @@ import { Link, useParams, useNavigate } from 'react-router-dom'
 import { ChevronLeft, Check, RotateCcw } from 'lucide-react'
 import { cn, getInitials } from '@/lib/utils'
 import { employeeService } from '@/services/employeeService'
-
-const ALL_PERMS_KEYS = [
-  'dashboard.view', 'products.send', 'products.publish', 'products.edit',
-  'stock.edit', 'orders.confirm', 'orders.cancel', 'orders.markPaid',
-]
-
-const PERMISSION_GROUPS = [
-  {
-    group: 'Tableau de bord',
-    items: [{ key: 'dashboard.view', label: 'Voir le tableau de bord' }],
-  },
-  {
-    group: 'Produits',
-    items: [
-      { key: 'products.send',    label: 'Envoyer des produits' },
-      { key: 'products.publish', label: 'Publier des produits' },
-      { key: 'products.edit',    label: 'Modifier des produits' },
-    ],
-  },
-  {
-    group: 'Stock',
-    items: [{ key: 'stock.edit', label: 'Modifier le stock' }],
-  },
-  {
-    group: 'Commandes',
-    items: [
-      { key: 'orders.confirm',  label: 'Confirmer une commande' },
-      { key: 'orders.cancel',   label: 'Annuler une commande' },
-      { key: 'orders.markPaid', label: 'Marquer une commande payée' },
-    ],
-  },
-]
+import { ALL_PERMS_KEYS, PERMISSION_GROUPS } from '@/lib/permissions'
 
 export function FicheEmployePage() {
   const { id } = useParams()
@@ -136,7 +105,7 @@ export function FicheEmployePage() {
   return (
     <div className="min-h-screen bg-navy-deep">
       <div className="sticky top-0 z-20 glass border-b border-white/6 px-4 py-3">
-        <div className="max-w-lg mx-auto flex items-center gap-3">
+        <div className="max-w-lg mx-auto lg:max-w-3xl flex items-center gap-3">
           <Link to="/app/equipe" className="p-2 -ml-2 rounded-xl text-white/60 hover:text-white hover:bg-white/8 transition-colors">
             <ChevronLeft size={20} />
           </Link>
@@ -144,53 +113,73 @@ export function FicheEmployePage() {
         </div>
       </div>
 
-      <div className="page-container py-5 flex flex-col gap-4">
-        {/* En-tête employé */}
-        <div className="glass rounded-3xl p-4 flex items-center gap-3">
-          <div className={cn(
-            'w-12 h-12 rounded-full flex items-center justify-center shrink-0 text-sm font-bold',
-            active ? 'bg-white/12 text-white' : 'bg-white/5 text-white/30'
-          )}>
-            {getInitials(employee.name)}
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-body font-semibold text-white">{employee.name}</p>
-            <p className="text-micro text-white/40">{employee.phone}</p>
-          </div>
-          <span className="flex items-center gap-1.5">
-            <span className={cn('w-1.5 h-1.5 rounded-full', active ? 'bg-emerald-400' : 'bg-white/20')} />
-            <span className={cn('text-micro font-semibold', active ? 'text-emerald-400' : 'text-white/30')}>
-              {active ? 'Actif' : 'Désactivé'}
+      <div className="page-container py-5 flex flex-col gap-4 lg:flex-row lg:items-start lg:gap-6">
+        {/* Colonne infos — identité, statut, actions */}
+        <div className="flex flex-col gap-4 lg:w-[340px] lg:shrink-0">
+          {/* En-tête employé */}
+          <div className="glass rounded-3xl p-4 flex items-center gap-3">
+            <div className={cn(
+              'w-12 h-12 rounded-full flex items-center justify-center shrink-0 text-sm font-bold',
+              active ? 'bg-white/12 text-white' : 'bg-white/5 text-white/30'
+            )}>
+              {getInitials(employee.name)}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-body font-semibold text-white">{employee.name}</p>
+              <p className="text-micro text-white/40">{employee.phone}</p>
+            </div>
+            <span className="flex items-center gap-1.5">
+              <span className={cn('w-1.5 h-1.5 rounded-full', active ? 'bg-emerald-400' : 'bg-white/20')} />
+              <span className={cn('text-micro font-semibold', active ? 'text-emerald-400' : 'text-white/30')}>
+                {active ? 'Actif' : 'Désactivé'}
+              </span>
             </span>
-          </span>
-        </div>
-
-        {/* Toggle compte actif */}
-        <div className="glass rounded-3xl p-4 flex items-center gap-3">
-          <div className="flex-1">
-            <p className="text-body font-semibold text-white">Compte actif</p>
-            <p className="text-micro text-white/40 mt-0.5 leading-snug">
-              Désactiver bloque la connexion et l'envoi de produits.
-            </p>
           </div>
+
+          {/* Toggle compte actif */}
+          <div className="glass rounded-3xl p-4 flex items-center gap-3">
+            <div className="flex-1">
+              <p className="text-body font-semibold text-white">Compte actif</p>
+              <p className="text-micro text-white/40 mt-0.5 leading-snug">
+                Désactiver bloque la connexion et l'envoi de produits.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={handleToggleActive}
+              disabled={savingActive}
+              role="switch"
+              aria-checked={active}
+              className={cn(
+                'relative w-12 h-6 rounded-full transition-colors shrink-0',
+                active ? 'bg-emerald-500' : 'bg-white/15',
+                savingActive && 'opacity-50'
+              )}
+            >
+              <span className={cn('absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-all', active ? 'left-6' : 'left-0.5')} />
+            </button>
+          </div>
+
+          {saveError && (
+            <p className="text-sm text-red-400 text-center px-2">{saveError}</p>
+          )}
+
+          {/* Actions */}
+          <button className="flex items-center justify-center gap-2 py-4 rounded-2xl glass border border-white/15 text-white/70 font-semibold text-body hover:text-white transition-colors">
+            <RotateCcw size={16} />
+            Réinitialiser le mot de passe
+          </button>
+
           <button
-            type="button"
-            onClick={handleToggleActive}
-            disabled={savingActive}
-            role="switch"
-            aria-checked={active}
-            className={cn(
-              'relative w-12 h-6 rounded-full transition-colors shrink-0',
-              active ? 'bg-emerald-500' : 'bg-white/15',
-              savingActive && 'opacity-50'
-            )}
+            onClick={() => setShowRemove(true)}
+            className="py-2 text-red-400 font-semibold text-body hover:text-red-300 transition-colors text-center"
           >
-            <span className={cn('absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-all', active ? 'left-6' : 'left-0.5')} />
+            Retirer de l'équipe
           </button>
         </div>
 
-        {/* Permissions */}
-        <div>
+        {/* Colonne permissions */}
+        <div className="lg:flex-1 lg:min-w-0">
           <div className="flex items-center justify-between mb-3 px-1">
             <p className="text-micro text-white/40 uppercase tracking-wider">Permissions</p>
             <span className="text-micro font-bold text-white/60 bg-white/8 rounded-full px-2.5 py-1">
@@ -233,23 +222,6 @@ export function FicheEmployePage() {
             {savingPerms ? 'Enregistrement…' : 'Enregistrer les permissions'}
           </button>
         </div>
-
-        {saveError && (
-          <p className="text-sm text-red-400 text-center px-2">{saveError}</p>
-        )}
-
-        {/* Actions */}
-        <button className="flex items-center justify-center gap-2 py-4 rounded-2xl glass border border-white/15 text-white/70 font-semibold text-body hover:text-white transition-colors">
-          <RotateCcw size={16} />
-          Réinitialiser le mot de passe
-        </button>
-
-        <button
-          onClick={() => setShowRemove(true)}
-          className="py-2 text-red-400 font-semibold text-body hover:text-red-300 transition-colors text-center"
-        >
-          Retirer de l'équipe
-        </button>
       </div>
 
       {/* Modale : confirmation retrait */}

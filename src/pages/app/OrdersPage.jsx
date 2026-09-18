@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
+import { useParams, useNavigate } from 'react-router-dom'
 import { ChevronLeft, ShoppingBag } from 'lucide-react'
 import { useOrders } from '@/hooks/useOrders'
 import { useAppSummary } from '@/hooks/useAppSummary'
@@ -39,6 +40,8 @@ function OrderRowSkeleton() {
 }
 
 export function OrdersPage() {
+  const { id: idParam } = useParams()
+  const navigate = useNavigate()
   const [filters, setFilters] = useState(DEFAULT_FILTERS)
   const [page, setPage] = useState(1)
   const listRef = useRef(null)
@@ -52,12 +55,29 @@ export function OrdersPage() {
     page,
   })
 
-  const [selected, setSelected] = useState(null)
+  const [selected, setSelected] = useState(idParam ?? null)
   const [statusUpdating, setStatusUpdating] = useState(false)
   const { ensure } = usePermissions()
   const { refreshSummary } = useAppSummary()
 
   const selectedOrder = selected ? (fetchedOrders.find(o => o.id === selected) ?? null) : null
+
+  // Lien direct (notification, email…) vers /app/commandes/:id : resynchronise
+  // la sélection si l'URL change sous nos pieds (ex. navigation programmatique).
+  useEffect(() => {
+    setSelected(idParam ?? null)
+  }, [idParam])
+
+  // Reflète la sélection dans l'URL en desktop pour que le bouton retour du
+  // navigateur fonctionne. En mobile, la vue liste/détail est gérée en local
+  // (bouton retour dédié) et n'a pas besoin de suivre l'URL.
+  useEffect(() => {
+    if (!window.matchMedia('(min-width: 1024px)').matches) return
+    const path = selected ? `/app/commandes/${selected}` : '/app/commandes'
+    if (window.location.pathname !== path) {
+      navigate(path, { replace: true })
+    }
+  }, [selected, navigate])
 
   // Tout changement de filtre repart en page 1 — uniquement setState → fetch → re-render
   function updateFilters(partial) {

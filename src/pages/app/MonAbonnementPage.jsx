@@ -97,7 +97,7 @@ export function MonAbonnementPage() {
     <div className="min-h-screen bg-navy-deep">
       {/* Header */}
       <div className="sticky top-0 z-20 glass border-b border-white/6 px-4 py-3">
-        <div className="max-w-lg mx-auto flex items-center gap-3">
+        <div className="max-w-lg mx-auto lg:max-w-3xl flex items-center gap-3">
           <Link
             to="/app/profil"
             className="p-2 -ml-2 rounded-xl text-white/60 hover:text-white hover:bg-white/8 transition-colors"
@@ -145,130 +145,135 @@ export function MonAbonnementPage() {
           <div className="relative overflow-hidden glass rounded-4xl p-6 animate-pulse h-40" />
         )}
 
-        {/* Plan actuel */}
-        {!subLoading && !subError && (
-          <div className="relative overflow-hidden glass rounded-4xl p-6">
-            <div className="absolute top-0 left-0 right-0 h-0.5 gradient-thread opacity-70" />
+        <div className="lg:flex lg:items-start lg:gap-6">
+          {/* Colonne plan + actions */}
+          <div className="flex flex-col gap-5 lg:w-[360px] lg:shrink-0">
+            {/* Plan actuel */}
+            {!subLoading && !subError && (
+              <div className="relative overflow-hidden glass rounded-4xl p-6">
+                <div className="absolute top-0 left-0 right-0 h-0.5 gradient-thread opacity-70" />
 
-            <p className="text-micro text-white/45 uppercase tracking-wider mb-3">Plan actuel</p>
+                <p className="text-micro text-white/45 uppercase tracking-wider mb-3">Plan actuel</p>
 
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-2xl bg-orange/15 flex items-center justify-center shrink-0">
-                <PlanIcon size={20} className={planColor} />
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 rounded-2xl bg-orange/15 flex items-center justify-center shrink-0">
+                    <PlanIcon size={20} className={planColor} />
+                  </div>
+                  <div>
+                    <p className={`font-display font-bold text-h2 ${planColor}`}>{planName}</p>
+                    {period && <p className="text-label text-white/50">{periodTxt}</p>}
+                  </div>
+                </div>
+
+                {/* Statut + date */}
+                <div className="pt-4 border-t border-white/8 flex items-center gap-2">
+                  <div className={`w-2 h-2 rounded-full ${statusDot} shrink-0`} />
+                  <p className="text-label text-white/60">
+                    {statusTxt}
+                    {endsAt && ` · renouvellement le ${endsAt}`}
+                  </p>
+                </div>
+
+                {/* Badge résiliation programmée */}
+                {cancelAtPeriodEnd && (
+                  <div className="mt-3 flex items-center gap-2 px-3 py-2 rounded-2xl bg-amber/10 border border-amber/20">
+                    <CalendarX size={14} className="text-amber shrink-0" />
+                    <p className="text-label text-amber">
+                      Résiliation programmée · accès jusqu'au {endsAt ?? '—'}
+                    </p>
+                  </div>
+                )}
               </div>
-              <div>
-                <p className={`font-display font-bold text-h2 ${planColor}`}>{planName}</p>
-                {period && <p className="text-label text-white/50">{periodTxt}</p>}
-              </div>
-            </div>
+            )}
 
-            {/* Statut + date */}
-            <div className="pt-4 border-t border-white/8 flex items-center gap-2">
-              <div className={`w-2 h-2 rounded-full ${statusDot} shrink-0`} />
-              <p className="text-label text-white/60">
-                {statusTxt}
-                {endsAt && ` · renouvellement le ${endsAt}`}
-              </p>
-            </div>
+            {/* Actions */}
+            {!subLoading && !subError && (
+              <div className="flex flex-col gap-3">
+                <Link
+                  to="/abonnement"
+                  className="flex items-center justify-center gap-2 py-4 rounded-3xl bg-orange text-white font-semibold text-body hover:bg-orange-hi active:scale-[0.98] transition-all shadow-orange-glow"
+                >
+                  <Zap size={18} />
+                  {plan === 'free' ? 'Choisir un plan' : 'Changer de formule · période'}
+                </Link>
 
-            {/* Badge résiliation programmée */}
-            {cancelAtPeriodEnd && (
-              <div className="mt-3 flex items-center gap-2 px-3 py-2 rounded-2xl bg-amber/10 border border-amber/20">
-                <CalendarX size={14} className="text-amber shrink-0" />
-                <p className="text-label text-amber">
-                  Résiliation programmée · accès jusqu'au {endsAt ?? '—'}
-                </p>
+                {/* Résiliation / Réactivation */}
+                {status === 'actif' && (
+                  cancelAtPeriodEnd ? (
+                    <button
+                      onClick={handleReactivate}
+                      disabled={reactivating}
+                      className="flex items-center justify-center gap-2 py-3.5 rounded-3xl glass border border-emerald/25 text-emerald font-semibold text-body hover:bg-emerald/8 active:scale-[0.98] transition-all disabled:opacity-60"
+                    >
+                      <RotateCcw size={16} />
+                      {reactivating ? 'Réactivation…' : 'Réactiver l\'abonnement'}
+                    </button>
+                  ) : (
+                    <button
+                      onClick={handleCancel}
+                      disabled={cancelling}
+                      className="flex items-center justify-center gap-2 py-3.5 rounded-3xl glass border border-white/12 text-white/50 font-semibold text-body hover:text-white/70 hover:bg-white/5 active:scale-[0.98] transition-all disabled:opacity-60"
+                    >
+                      <CalendarX size={16} />
+                      {cancelling ? 'Résiliation…' : 'Annuler l\'abonnement'}
+                    </button>
+                  )
+                )}
               </div>
             )}
           </div>
-        )}
 
-        {/* Actions */}
-        {!subLoading && !subError && (
-          <div className="flex flex-col gap-3">
-            <Link
-              to="/abonnement"
-              className="flex items-center justify-center gap-2 py-4 rounded-3xl bg-orange text-white font-semibold text-body hover:bg-orange-hi active:scale-[0.98] transition-all shadow-orange-glow"
-            >
-              <Zap size={18} />
-              {plan === 'free' ? 'Choisir un plan' : 'Changer de formule · période'}
-            </Link>
+          {/* Historique des paiements */}
+          <div className="glass rounded-3xl p-6 flex flex-col gap-4 mt-5 lg:mt-0 lg:flex-1 lg:min-w-0">
+            <p className="font-display font-semibold text-h3 text-white">Historique des paiements</p>
 
-            {/* Résiliation / Réactivation */}
-            {status === 'actif' && (
-              cancelAtPeriodEnd ? (
-                <button
-                  onClick={handleReactivate}
-                  disabled={reactivating}
-                  className="flex items-center justify-center gap-2 py-3.5 rounded-3xl glass border border-emerald/25 text-emerald font-semibold text-body hover:bg-emerald/8 active:scale-[0.98] transition-all disabled:opacity-60"
-                >
-                  <RotateCcw size={16} />
-                  {reactivating ? 'Réactivation…' : 'Réactiver l\'abonnement'}
-                </button>
-              ) : (
-                <button
-                  onClick={handleCancel}
-                  disabled={cancelling}
-                  className="flex items-center justify-center gap-2 py-3.5 rounded-3xl glass border border-white/12 text-white/50 font-semibold text-body hover:text-white/70 hover:bg-white/5 active:scale-[0.98] transition-all disabled:opacity-60"
-                >
-                  <CalendarX size={16} />
-                  {cancelling ? 'Résiliation…' : 'Annuler l\'abonnement'}
-                </button>
-              )
+            {paymentsLoading && (
+              <div className="animate-pulse flex flex-col gap-3">
+                {[0, 1].map(i => <div key={i} className="h-12 rounded-2xl bg-white/5" />)}
+              </div>
             )}
-          </div>
-        )}
 
-        {/* Historique des paiements */}
-        <div className="glass rounded-3xl p-6 flex flex-col gap-4">
-          <p className="font-display font-semibold text-h3 text-white">Historique des paiements</p>
+            {paymentsError && (
+              <div className="flex flex-col items-center gap-2 text-center py-2">
+                <p className="text-label text-white/40">Impossible de charger l'historique</p>
+                <button
+                  onClick={refetchPayments}
+                  className="text-label text-orange hover:text-orange-hi transition-colors"
+                >
+                  Réessayer
+                </button>
+              </div>
+            )}
 
-          {paymentsLoading && (
-            <div className="animate-pulse flex flex-col gap-3">
-              {[0, 1].map(i => <div key={i} className="h-12 rounded-2xl bg-white/5" />)}
-            </div>
-          )}
+            {!paymentsLoading && !paymentsError && (paymentsData?.payments ?? []).length === 0 && (
+              <div className="text-center py-2">
+                <p className="text-body font-semibold text-white/40">Aucun paiement</p>
+                <p className="text-label text-white/25 mt-1">Votre historique apparaîtra ici</p>
+              </div>
+            )}
 
-          {paymentsError && (
-            <div className="flex flex-col items-center gap-2 text-center py-2">
-              <p className="text-label text-white/40">Impossible de charger l'historique</p>
-              <button
-                onClick={refetchPayments}
-                className="text-label text-orange hover:text-orange-hi transition-colors"
+            {!paymentsLoading && !paymentsError && (paymentsData?.payments ?? []).map((p, i) => (
+              <div
+                key={i}
+                className="flex items-center justify-between gap-3 py-3 border-t border-white/6 first:border-0 first:pt-0"
               >
-                Réessayer
-              </button>
-            </div>
-          )}
-
-          {!paymentsLoading && !paymentsError && (paymentsData?.payments ?? []).length === 0 && (
-            <div className="text-center py-2">
-              <p className="text-body font-semibold text-white/40">Aucun paiement</p>
-              <p className="text-label text-white/25 mt-1">Votre historique apparaîtra ici</p>
-            </div>
-          )}
-
-          {!paymentsLoading && !paymentsError && (paymentsData?.payments ?? []).map((p, i) => (
-            <div
-              key={i}
-              className="flex items-center justify-between gap-3 py-3 border-t border-white/6 first:border-0 first:pt-0"
-            >
-              <div>
-                <p className="text-label font-semibold text-white capitalize">
-                  {PLAN_NAME[p.plan] ?? p.plan} · {PERIOD_LABEL[p.period] ?? p.period}
-                </p>
-                <p className="text-micro text-white/40">
-                  {new Date(p.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })}
-                </p>
+                <div>
+                  <p className="text-label font-semibold text-white capitalize">
+                    {PLAN_NAME[p.plan] ?? p.plan} · {PERIOD_LABEL[p.period] ?? p.period}
+                  </p>
+                  <p className="text-micro text-white/40">
+                    {new Date(p.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })}
+                  </p>
+                </div>
+                <div className="text-right shrink-0">
+                  <p className="text-label font-semibold text-white">{fmtAmount(p.amount)} FCFA</p>
+                  <p className={`text-micro ${p.status === 'completed' ? 'text-emerald' : 'text-red-400'}`}>
+                    {p.status === 'completed' ? 'Payé' : 'Échoué'}
+                  </p>
+                </div>
               </div>
-              <div className="text-right shrink-0">
-                <p className="text-label font-semibold text-white">{fmtAmount(p.amount)} FCFA</p>
-                <p className={`text-micro ${p.status === 'completed' ? 'text-emerald' : 'text-red-400'}`}>
-                  {p.status === 'completed' ? 'Payé' : 'Échoué'}
-                </p>
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
     </div>

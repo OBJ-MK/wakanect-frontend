@@ -5,38 +5,7 @@ import { cn, buildWhatsAppLink } from '@/lib/utils'
 import { useAuthStore } from '@/store/authStore'
 import { employeeService } from '@/services/employeeService'
 import { Input } from '@/components/ui/Input'
-
-const ALL_PERMS_KEYS = [
-  'dashboard.view', 'products.send', 'products.publish', 'products.edit',
-  'stock.edit', 'orders.confirm', 'orders.cancel', 'orders.markPaid',
-]
-
-const PERMISSION_GROUPS = [
-  {
-    group: 'Tableau de bord',
-    items: [{ key: 'dashboard.view', label: 'Voir le tableau de bord', hint: '(par défaut)' }],
-  },
-  {
-    group: 'Produits',
-    items: [
-      { key: 'products.send',    label: 'Envoyer des produits' },
-      { key: 'products.publish', label: 'Publier des produits' },
-      { key: 'products.edit',    label: 'Modifier des produits' },
-    ],
-  },
-  {
-    group: 'Stock',
-    items: [{ key: 'stock.edit', label: 'Modifier le stock' }],
-  },
-  {
-    group: 'Commandes',
-    items: [
-      { key: 'orders.confirm',  label: 'Confirmer une commande' },
-      { key: 'orders.cancel',   label: 'Annuler une commande' },
-      { key: 'orders.markPaid', label: 'Marquer une commande payée' },
-    ],
-  },
-]
+import { ALL_PERMS_KEYS, PERMISSION_GROUPS } from '@/lib/permissions'
 
 const PRESETS = [
   { id: 'vendor',    label: 'Vendeur',           keys: ['dashboard.view', 'products.send', 'orders.confirm'] },
@@ -208,7 +177,7 @@ export function AjouterEmployePage() {
   return (
     <div className="min-h-screen bg-navy-deep">
       <div className="sticky top-0 z-20 glass border-b border-white/6 px-4 py-3">
-        <div className="max-w-lg mx-auto flex items-center gap-3">
+        <div className="max-w-lg mx-auto lg:max-w-3xl flex items-center gap-3">
           <Link to="/app/equipe" className="p-2 -ml-2 rounded-xl text-white/60 hover:text-white hover:bg-white/8 transition-colors">
             <ChevronLeft size={20} />
           </Link>
@@ -216,44 +185,69 @@ export function AjouterEmployePage() {
         </div>
       </div>
 
-      <form onSubmit={onSubmit} className="page-container py-5 flex flex-col gap-5">
-        {/* Informations */}
-        <div className="glass rounded-3xl p-4 flex flex-col gap-4">
-          <FieldGroup label="Nom">
-            <Input required value={form.name} onChange={set('name')} placeholder="Ex : Moussa Sow" />
-          </FieldGroup>
-          <FieldGroup label="Numéro de téléphone" hint="Identifiant de connexion + envoi de produits.">
-            <Input required type="tel" value={form.phone} onChange={set('phone')} placeholder="+221 …" />
-          </FieldGroup>
-          <FieldGroup label="Mot de passe">
-            <Input required value={form.password} onChange={set('password')} placeholder="Définis un mot de passe" />
-          </FieldGroup>
-        </div>
-
-        {/* Prérèglage */}
-        <div>
-          <p className="text-micro text-white/40 uppercase tracking-wider mb-3 px-1">Prérèglage</p>
-          <div className="flex flex-wrap gap-2">
-            {PRESETS.map(p => (
-              <button
-                key={p.id}
-                type="button"
-                onClick={() => applyPreset(p)}
-                className={cn(
-                  'px-3.5 py-2 rounded-full text-sm font-semibold border transition-colors',
-                  activePreset === p.id
-                    ? 'bg-white text-navy-deep border-white'
-                    : 'bg-white/6 text-white/60 border-white/15 hover:text-white hover:border-white/30'
-                )}
-              >
-                {p.label}
-              </button>
-            ))}
+      <form onSubmit={onSubmit} className="page-container py-5 flex flex-col gap-5 lg:flex-row lg:items-start lg:gap-6">
+        {/* Colonne infos — nom, téléphone, mot de passe, prérèglage */}
+        <div className="flex flex-col gap-5 lg:w-[340px] lg:shrink-0">
+          <div className="glass rounded-3xl p-4 flex flex-col gap-4">
+            <FieldGroup label="Nom">
+              <Input required value={form.name} onChange={set('name')} placeholder="Ex : Moussa Sow" />
+            </FieldGroup>
+            <FieldGroup label="Numéro de téléphone" hint="Identifiant de connexion + envoi de produits.">
+              <Input required type="tel" value={form.phone} onChange={set('phone')} placeholder="+221 …" />
+            </FieldGroup>
+            <FieldGroup label="Mot de passe">
+              <Input required value={form.password} onChange={set('password')} placeholder="Définis un mot de passe" />
+            </FieldGroup>
           </div>
+
+          {/* Prérèglage */}
+          <div>
+            <p className="text-micro text-white/40 uppercase tracking-wider mb-3 px-1">Prérèglage</p>
+            <div className="flex flex-wrap gap-2">
+              {PRESETS.map(p => (
+                <button
+                  key={p.id}
+                  type="button"
+                  onClick={() => applyPreset(p)}
+                  className={cn(
+                    'px-3.5 py-2 rounded-full text-sm font-semibold border transition-colors',
+                    activePreset === p.id
+                      ? 'bg-white text-navy-deep border-white'
+                      : 'bg-white/6 text-white/60 border-white/15 hover:text-white hover:border-white/30'
+                  )}
+                >
+                  {p.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {limitError && (
+            <div className="glass rounded-2xl p-4 border border-amber/20 flex flex-col items-center gap-2 text-center">
+              <p className="text-label text-white/80">{error}</p>
+              <Link
+                to="/abonnement"
+                className="text-label text-orange underline hover:text-orange-hi transition-colors font-semibold"
+              >
+                Voir les plans disponibles →
+              </Link>
+            </div>
+          )}
+          {!limitError && error && (
+            <p className="text-sm text-red-400 text-center px-2">{error}</p>
+          )}
+
+          <button
+            type="submit"
+            disabled={loading || !form.name || !form.phone || !form.password}
+            className="py-4 rounded-2xl bg-white text-navy-deep font-bold text-body hover:opacity-90 active:scale-95 disabled:opacity-40 disabled:scale-100 transition-all"
+          >
+            {loading ? 'Création…' : 'Créer le compte'}
+          </button>
         </div>
 
-        {/* Permissions */}
-        <div>
+        {/* Colonne permissions */}
+        <div className="lg:flex-1 lg:min-w-0">
           <div className="flex items-center justify-between mb-3 px-1">
             <p className="text-micro text-white/40 uppercase tracking-wider">Permissions</p>
             <span className="text-micro font-bold text-white/60 bg-white/8 rounded-full px-2.5 py-1">
@@ -291,29 +285,6 @@ export function AjouterEmployePage() {
             ))}
           </div>
         </div>
-
-        {limitError && (
-          <div className="glass rounded-2xl p-4 border border-amber/20 flex flex-col items-center gap-2 text-center">
-            <p className="text-label text-white/80">{error}</p>
-            <Link
-              to="/abonnement"
-              className="text-label text-orange underline hover:text-orange-hi transition-colors font-semibold"
-            >
-              Voir les plans disponibles →
-            </Link>
-          </div>
-        )}
-        {!limitError && error && (
-          <p className="text-sm text-red-400 text-center px-2">{error}</p>
-        )}
-
-        <button
-          type="submit"
-          disabled={loading || !form.name || !form.phone || !form.password}
-          className="py-4 rounded-2xl bg-white text-navy-deep font-bold text-body hover:opacity-90 active:scale-95 disabled:opacity-40 disabled:scale-100 transition-all"
-        >
-          {loading ? 'Création…' : 'Créer le compte'}
-        </button>
       </form>
     </div>
   )

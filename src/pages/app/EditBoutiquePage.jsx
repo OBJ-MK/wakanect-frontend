@@ -69,7 +69,7 @@ export function EditBoutiquePage() {
   return (
     <div className="min-h-screen bg-navy-deep">
       <div className="sticky top-0 z-20 glass border-b border-white/6 px-4 py-3">
-        <div className="max-w-lg mx-auto flex items-center gap-3">
+        <div className="max-w-lg mx-auto lg:max-w-3xl flex items-center gap-3">
           <Link
             to="/app/profil"
             className="p-2 -ml-2 rounded-xl text-white/60 hover:text-white hover:bg-white/8 transition-colors"
@@ -83,9 +83,9 @@ export function EditBoutiquePage() {
       </div>
 
       <form onSubmit={handleSubmit}>
-        <div className="page-container py-5 flex flex-col gap-5">
-          {/* Logo */}
-          <div className="flex flex-col items-center gap-3">
+        <div className="page-container py-5 flex flex-col gap-5 lg:flex-row lg:items-start lg:gap-6">
+          {/* Colonne logo + aperçu — sticky sous l'en-tête en desktop */}
+          <div className="flex flex-col items-center gap-3 lg:w-[260px] lg:shrink-0 lg:sticky lg:top-20 lg:self-start">
             <div className="relative">
               <div className="w-20 h-20 rounded-full bg-gradient-to-br from-orange to-amber flex items-center justify-center overflow-hidden">
                 {logoPreview ? (
@@ -121,106 +121,123 @@ export function EditBoutiquePage() {
                 />
               </label>
             </div>
-            <p className="text-micro text-white/40">Appuyez sur l'icône pour changer le logo</p>
+            <p className="text-micro text-white/40 text-center">Appuyez sur l'icône pour changer le logo</p>
+
+            {/* Aperçu — desktop uniquement, reflète le formulaire en direct */}
+            <div className="hidden lg:flex flex-col w-full glass rounded-3xl p-4 mt-2 gap-1">
+              <p className="text-micro text-white/40 uppercase tracking-wider mb-1">Aperçu boutique</p>
+              <p className="font-display font-semibold text-body text-white truncate">
+                {form.shop_name || 'Ma Super Boutique'}
+              </p>
+              <p className="text-micro text-white/40 break-all">
+                {`${PUBLIC_BASE}/boutique/${form.slug || '...'}`.replace(/^https?:\/\//, '')}
+              </p>
+              {form.address && (
+                <p className="text-micro text-white/35 mt-1">{form.address}</p>
+              )}
+            </div>
           </div>
 
-          {/* Fields */}
-          <div className="glass rounded-3xl p-4 flex flex-col gap-4">
-            <Input
-              label="Nom de la boutique"
-              placeholder="Ma Super Boutique"
-              value={form.shop_name}
-              onChange={set('shop_name')}
-              required
-            />
-
-            <div className="flex flex-col gap-1.5">
+          {/* Colonne formulaire */}
+          <div className="flex flex-col gap-5 lg:flex-1 lg:min-w-0">
+            {/* Fields */}
+            <div className="glass rounded-3xl p-4 flex flex-col gap-4">
               <Input
-                label="Lien de la boutique"
-                placeholder="ma-boutique"
-                value={form.slug}
-                onChange={setSlug}
-                hint={`${PUBLIC_BASE}/boutique/${form.slug || '...'}`.replace(/^https?:\/\//, '')}
+                label="Nom de la boutique"
+                placeholder="Ma Super Boutique"
+                value={form.shop_name}
+                onChange={set('shop_name')}
                 required
               />
-            </div>
 
-            <Input
-              label="Numéro WhatsApp"
-              type="tel"
-              value={merchant?.whatsapp_number ?? ''}
-              disabled
-              hint="Modifiable depuis les paramètres du compte"
-            />
+              <div className="flex flex-col gap-1.5">
+                <Input
+                  label="Lien de la boutique"
+                  placeholder="ma-boutique"
+                  value={form.slug}
+                  onChange={setSlug}
+                  hint={`${PUBLIC_BASE}/boutique/${form.slug || '...'}`.replace(/^https?:\/\//, '')}
+                  required
+                />
+              </div>
 
-            <Input
-              label="Adresse"
-              placeholder="5 Rue Moussé Diop, Dakar"
-              value={form.address}
-              onChange={set('address')}
-            />
-          </div>
+              <Input
+                label="Numéro WhatsApp"
+                type="tel"
+                value={merchant?.whatsapp_number ?? ''}
+                disabled
+                hint="Modifiable depuis les paramètres du compte"
+              />
 
-          <div className="glass rounded-3xl p-4">
-            <div className="flex flex-col gap-1.5">
-              <label className="text-label font-semibold text-white/60">
-                Description <span className="text-white/35 font-normal">(facultatif)</span>
-              </label>
-              <textarea
-                value={form.description}
-                onChange={set('description')}
-                placeholder="Présentez votre boutique en quelques mots..."
-                rows={3}
-                className="w-full rounded-2xl px-4 py-3 text-body bg-[var(--bg-surface)] border border-[var(--border-default)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-orange/40 focus:border-orange resize-none dark:bg-navy/60 dark:border-white/10"
+              <Input
+                label="Adresse"
+                placeholder="5 Rue Moussé Diop, Dakar"
+                value={form.address}
+                onChange={set('address')}
               />
             </div>
-          </div>
 
-          <div className="glass rounded-3xl p-4 flex flex-col gap-4">
-            <div>
-              <p className="text-label font-semibold text-white/80">Wave &amp; Orange Money</p>
-              <p className="text-micro text-white/40 mt-0.5">
-                Affichés au client dans le tunnel de commande quand il choisit ce mode de paiement.
-              </p>
+            <div className="glass rounded-3xl p-4">
+              <div className="flex flex-col gap-1.5">
+                <label className="text-label font-semibold text-white/60">
+                  Description <span className="text-white/35 font-normal">(facultatif)</span>
+                </label>
+                <textarea
+                  value={form.description}
+                  onChange={set('description')}
+                  placeholder="Présentez votre boutique en quelques mots..."
+                  rows={3}
+                  className="w-full rounded-2xl px-4 py-3 text-body bg-[var(--bg-surface)] border border-[var(--border-default)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-orange/40 focus:border-orange resize-none dark:bg-navy/60 dark:border-white/10"
+                />
+              </div>
             </div>
-            <Input
-              label="Numéro Wave"
-              type="tel"
-              placeholder="+221 77 000 00 00"
-              value={form.wave_number}
-              onChange={set('wave_number')}
-            />
-            <Input
-              label="Nom affiché sur le compte Wave"
-              placeholder="Ex : Boutique Aminata"
-              value={form.wave_name}
-              onChange={set('wave_name')}
-              hint="Facultatif — rassure le client qu'il envoie au bon compte"
-            />
-            <Input
-              label="Numéro Orange Money"
-              type="tel"
-              placeholder="+221 77 000 00 00"
-              value={form.orange_money_number}
-              onChange={set('orange_money_number')}
-            />
-            <Input
-              label="Nom affiché sur le compte Orange Money"
-              placeholder="Ex : Boutique Aminata"
-              value={form.orange_money_name}
-              onChange={set('orange_money_name')}
-              hint="Facultatif — rassure le client qu'il envoie au bon compte"
-            />
+
+            <div className="glass rounded-3xl p-4 flex flex-col gap-4">
+              <div>
+                <p className="text-label font-semibold text-white/80">Wave &amp; Orange Money</p>
+                <p className="text-micro text-white/40 mt-0.5">
+                  Affichés au client dans le tunnel de commande quand il choisit ce mode de paiement.
+                </p>
+              </div>
+              <Input
+                label="Numéro Wave"
+                type="tel"
+                placeholder="+221 77 000 00 00"
+                value={form.wave_number}
+                onChange={set('wave_number')}
+              />
+              <Input
+                label="Nom affiché sur le compte Wave"
+                placeholder="Ex : Boutique Aminata"
+                value={form.wave_name}
+                onChange={set('wave_name')}
+                hint="Facultatif — rassure le client qu'il envoie au bon compte"
+              />
+              <Input
+                label="Numéro Orange Money"
+                type="tel"
+                placeholder="+221 77 000 00 00"
+                value={form.orange_money_number}
+                onChange={set('orange_money_number')}
+              />
+              <Input
+                label="Nom affiché sur le compte Orange Money"
+                placeholder="Ex : Boutique Aminata"
+                value={form.orange_money_name}
+                onChange={set('orange_money_name')}
+                hint="Facultatif — rassure le client qu'il envoie au bon compte"
+              />
+            </div>
+
+            {error && (
+              <p className="text-sm text-red-400 text-center px-2">{error}</p>
+            )}
+
+            <Button type="submit" size="lg" fullWidth loading={saving} disabled={logoUploading}>
+              <Check size={16} />
+              Enregistrer
+            </Button>
           </div>
-
-          {error && (
-            <p className="text-sm text-red-400 text-center px-2">{error}</p>
-          )}
-
-          <Button type="submit" size="lg" fullWidth loading={saving} disabled={logoUploading}>
-            <Check size={16} />
-            Enregistrer
-          </Button>
         </div>
       </form>
     </div>
